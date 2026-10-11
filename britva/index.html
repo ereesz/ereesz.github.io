@@ -1727,8 +1727,36 @@
       if (event.target.closest('.field.invalid')) validate();
     });
 
+    // =====================================================================
+    // ЗАЯВКИ В TELEGRAM
+    // Вставь сюда токен бота (от @BotFather) и свой ID (от @userinfobot).
+    // Кавычки оставь, меняй только текст внутри них.
+    // =====================================================================
+    const TG_TOKEN   = '8400860427:AAE74YNZqeOjqjiN3xd4leyHTsPy09cNkpE';
+    const TG_CHAT_ID = '5647122931';
+
+    // Отправляет текст в Telegram. Возвращает true, если всё дошло.
+    async function sendToTelegram(text) {
+      try {
+        const res = await fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text })
+        });
+        return res.ok;          // ok = Telegram ответил «принято»
+      } catch (e) {
+        return false;           // нет интернета или Telegram недоступен
+      }
+    }
+
+    const submitBtn = form.querySelector('.booking-submit');
+    const sendError = document.createElement('p');      // строка для сообщения об ошибке
+    sendError.className = 'field-error';
+    sendError.setAttribute('role', 'alert');
+    submitBtn.after(sendError);
+
     // --- Отправка формы
-    form.addEventListener('submit', function (event) {
+    form.addEventListener('submit', async function (event) {
       event.preventDefault();                                // не перезагружаем страницу
       const firstBad = validate();
       if (firstBad) {
@@ -1737,11 +1765,33 @@
       }
 
       const data = Object.fromEntries(new FormData(form));   // все ответы формы одним объектом
-      // ЗДЕСЬ на настоящем сайте заявка уходит владельцу: в Telegram, на почту или в CRM.
-      // Для портфолио просто выводим её в консоль браузера (F12 → Console).
-      console.log('Новая заявка:', data);
-
       const [y, m, d] = data.date.split('-');
+
+      // Текст сообщения, которое придёт в Telegram
+      const message =
+        '✂️ Новая запись — «Бритва»\n\n' +
+        'Имя: ' + data.name.trim() + '\n' +
+        'Телефон: ' + data.phone + '\n' +
+        'Услуга: ' + data.service + '\n' +
+        'Мастер: ' + data.master + '\n' +
+        'Когда: ' + d + '.' + m + '.' + y + ' в ' + data.time +
+        (data.comment.trim() ? '\nКомментарий: ' + data.comment.trim() : '');
+
+      // Пока отправляем — блокируем кнопку, чтобы не нажали дважды
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Отправляем…';
+      sendError.textContent = '';
+
+      const ok = await sendToTelegram(message);
+
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Записаться';
+
+      if (!ok) {
+        sendError.textContent = 'Не получилось отправить заявку. Попробуйте ещё раз или позвоните: +7 999 000-00-00';
+        return;                                              // форму не прячем — данные не пропадут
+      }
+
       document.getElementById('booking-done-text').textContent =
         data.name.trim() + ', спасибо! Ждём вас ' + d + '.' + m + ' в ' + data.time +
         '. Администратор перезвонит на ' + data.phone + ' и подтвердит запись.';
