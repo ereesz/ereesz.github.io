@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Андрей — сайты для малого бизнеса</title>
+  <meta name="description" content="Андрей, веб-разработчик. Делаю сайты для малого бизнеса: онлайн-запись, меню и предзаказ, каталоги. Адаптация под телефон.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Андрей — сайты для малого бизнеса">
+  <meta property="og:description" content="Сайты с онлайн-записью, меню, предзаказом и каталогом. Пишите в Telegram: @ereesz">
+  <meta property="og:url" content="https://ereesz.github.io/">
+  <meta property="og:image" content="https://ereesz.github.io/images/og-preview.jpg">
+  <meta name="theme-color" content="#F1F2EE">
+  <!-- Иконка во вкладке: буква «А» на лаймовом квадрате -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23D4F24A'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-family='Arial' font-size='38' font-weight='800' fill='%23111312'%3E%D0%90%3C/text%3E%3C/svg%3E">
+
+  <!-- Шрифт Commissioner: один шрифт на всё, характер даём жирностью и размером -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Commissioner:wght@400;500;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===================================================================
+       ЦВЕТА. Идея: чистый «рабочий стол» — светло-серая бумага, чёрные
+       чернила и один яркий лаймовый акцент, как маркер.
+       =================================================================== */
+    :root {
+      --bg: #F1F2EE;
+      --card: #FFFFFF;
+      --ink: #111312;
+      --muted: #5C625E;
+      --line: #D7DAD4;
+      --lime: #D4F24A;
+      --font: "Commissioner", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    a { color: inherit; }
+    :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+    section[id] { scroll-margin-top: 76px; }
+
+    h1, h2, h3 { margin: 0; line-height: 1.05; letter-spacing: -0.03em; }
+
+    h2 { font-size: clamp(36px, 5.4vw, 64px); font-weight: 800; }
+
+    .section { padding: 112px 0; }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 32px;
+      margin-bottom: 56px;
+    }
+
+    .section-head p { margin: 0; max-width: 380px; color: var(--muted); }
+
+    /* ===== Кнопки ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 26px;
+      border-radius: 14px;
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--bg);
+      font: inherit;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.15s, background 0.2s, color 0.2s;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+
+    .btn-lime { background: var(--lime); border-color: var(--lime); color: var(--ink); }
+    .btn-ghost { background: transparent; color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--bg); }
+
+    /* Значок Telegram внутри кнопки */
+    .tg { width: 20px; height: 20px; flex: none; }
+
+    /* ===================================================================
+       ШАПКА
+       =================================================================== */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(241, 242, 238, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    .me {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    /* Кружок с буквой — «аватар» */
+    .me-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--lime);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+
+    .me small { display: block; font-weight: 400; color: var(--muted); font-size: 13px; line-height: 1.2; }
+
+    .nav { display: flex; align-items: center; gap: 32px; font-size: 16px; }
+    .nav a:not(.btn) { text-decoration: none; color: var(--muted); }
+    .nav a:not(.btn):hover { color: var(--ink); }
+    .nav .btn { padding: 10px 18px; border-radius: 12px; }
+
+    /* ===================================================================
+       ПЕРВЫЙ ЭКРАН
+       =================================================================== */
+    .hero { padding: 88px 0 72px; }
+
+    .hero h1 {
+      font-size: clamp(44px, 7.4vw, 104px);
+      font-weight: 800;
+      max-width: 13ch;
+    }
+
+    .hero-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: end;
+      margin-top: 48px;
+    }
+
+    .hero-lead { font-size: 20px; max-width: 30em; margin: 0 0 28px; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+    /* Веер из трёх телефонов с работами справа */
+    .fan {
+      position: relative;
+      height: 380px;
+    }
+
+    .fan img {
+      position: absolute;
+      bottom: 0;
+      width: 168px;
+      border-radius: 22px;
+      border: 6px solid var(--ink);
+      box-shadow: 0 18px 40px rgba(17, 19, 18, 0.18);
+      background: var(--ink);
+    }
+
+    .fan img:nth-child(1) { left: 6%;  transform: rotate(-9deg); }
+    .fan img:nth-child(2) { left: 34%; bottom: 24px; z-index: 2; }
+    .fan img:nth-child(3) { left: 62%; transform: rotate(9deg); }
+
+    /* ===================================================================
+       РАБОТЫ
+       =================================================================== */
+    .works { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
+
+    .work {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr;
+      gap: 40px;
+      align-items: center;
+      padding: 28px;
+      border-radius: 28px;
+      background: var(--card);
+      border: 1px solid var(--line);
+    }
+
+    /* Скриншот в «окне браузера» + телефон поверх угла */
+    .shot { position: relative; padding-bottom: 28px; }
+
+    .browser {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--bg);
+    }
+
+    /* Три точки, как у окна браузера */
+    .browser-bar {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      background: #E6E8E3;
+    }
+
+    .browser-bar span { width: 9px; height: 9px; border-radius: 50%; background: #C3C7C0; }
+
+    .browser img { display: block; width: 100%; height: auto; }
+
+    .phone {
+      position: absolute;
+      right: -14px;
+      bottom: 0;
+      width: 24%;
+      border-radius: 16px;
+      border: 5px solid var(--ink);
+      background: var(--ink);
+      box-shadow: 0 14px 30px rgba(17, 19, 18, 0.22);
+    }
+
+    .work-type { margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+
+    /* Метка «Демо» или «Работает» */
+    .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+      vertical-align: 1px;
+    }
+
+    .badge.live { background: var(--lime); border-color: var(--lime); }
+
+    .work h3 { font-size: 36px; font-weight: 800; margin-bottom: 14px; }
+
+    .work p { margin: 0 0 20px; }
+
+    .features { list-style: none; margin: 0 0 24px; padding: 0; }
+
+    .features li {
+      position: relative;
+      padding: 9px 0 9px 26px;
+      border-top: 1px solid var(--line);
+      font-size: 15px;
+    }
+
+    .features li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 17px;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--lime);
+      outline: 1px solid var(--ink);
+    }
+
+    .work-link { font-weight: 600; text-underline-offset: 4px; text-decoration-thickness: 2px; text-decoration-color: var(--lime); }
+    .work-soon { font-size: 14px; color: var(--muted); }
+
+    /* ===================================================================
+       ЦЕНЫ
+       =================================================================== */
+    .prices-section { background: var(--ink); color: var(--bg); }
+    .prices-section .section-head p { color: #A6ABA7; }
+
+    .plans { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+    .plan {
+      display: flex;
+      flex-direction: column;
+      padding: 32px;
+      border-radius: 24px;
+      border: 1px solid #2E322F;
+    }
+
+    /* Средний пакет — именно такие сайты в примерах — выделяем лаймом */
+    .plan.main { background: var(--lime); color: var(--ink); border-color: var(--lime); }
+
+    .plan h3 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .plan-note { margin: 0 0 24px; font-size: 15px; opacity: 0.75; }
+
+    .plan-price { font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; margin-bottom: 6px; }
+    .plan-time { font-size: 15px; opacity: 0.75; margin: 0 0 24px; }
+
+    .plan ul { margin: 0; padding: 0; list-style: none; flex: 1; }
+    .plan li { padding: 8px 0; border-top: 1px solid currentColor; border-top-color: rgba(127, 127, 127, 0.3); font-size: 15px; }
+
+    .included {
+      margin: 32px 0 0;
+      padding: 20px 24px;
+      border-radius: 18px;
+      border: 1px dashed #3A3F3B;
+      color: #C9CDCA;
+      font-size: 16px;
+    }
+
+    .included b { color: var(--bg); }
+
+    /* ===================================================================
+       КАК РАБОТАЮ — это последовательность, поэтому с номерами
+       =================================================================== */
+    .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; counter-reset: step; }
+
+    .step { padding-top: 20px; border-top: 3px solid var(--ink); counter-increment: step; }
+
+    .step::before {
+      content: counter(step);
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      background: var(--lime);
+      font-weight: 800;
+    }
+
+    .step h3 { font-size: 22px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .step p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    /* ===================================================================
+       КОНТАКТЫ
+       =================================================================== */
+    .contact { padding: 0 0 112px; }
+
+    .contact-box {
+      padding: 64px;
+      border-radius: 32px;
+      background: var(--lime);
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 40px;
+      align-items: end;
+    }
+
+    .contact-box h2 { font-size: clamp(36px, 5vw, 60px); }
+    .contact-box p { margin: 16px 0 0; font-size: 18px; max-width: 28em; }
+
+    .contact-side { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+    .contact-side .btn { font-size: 19px; padding: 18px 28px; }
+    .contact-side small { font-size: 15px; }
+
+    footer { padding: 28px 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+
+    /* ===================================================================
+       АДАПТИВ
+       =================================================================== */
+    @media (max-width: 960px) {
+      .work { grid-template-columns: 1fr; gap: 28px; }
+      .plans { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
+      .contact-box { grid-template-columns: 1fr; padding: 44px; }
+      .hero-bottom { grid-template-columns: 1fr; }
+      .fan { height: 330px; max-width: 520px; }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 0 20px; }
+      .nav a:not(.btn) { display: none; }
+      .me small { display: none; }
+      .section { padding: 80px 0; }
+      .section-head { flex-direction: column; align-items: start; gap: 14px; margin-bottom: 36px; }
+      .hero { padding: 48px 0 56px; }
+      .hero-lead { font-size: 18px; }
+      .fan { height: 260px; }
+      .fan img { width: 118px; border-width: 4px; border-radius: 16px; }
+      .work { padding: 16px; border-radius: 22px; }
+      .work h3 { font-size: 28px; }
+      .phone { right: -6px; width: 26%; border-width: 3px; border-radius: 10px; }
+      .plan { padding: 26px; }
+      .steps { grid-template-columns: 1fr; }
+      .contact { padding-bottom: 80px; }
+      .contact-box { padding: 32px 24px; border-radius: 24px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .btn { transition: none; }
+      .btn:hover { transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Значок Telegram: рисуем один раз, потом используем через <use> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="tg" viewBox="0 0 24 24"><path fill="currentColor" d="M21.9 4.3 18.6 20c-.2 1.1-.9 1.4-1.8.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.2-8.3c.4-.4-.1-.6-.6-.2L6 13.6 1.1 12.1c-1.1-.3-1.1-1.1.2-1.6L20.5 3c.9-.3 1.7.2 1.4 1.3z"/></symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="me" href="#top">
+        <span class="me-mark" aria-hidden="true">А</span>
+        <span>Андрей<small>сайты для малого бизнеса</small></span>
+      </a>
+      <nav class="nav" aria-label="Разделы">
+        <a href="#works">Работы</a>
+        <a href="#prices">Цены</a>
+        <a href="#process">Как работаю</a>
+        <a class="btn btn-lime" href="https://t.me/ereesz" target="_blank" rel="noopener">Написать</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ===== Первый экран ===== -->
+    <section class="hero">
+      <div class="container">
+        <h1>Сайты, через которые к вам записываются и&nbsp;заказывают</h1>
+        <div class="hero-bottom">
+          <div>
+            <p class="hero-lead">Привет, я Андрей. Делаю сайты для барбершопов, кофеен, студий и магазинов — с онлайн-записью, меню, предзаказом и каталогом. Каждый сайт под ваш бизнес и удобен с телефона.</p>
+            <div class="hero-actions">
+              <a class="btn" href="https://t.me/ereesz" target="_blank" rel="noopener"><svg class="tg" aria-hidden="true"><use href="#tg"/></svg>Обсудить проект</a>
+              <a class="btn btn-ghost" href="#works">Смотреть работы</a>
+            </div>
+          </div>
+          <!-- Веер из телефонов: сразу видно, что я делаю -->
+          <div class="fan" aria-hidden="true">
+            <img src="images/works/britva-m.jpg" alt="">
+            <img src="images/works/penka-m.jpg" alt="">
+            <img src="images/works/neyro-m.jpg" alt="">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Работы ===== -->
+    <section class="section" id="works">
+      <div class="container">
+        <div class="section-head">
+          <h2>Работы</h2>
+          <p>Демо-проекты показывают, каким может быть сайт для вашего бизнеса. НейроКомпас — мой собственный работающий сайт.</p>
+        </div>
+
+        <!-- Чтобы добавить работу: скопируй блок <li class="work">…</li> и поменяй тексты и картинки -->
+        <ul class="works">
+          <li class="work">
+            <div class="shot">
+              <div class="browser"><div class="browser-bar"><span></span><span></span><span></span></div><img src="images/works/britva-d.jpg" alt="Сайт барбершопа «Бритва» на компьютере" loading="lazy"></div>
+              <img class="phone" src="images/works/britva-m.jpg" alt="Сайт барбершопа «Бритва» на телефоне" loading="lazy">
+            </div>
+            <div>
+              <p class="work-type">Барбершоп <span class="badge">Демо</span></p>
+              <h3>Бритва</h3>
+              <p>Сайт барбершопа и женского зала: клиент выбирает стрижку и сразу записывается к мастеру.</p>
+              <ul class="features">
+                <li>Онлайн-запись: услуга, мастер, дата и время</li>
+                <li>Каталог из 10 стрижек с осмотром с трёх сторон</li>
+                <li>Цены для мужчин, женщин и детей в одном блоке</li>
+              </ul>
+              <a class="work-link" href="britva/" target="_blank" rel="noopener">Открыть сайт →</a>
+            </div>
+          </li>
+
+          <li class="work">
+            <div class="shot">
+              <div class="browser"><div class="browser-bar"><span></span><span></span><span></span></div><img src="images/works/penka-d.jpg" alt="Сайт кофейни «Пенка» на компьютере" loading="lazy"></div>
+              <img class="phone" src="images/works/penka-m.jpg" alt="Сайт кофейни «Пенка» на телефоне" loading="lazy">
+            </div>
+            <div>
+              <p class="work-type">Кофейня <span class="badge">Демо</span></p>
+              <h3>Пенка</h3>
+              <p>Сайт кофейни с предзаказом: гость собирает заказ, выбирает время и забирает кофе без очереди.</p>
+              <ul class="features">
+                <li>Меню с фото и выбором размера, цена меняется сразу</li>
+                <li>Корзина и время получения с учётом часов работы</li>
+                <li>Метка «Открыто до 21:00», которая следит за временем</li>
+              </ul>
+              <a class="work-link" href="penka/" target="_blank" rel="noopener">Открыть сайт →</a>
+            </div>
+          </li>
+
+          <li class="work">
+            <div class="shot">
+              <div class="browser"><div class="browser-bar"><span></span><span></span><span></span></div><img src="images/works/neyro-d.jpg" alt="Каталог НейроКомпас на компьютере" loading="lazy"></div>
+              <img class="phone" src="images/works/neyro-m.jpg" alt="Каталог НейроКомпас на телефоне" loading="lazy">
+            </div>
+            <div>
+              <p class="work-type">Каталог сервисов <span class="badge live">Работает</span></p>
+              <h3>НейроКомпас</h3>
+              <p>Мой проект: каталог AI-сервисов с честными обзорами. Сам тестирую сервисы и обновляю цены.</p>
+              <ul class="features">
+                <li>Поиск, фильтры по категориям и цене, сортировка</li>
+                <li>Подробная карточка каждого сервиса в окне</li>
+                <li>Светлая и тёмная тема, которая запоминается</li>
+              </ul>
+              <a class="work-link" href="https://neyrokcompas.ru" target="_blank" rel="noopener">Открыть сайт →</a>
+            </div>
+          </li>
+
+          <li class="work">
+            <div class="shot">
+              <div class="browser"><div class="browser-bar"><span></span><span></span><span></span></div><img src="images/works/halden-d.jpg" alt="Сайт часовой мануфактуры Halden Voss на компьютере" loading="lazy"></div>
+              <img class="phone" src="images/works/halden-m.jpg" alt="Сайт Halden Voss на телефоне" loading="lazy">
+            </div>
+            <div>
+              <p class="work-type">Бренд часов <span class="badge">Демо</span></p>
+              <h3>Halden Voss</h3>
+              <p>Имиджевый сайт часовой мануфактуры: спокойный премиальный стиль, история бренда и коллекции.</p>
+              <ul class="features">
+                <li>Циферблат, нарисованный кодом</li>
+                <li>Плавное появление блоков при прокрутке</li>
+                <li>Отдельная страница коллекций</li>
+              </ul>
+              <a class="work-link" href="halden-voss/" target="_blank" rel="noopener">Открыть сайт →</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Цены ===== -->
+    <section class="section prices-section" id="prices">
+      <div class="container">
+        <div class="section-head">
+          <h2>Цены</h2>
+          <p>Точную стоимость назову после короткого разговора о задаче. Ниже — с чего обычно начинается.</p>
+        </div>
+
+        <ul class="plans">
+          <li class="plan">
+            <h3>Лендинг</h3>
+            <p class="plan-note">Одна страница, чтобы о вас узнали и позвонили</p>
+            <div class="plan-price">от 15 000 ₽</div>
+            <p class="plan-time">от 5 дней</p>
+            <ul>
+              <li>Услуги, цены, фото, контакты</li>
+              <li>Кнопки звонка и мессенджеров</li>
+              <li>Карта и часы работы</li>
+            </ul>
+          </li>
+          <li class="plan main">
+            <h3>Сайт с записью или заказом</h3>
+            <p class="plan-note">Как «Бритва» и «Пенка» в примерах выше</p>
+            <div class="plan-price">от 30 000 ₽</div>
+            <p class="plan-time">от 2 недель</p>
+            <ul>
+              <li>Онлайн-запись или предзаказ</li>
+              <li>Меню, каталог услуг или стрижек</li>
+              <li>Окна, галереи, мастера и команда</li>
+            </ul>
+          </li>
+          <li class="plan">
+            <h3>Каталог</h3>
+            <p class="plan-note">Много позиций, которые удобно искать</p>
+            <div class="plan-price">от 50 000 ₽</div>
+            <p class="plan-time">от 3 недель</p>
+            <ul>
+              <li>Поиск, фильтры и сортировка</li>
+              <li>Подробные карточки товаров или услуг</li>
+              <li>Легко добавлять новые позиции</li>
+            </ul>
+          </li>
+        </ul>
+
+        <p class="included"><b>В каждый сайт входит:</b> адаптация под телефон, публикация на вашем домене и две недели бесплатных правок после запуска.</p>
+      </div>
+    </section>
+
+    <!-- ===== Как работаю ===== -->
+    <section class="section" id="process">
+      <div class="container">
+        <div class="section-head">
+          <h2>Как работаю</h2>
+          <p>Вы видите сайт с первых дней и можете поправить его на любом шаге.</p>
+        </div>
+        <ol class="steps">
+          <li class="step"><h3>Знакомимся</h3><p>Пишете в Telegram, рассказываете о бизнесе. Разбираемся, что должен делать сайт.</p></li>
+          <li class="step"><h3>Показываю первый экран</h3><p>Делаю главный экран в вашем стиле. Согласуем цвета, шрифты и настроение.</p></li>
+          <li class="step"><h3>Собираю сайт</h3><p>Делаю все разделы и показываю по ходу. Правки — сразу, без долгих писем.</p></li>
+          <li class="step"><h3>Запускаю</h3><p>Публикую на вашем домене и показываю, как самому менять цены и тексты.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Контакты ===== -->
+    <section class="contact" id="contact">
+      <div class="container">
+        <div class="contact-box">
+          <div>
+            <h2>Расскажите о&nbsp;своём бизнесе</h2>
+            <p>Напишите пару слов: чем занимаетесь и есть ли уже сайт. Предложу, каким он может быть, и назову цену.</p>
+          </div>
+          <div class="contact-side">
+            <a class="btn" href="https://t.me/ereesz" target="_blank" rel="noopener"><svg class="tg" aria-hidden="true"><use href="#tg"/></svg>@ereesz</a>
+            <small>Telegram — самый быстрый способ связаться</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© 2026 Андрей · сайты для малого бизнеса</div>
+  </footer>
+</body>
+</html>

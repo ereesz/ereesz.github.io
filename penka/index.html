@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Кофейня «Пенка»</title>
+  <meta name="description" content="Кофейня «Пенка»: кофе, чай, завтраки и десерты. Открыты с 7:30, предзаказ навынос.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Кофейня «Пенка»">
+  <meta property="og:description" content="Кофе, завтраки и десерты. Предзаказ навынос без очереди.">
+  <meta property="og:url" content="https://ereesz.github.io/penka/">
+  <meta property="og:image" content="https://ereesz.github.io/penka/images/og-preview.jpg">
+  <meta name="theme-color" content="#FFFDF9">
+  <!-- Иконка во вкладке: жёлтое «солнце»-чашка на белом -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232B1D14'/%3E%3Ccircle cx='32' cy='34' r='16' fill='%23F2C14E'/%3E%3C/svg%3E">
+
+  <!-- Шрифты: Yeseva One — для заголовков (характерная «кофейная» антиква),
+       Golos Text — для текста (спокойный, хорошо читается). Оба с русскими буквами -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Yeseva+One&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===================================================================
+       ЦВЕТА САЙТА — все в одном месте. Поменяешь здесь — поменяется везде.
+       Идея: утро. Белый свет, глубокий цвет эспрессо и жёлтое утреннее солнце.
+       =================================================================== */
+    :root {
+      --bg: #FFFDF9;          /* фон страницы — тёплый белый, как утренний свет */
+      --sky: #EEF4F7;         /* светло-голубой фон для отдельных блоков — утреннее небо */
+      --ink: #2B1D14;         /* основной текст — цвет эспрессо */
+      --muted: #75655A;       /* второстепенный текст — кофе с молоком */
+      --line: #E8E1D9;        /* тонкие линии и рамки */
+      --sun: #F2C14E;         /* акцент — утреннее солнце */
+      --sun-deep: #E0A82E;    /* акцент потемнее — для наведения */
+      --font-head: "Yeseva One", Georgia, serif;
+      --font-body: "Golos Text", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }   /* ширина элемента включает рамки и отступы */
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    /* [hidden] всегда прячет элемент, даже если в CSS у него display: flex */
+    [hidden] { display: none !important; }
+
+    a { color: inherit; }
+
+    /* Подсветка элемента при управлении с клавиатуры (Tab) */
+    :focus-visible { outline: 3px solid var(--sun-deep); outline-offset: 3px; }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    h1, h2, h3 { font-family: var(--font-head); font-weight: 400; margin: 0; }
+
+    h2 {
+      font-size: clamp(34px, 5vw, 48px);
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .section { padding: 96px 0; }
+
+    /* Когда переходим к разделу по меню, он не прячется под шапкой */
+    section[id] { scroll-margin-top: 80px; }
+
+    .section-lead {
+      max-width: 520px;
+      margin: 0 0 40px;
+      color: var(--muted);
+    }
+
+    /* ===== Кнопки ===== */
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 999px;          /* полностью скруглённая «таблетка» */
+      border: 2px solid var(--ink);
+      background: var(--ink);
+      color: var(--bg);
+      font: inherit;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn:hover { background: transparent; color: var(--ink); }
+
+    .btn-ghost { background: transparent; color: var(--ink); }
+    .btn-ghost:hover { background: var(--ink); color: var(--bg); }
+
+    /* ===================================================================
+       ШАПКА
+       =================================================================== */
+    .site-header {
+      position: sticky;               /* прилипает к верху при прокрутке */
+      top: 0;
+      z-index: 10;
+      background: rgba(255, 253, 249, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+
+    .logo {
+      font-family: var(--font-head);
+      font-size: 28px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Жёлтый кружок-«солнце» перед названием */
+    .logo::before {
+      content: "";
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--sun);
+    }
+
+    .menu-links {
+      display: flex;
+      gap: 32px;
+      font-size: 16px;
+    }
+
+    .menu-links a {
+      text-decoration: none;
+      color: var(--muted);
+    }
+
+    .menu-links a:hover { color: var(--ink); }
+
+    /* ===================================================================
+       ПЕРВЫЙ ЭКРАН
+       =================================================================== */
+    .hero { padding: 72px 0 96px; }
+
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;   /* текст чуть шире картинки */
+      gap: 48px;
+      align-items: center;
+    }
+
+    /* Метка «Сейчас открыто» — цвет и текст меняет скрипт по времени */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--sky);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #3E9B5B;           /* зелёный — открыто */
+    }
+
+    .status.closed .status-dot { background: #C0573E; }   /* красный — закрыто */
+
+    .hero h1 {
+      font-size: clamp(72px, 13vw, 156px);
+      line-height: 0.9;
+      margin-bottom: 24px;
+    }
+
+    .hero-lead {
+      font-size: 20px;
+      max-width: 460px;
+      margin: 0 0 36px;
+      color: var(--muted);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Картинка-чашка справа: нарисована кодом (SVG), фото не нужно */
+    .hero-art {
+      position: relative;
+      aspect-ratio: 1;
+    }
+
+    /* Большой жёлтый круг — утреннее солнце за чашкой */
+    .hero-art::before {
+      content: "";
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      background: var(--sun);
+    }
+
+    .hero-art svg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Пар над чашкой — один раз плавно поднимается при загрузке */
+    /* Две анимации подряд:
+       1) steam — пар один раз «рисуется» снизу вверх при загрузке;
+       2) drift — потом бесконечно плавно поднимается, колышется и тает. */
+    .steam path {
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      transform-box: fill-box;          /* двигаем каждую струйку относительно себя */
+      transform-origin: 50% 100%;       /* точка опоры — низ струйки */
+      animation:
+        steam 2.4s ease-out 0.4s forwards,
+        drift 3.6s ease-in-out 2.8s infinite;
+    }
+
+    /* У каждой струйки своя задержка — так пар движется вразнобой, живее */
+    .steam path:nth-child(2) { animation-delay: 0.7s, 3.8s; }
+    .steam path:nth-child(3) { animation-delay: 1s, 3.3s; }
+
+    @keyframes steam { to { stroke-dashoffset: 0; } }
+
+    @keyframes drift {
+      0%   { transform: translate(0, 0) scaleY(1);       opacity: 1; }
+      35%  { transform: translate(4px, -8px) scaleY(1.06); opacity: 0.85; }
+      70%  { transform: translate(-3px, -16px) scaleY(1.1); opacity: 0.2; }
+      71%  { transform: translate(0, 6px) scaleY(0.95);  opacity: 0; }   /* незаметно возвращаемся вниз */
+      100% { transform: translate(0, 0) scaleY(1);       opacity: 1; }
+    }
+
+    /* ===================================================================
+       МЕНЮ
+       =================================================================== */
+    .menu-section { background: var(--sky); }
+
+    /* Вкладки «Кофе / Чай / Десерты / Завтраки» */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .tab {
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .tab:hover { border-color: var(--ink); }
+
+    .tab[aria-selected="true"] {
+      background: var(--ink);
+      border-color: var(--ink);
+      color: var(--bg);
+    }
+
+    /* Список позиций: две колонки строк, как в бумажном меню */
+    .menu-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 56px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;   /* слева название и описание, справа цена */
+      gap: 4px 16px;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+      align-content: start;            /* содержимое прижато к верху, без пустых промежутков */
+    }
+
+    /* Позиция с фото: картинка слева, весь остальной текст — справа от неё */
+    .item.has-photo {
+      grid-template-columns: 96px 1fr auto;
+      column-gap: 18px;
+    }
+
+    .item.has-photo .item-photo { grid-row: 1 / span 3; }
+    .item.has-photo .item-desc,
+    .item.has-photo .item-actions { grid-column: 2 / -1; }
+
+    .item-photo {
+      width: 96px;
+      height: 96px;
+      border-radius: 20px;
+      object-fit: cover;
+      background: var(--bg);
+    }
+
+    .item-name {
+      font-family: var(--font-head);
+      font-size: 22px;
+      line-height: 1.2;
+    }
+
+    .item-price {
+      font-weight: 600;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .item-desc {
+      grid-column: 1 / -1;               /* описание на всю ширину строки */
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* Метка «Хит» или «Новинка» */
+    .item-tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 8px;
+      border-radius: 999px;
+      background: var(--sun);
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      vertical-align: 4px;
+    }
+
+    /* Выбор размера S / M / L */
+    /* Нижняя строка позиции: слева размеры, справа кнопка «В заказ» */
+    .item-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .sizes {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Кнопка «+ В заказ» */
+    .add {
+      margin-left: auto;               /* прижимаем вправо */
+      padding: 6px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .add:hover { background: var(--ink); color: var(--bg); }
+
+    /* Короткое подтверждение «Добавлено ✓» после нажатия */
+    .add.added {
+      background: var(--sun);
+      border-color: var(--sun);
+      color: var(--ink);
+    }
+
+    .size {
+      min-width: 52px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .size:hover { color: var(--ink); border-color: var(--ink); }
+
+    .size[aria-pressed="true"] {
+      background: var(--sun);
+      border-color: var(--sun);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .menu-note {
+      margin: 28px 0 0;
+      font-size: 15px;
+      color: var(--muted);
+    }
+
+    /* ===================================================================
+       ГАЛЕРЕЯ ИНТЕРЬЕРА — ряд фото. На телефоне листается пальцем вбок
+       =================================================================== */
+    .gallery-section { padding: 96px 0 0; }
+
+    .gallery {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .gallery li {
+      aspect-ratio: 4 / 5;             /* вертикальные карточки */
+      border-radius: 22px;
+      overflow: hidden;
+      background: var(--sky);          /* светлый фон, пока фото не загрузилось */
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ===================================================================
+       АКЦИЯ: КАЖДЫЙ 6-Й КОФЕ В ПОДАРОК
+       =================================================================== */
+    .promo-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    /* Карточка лояльности: 6 кружков-штампов */
+    .stamp-card {
+      padding: 36px;
+      border-radius: 28px;
+      background: var(--ink);
+      color: var(--bg);
+    }
+
+    .stamp-card-title {
+      font-family: var(--font-head);
+      font-size: 26px;
+      margin-bottom: 24px;
+    }
+
+    .stamps {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+
+    .stamp {
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px dashed rgba(255, 253, 249, 0.35);
+    }
+
+    .stamp.filled {
+      border: 0;
+      background: rgba(255, 253, 249, 0.9);
+    }
+
+    /* Шестой кружок — подарок: жёлтый */
+    .stamp.gift {
+      border: 0;
+      background: var(--sun);
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .stamp-card p {
+      margin: 20px 0 0;
+      font-size: 15px;
+      color: rgba(255, 253, 249, 0.7);
+    }
+
+    /* ===================================================================
+       О НАС И БАРИСТА
+       =================================================================== */
+    /* Окно «О нас» шире окна заказа: внутри две колонки и три бариста */
+    .order.about-dlg { width: min(940px, calc(100% - 24px)); padding: 40px; }   /* .order.about-dlg — чтобы перебить ширину .order */
+
+    .about-dlg .order-top { margin-bottom: 20px; }
+
+    .about-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .about-story p {
+      margin: 0 0 16px;
+      font-size: 18px;
+      max-width: 34em;
+    }
+
+    /* Правила «Пенки» — список с жёлтыми точками-«солнцами» */
+    .rules {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .rules li {
+      position: relative;
+      padding: 0 0 22px 34px;
+    }
+
+    .rules li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 6px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--sun);
+    }
+
+    .rules strong {
+      display: block;
+      font-family: var(--font-head);
+      font-weight: 400;
+      font-size: 22px;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .rules span { color: var(--muted); font-size: 16px; }
+
+    /* Бариста */
+    .team-title {
+      font-family: var(--font-head);
+      font-size: 30px;
+      margin-bottom: 28px;
+    }
+
+    .team {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    /* Круглое фото. Пока фото нет — жёлтый круг с первой буквой имени */
+    .barista-photo {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--sun);
+      display: grid;
+      place-items: center;
+      margin-bottom: 18px;
+      overflow: hidden;
+      font-family: var(--font-head);
+      font-size: 56px;
+    }
+
+    .barista-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .barista h3 { font-size: 26px; margin-bottom: 2px; }
+
+    .barista-role { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
+
+    .barista-fav {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .barista-fav b { font-weight: 600; }
+
+    /* ===================================================================
+       КОНТАКТЫ И ЧАСЫ РАБОТЫ
+       =================================================================== */
+    .contacts-section { background: var(--sky); }
+
+    .contacts-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+    }
+
+    .contacts-inner p { margin: 0 0 10px; }
+
+    .contacts-inner a { text-decoration-color: var(--sun-deep); text-underline-offset: 4px; }
+
+    .hours {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .hours li {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    /* Сегодняшний день выделяется — класс today ставит скрипт */
+    .hours li.today { font-weight: 600; }
+
+    .hours li.today::after {
+      content: "сегодня";
+      margin-left: 12px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: var(--sun);
+      font-size: 12px;
+      align-self: center;
+      order: 1;                        /* метка между днём и временем */
+    }
+
+    .hours li span:last-child {
+      order: 2;
+      margin-left: auto;               /* время всегда прижато вправо */
+      white-space: nowrap;             /* «7:30 – 21:00» не разрывается */
+    }
+
+    /* ===== Подвал ===== */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* ===================================================================
+       ПРЕДЗАКАЗ: КНОПКА КОРЗИНЫ, ПАНЕЛЬ ВНИЗУ И ОКНО ЗАКАЗА
+       =================================================================== */
+    /* Кнопка «Заказ» в шапке */
+    .cart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .cart-btn:hover { background: var(--ink); color: var(--bg); }
+
+    /* Кружок с количеством позиций */
+    .cart-count {
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: var(--sun);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 22px;
+      text-align: center;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    /* Панель внизу экрана — появляется, когда в заказе что-то есть */
+    .cart-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      z-index: 20;
+      transform: translateX(-50%);
+      width: min(560px, calc(100% - 32px));
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 10px 10px 22px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: var(--bg);
+      box-shadow: 0 10px 30px rgba(43, 29, 20, 0.25);
+    }
+
+    .cart-bar-text { flex: 1; font-size: 15px; }
+
+    .cart-bar .btn {
+      padding: 10px 22px;
+      background: var(--sun);
+      border-color: var(--sun);
+      color: var(--ink);
+    }
+
+    .cart-bar .btn:hover { background: var(--sun-deep); border-color: var(--sun-deep); }
+
+    /* Окно заказа (встроенный в браузер тег <dialog>) */
+    .order {
+      width: min(560px, calc(100% - 24px));
+      max-height: calc(100vh - 32px);
+      padding: 32px;
+      border: 0;
+      border-radius: 28px;
+      background: var(--bg);
+      color: var(--ink);
+      overflow-y: auto;
+    }
+
+    .order::backdrop { background: rgba(43, 29, 20, 0.45); backdrop-filter: blur(3px); }
+
+    .order[open] { animation: pop 0.2s ease-out; }
+    @keyframes pop { from { opacity: 0; transform: translateY(12px); } }
+
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .order h2 { font-size: 34px; margin: 0; }
+
+    .x {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .x:hover { border-color: var(--ink); }
+
+    /* Строки заказа */
+    .lines { list-style: none; margin: 0; padding: 0; }
+
+    .line {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .line-name { font-weight: 500; }
+    .line-size { color: var(--muted); font-size: 14px; }
+    .line-sum { font-weight: 600; min-width: 64px; text-align: right; }
+
+    /* Счётчик «− 2 +» */
+    .qty {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px;
+    }
+
+    .qty button {
+      width: 30px;
+      height: 30px;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--ink);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .qty button:hover { background: var(--sky); }
+    .qty span { min-width: 18px; text-align: center; font-weight: 600; }
+
+    .total {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 0 24px;
+      font-family: var(--font-head);
+      font-size: 24px;
+    }
+
+    .empty-cart { color: var(--muted); padding: 16px 0 8px; }
+
+    /* Поля формы заказа */
+    .f { margin-bottom: 14px; }
+
+    .f label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .f input,
+    .f select,
+    .f textarea {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 16px;                 /* 16px — чтобы iPhone не приближал страницу */
+    }
+
+    .f textarea { height: auto; padding: 12px 16px; resize: vertical; }
+
+    .f input:focus,
+    .f select:focus,
+    .f textarea:focus { outline: none; border-color: var(--ink); }
+
+    .f.invalid input { border-color: #C0573E; }
+
+    .err { min-height: 18px; margin: 4px 0 0; font-size: 13px; color: #B04A33; }
+
+    .order .btn { width: 100%; margin-top: 6px; }
+
+    .pay-note { margin: 12px 0 0; font-size: 13px; color: var(--muted); text-align: center; }
+
+    /* Экран «Заказ принят» */
+    .done { text-align: center; padding: 8px 0; }
+
+    .done-cup {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 18px;
+      border-radius: 50%;
+      background: var(--sun);
+      display: grid;
+      place-items: center;
+      font-size: 32px;
+    }
+
+    .done h2 { margin-bottom: 10px; }
+    .done p { color: var(--muted); margin: 0 0 8px; }
+    .done strong { color: var(--ink); }
+
+    /* ===================================================================
+       АДАПТИВ
+       =================================================================== */
+    @media (max-width: 860px) {
+      .hero-inner,
+      .promo-inner,
+      .about-top,
+      .contacts-inner {
+        grid-template-columns: 1fr;    /* колонки друг под другом */
+      }
+
+      .hero-art {
+        max-width: 360px;
+        margin: 0 auto;
+        order: -1;                     /* на телефоне картинка над текстом */
+      }
+
+      .menu-list { grid-template-columns: 1fr; }
+      .about-top { gap: 24px; margin-bottom: 40px; }
+      .order.about-dlg { padding: 24px 20px; }
+    }
+
+    @media (max-width: 600px) {
+      .container { padding: 0 20px; }
+      /* На телефоне из меню оставляем только «О нас» — остальное есть кнопками на странице */
+      .header-right { gap: 16px; }
+      .menu-links a:not([href="#about"]) { display: none; }
+      .order { padding: 24px 20px; border-radius: 22px; }
+      .line { gap: 8px; }
+      .line-sum { min-width: 52px; }
+      .add { padding: 6px 12px; }
+      .item.has-photo { grid-template-columns: 72px 1fr auto; column-gap: 14px; }
+      .item-photo { width: 72px; height: 72px; border-radius: 16px; }
+      .item-actions { flex-wrap: wrap; gap: 8px; }   /* если не влезает в строку — кнопка переносится, а не вылезает */
+      .size { min-width: 40px; }
+      .gallery-section { padding-top: 64px; }
+      /* Галерея-лента: фото в ряд, листается пальцем; край следующего фото подсказывает, что есть ещё */
+      .gallery {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;   /* фото «примагничиваются» при пролистывании */
+        margin: 0 -20px;
+        padding: 0 20px 4px;
+        scrollbar-width: none;
+      }
+      .gallery li { flex: 0 0 72%; scroll-snap-align: center; }
+      .team { grid-template-columns: 1fr; gap: 28px; }
+      /* На телефоне бариста — строкой: фото слева, текст справа */
+      .barista { display: grid; grid-template-columns: 96px 1fr; gap: 0 18px; align-items: center; }
+      .barista-photo { width: 96px; height: 96px; font-size: 40px; margin: 0; grid-row: span 3; }
+      .section { padding: 64px 0; }
+      .hero { padding: 32px 0 64px; }
+      .hero-lead { font-size: 18px; }
+      .stamp-card { padding: 24px; }
+      .stamps { gap: 6px; }
+    }
+
+    /* Если человек отключил анимации в системе — пар сразу нарисован */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .steam path { animation: none; stroke-dashoffset: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Шапка ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="#top">Пенка</a>
+      <div class="header-right">
+        <nav class="menu-links" aria-label="Разделы">
+          <a href="#menu">Меню</a>
+          <a href="#promo">Акция</a>
+          <a href="#about">О нас</a>
+          <a href="#contacts">Контакты</a>
+        </nav>
+        <!-- Кнопка корзины: число в жёлтом кружке обновляет скрипт -->
+        <button class="cart-btn" type="button" id="cart-btn" aria-label="Открыть заказ">
+          Заказ <span class="cart-count" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+
+    <!-- ===== Первый экран ===== -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <div>
+          <!-- Текст и цвет этой метки скрипт меняет по текущему времени -->
+          <p class="status" id="status"><span class="status-dot"></span><span id="status-text">Открыто</span></p>
+          <h1>Пенка</h1>
+          <p class="hero-lead">Кофейня на Садовой. Варим с половины восьмого — к первой электричке, к первой паре, к первому созвону.</p>
+          <div class="hero-actions">
+            <a class="btn" href="#menu">Смотреть меню</a>
+            <a class="btn btn-ghost" href="#contacts">Как нас найти</a>
+          </div>
+        </div>
+
+        <!-- Чашка капучино, нарисованная кодом (SVG). viewBox — «холст» 400×400 -->
+        <div class="hero-art" aria-hidden="true">
+          <svg viewBox="0 0 400 400">
+            <!-- пар -->
+            <g class="steam" fill="none" stroke="#2B1D14" stroke-width="5" stroke-linecap="round" opacity="0.55">
+              <path d="M165 150 C150 125 180 110 165 80"/>
+              <path d="M200 145 C185 118 215 100 200 66"/>
+              <path d="M235 150 C220 125 250 110 235 80"/>
+            </g>
+            <!-- блюдце -->
+            <ellipse cx="200" cy="300" rx="140" ry="26" fill="#FFFDF9"/>
+            <ellipse cx="200" cy="296" rx="140" ry="26" fill="none" stroke="#2B1D14" stroke-width="5"/>
+            <!-- ручка -->
+            <path d="M292 200 C345 196 345 262 286 258" fill="none" stroke="#2B1D14" stroke-width="16" stroke-linecap="round"/>
+            <!-- чашка -->
+            <path d="M100 178 H300 C300 248 262 290 200 290 C138 290 100 248 100 178 Z" fill="#FFFDF9" stroke="#2B1D14" stroke-width="5"/>
+            <!-- кофе с пенкой сверху -->
+            <ellipse cx="200" cy="178" rx="100" ry="20" fill="#A0703F" stroke="#2B1D14" stroke-width="5"/>
+            <!-- рисунок на пенке — сердечко -->
+            <path d="M200 190 C186 180 180 172 188 167 C194 164 199 168 200 171 C201 168 206 164 212 167 C220 172 214 180 200 190 Z" fill="#FFFDF9"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Меню ===== -->
+    <section class="section menu-section" id="menu">
+      <div class="container">
+        <h2>Меню</h2>
+        <p class="section-lead">Закажите заранее — к вашему приходу всё будет готово, без очереди. Оплата на месте, картой или наличными.</p>
+
+        <!-- Вкладки. Позиции меню рисует скрипт из списка MENU (см. внизу файла) -->
+        <div class="tabs" role="tablist" aria-label="Разделы меню" id="tabs"></div>
+        <ul class="menu-list" id="menu-list"></ul>
+        <p class="menu-note">Альтернативное молоко — +50 ₽. Сироп — +40 ₽.</p>
+      </div>
+    </section>
+
+    <!-- ===== Галерея интерьера: 4 фото из папки images ===== -->
+    <section class="gallery-section" id="gallery" aria-label="Как у нас внутри">
+      <div class="container">
+        <h2>Как у нас внутри</h2>
+        <p class="section-lead">Восемь столиков, подоконник с розетками и много утреннего солнца.</p>
+        <ul class="gallery" id="gallery-list">
+          <li><img src="images/hall.jpg" alt="Зал с деревянными столиками и большим окном" loading="lazy"></li>
+          <li><img src="images/cup.jpg" alt="Капучино с сердечком на столике у окна" loading="lazy"></li>
+          <li><img src="images/bar.jpg" alt="Барная стойка с кофемашиной" loading="lazy"></li>
+          <li><img src="images/pastry.jpg" alt="Витрина с круассанами и синнабонами" loading="lazy"></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== Акция ===== -->
+    <section class="section" id="promo">
+      <div class="container promo-inner">
+        <div>
+          <h2>Каждый шестой кофе — от нас</h2>
+          <p class="section-lead">Попросите у бариста карточку. За каждый кофе ставим штамп, а шестой наливаем бесплатно — любой размер, любой напиток.</p>
+        </div>
+
+        <!-- Карточка лояльности: 5 штампов уже стоят, шестой — подарок -->
+        <div class="stamp-card" aria-label="Пример карточки: пять штампов из шести">
+          <div class="stamp-card-title">Пенка · карта гостя</div>
+          <div class="stamps">
+            <span class="stamp filled"></span>
+            <span class="stamp filled"></span>
+            <span class="stamp filled"></span>
+            <span class="stamp filled"></span>
+            <span class="stamp filled"></span>
+            <span class="stamp gift">6</span>
+          </div>
+          <p>Карточка без срока действия. Штампы не сгорают.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Контакты ===== -->
+    <section class="section contacts-section" id="contacts">
+      <div class="container contacts-inner">
+        <div>
+          <h2>Заходите</h2>
+          <p>ул. Садовая, 8 — вход со двора, у жёлтой двери</p>
+          <p><a href="tel:+79990000001">+7 999 000-00-01</a></p>
+          <p><a href="https://t.me/" target="_blank" rel="noopener">Наш Telegram</a> — новинки меню и свободные столики</p>
+        </div>
+        <div>
+          <!-- data-days — номера дней недели (1 — понедельник, 7 — воскресенье).
+               По ним скрипт находит сегодняшний день и подсвечивает его -->
+          <ul class="hours" id="hours">
+            <li data-days="1,2,3,4,5"><span>Будни</span><span>7:30 – 21:00</span></li>
+            <li data-days="6"><span>Суббота</span><span>9:00 – 21:00</span></li>
+            <li data-days="7"><span>Воскресенье</span><span>9:00 – 20:00</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================================================================
+       ОКНО «О НАС». Открывается по пункту меню «О нас» (см. скрипт)
+       =================================================================== -->
+  <dialog class="order about-dlg" id="about" aria-labelledby="about-title">
+    <div class="order-top">
+      <h2 id="about-title">О нас</h2>
+      <button class="x" type="button" data-close aria-label="Закрыть">×</button>
+    </div>
+    <div class="about-top">
+      <div class="about-story">
+        <p>«Пенку» открыли в 2021 году три друга-бариста, которым надоело, что утренний кофе в округе — это автомат на заправке.</p>
+        <p>Мы маленькие: восемь столиков, подоконник с розетками и большое окно на Садовую. Многих гостей знаем по имени и помним, кто пьёт капучино без сахара, а кто — раф с двойной ванилью.</p>
+      </div>
+
+      <!-- Три правила кофейни. Обычный список: порядок тут неважен, поэтому без номеров -->
+      <ul class="rules">
+        <li>
+          <strong>Зерно — свежей обжарки</strong>
+          <span>Берём у обжарщика в нашем городе раз в неделю, поэтому вкус не успевает выдохнуться.</span>
+        </li>
+        <li>
+          <strong>Выпечка — с утра</strong>
+          <span>Круассаны и синнабоны печём к открытию. Что осталось вечером — отдаём со скидкой.</span>
+        </li>
+        <li>
+          <strong>Не понравилось — переделаем</strong>
+          <span>Если напиток не тот, скажите бариста. Сварим заново, без вопросов.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="team-title">Кто варит ваш кофе</div>
+    <!-- Чтобы поставить фото, замени букву внутри .barista-photo на
+         <img src="images/имя.jpg" alt="Бариста Имя"> -->
+    <ul class="team">
+      <li class="barista">
+        <div class="barista-photo"><img src="images/masha.jpg" alt="Бариста Маша"></div>
+        <h3>Маша</h3>
+        <p class="barista-role">Старший бариста, одна из основателей</p>
+        <p class="barista-fav">Любимое: <b>флэт уайт</b> — «крепко, но нежно»</p>
+      </li>
+      <li class="barista">
+        <div class="barista-photo"><img src="images/danya.jpg" alt="Бариста Даня"></div>
+        <h3>Даня</h3>
+        <p class="barista-role">Бариста, рисует на пенке что угодно</p>
+        <p class="barista-fav">Любимое: <b>апельсиновый бамбл</b></p>
+      </li>
+      <li class="barista">
+        <div class="barista-photo"><img src="images/lena.jpg" alt="Бариста Лена"></div>
+        <h3>Лена</h3>
+        <p class="barista-role">Кондитер, отвечает за всю выпечку</p>
+        <p class="barista-fav">Любимое: <b>облепиховый чай и синнабон</b></p>
+      </li>
+    </ul>
+  </dialog>
+
+  <!-- Панель внизу экрана: видна, когда в заказе есть позиции -->
+  <div class="cart-bar" id="cart-bar" hidden>
+    <span class="cart-bar-text" id="cart-bar-text"></span>
+    <button class="btn" type="button" id="cart-bar-btn">Оформить</button>
+  </div>
+
+  <!-- ===================================================================
+       ОКНО ПРЕДЗАКАЗА. Внутри два «экрана»: сам заказ и «Заказ принят»
+       =================================================================== -->
+  <dialog class="order" id="order" aria-labelledby="order-title">
+    <div id="order-step">
+      <div class="order-top">
+        <h2 id="order-title">Ваш заказ</h2>
+        <button class="x" type="button" data-close aria-label="Закрыть">×</button>
+      </div>
+
+      <ul class="lines" id="lines"></ul>
+      <p class="empty-cart" id="empty-cart">Пока пусто. Добавьте что-нибудь из меню — кнопка «+ В заказ» у каждой позиции.</p>
+      <div class="total" id="total-row"><span>Итого</span><span id="total">0 ₽</span></div>
+
+      <form id="order-form" novalidate>
+        <div class="f">
+          <label for="o-time">Когда заберёте</label>
+          <!-- Варианты времени добавляет скрипт: только когда кофейня открыта -->
+          <select id="o-time"></select>
+        </div>
+        <div class="f">
+          <label for="o-name">Имя — назовём его, когда заказ будет готов</label>
+          <input id="o-name" type="text" autocomplete="given-name" placeholder="Например, Андрей">
+          <p class="err" id="o-name-err"></p>
+        </div>
+        <div class="f">
+          <label for="o-phone">Телефон</label>
+          <input id="o-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (999) 000-00-00">
+          <p class="err" id="o-phone-err"></p>
+        </div>
+        <div class="f">
+          <label for="o-comment">Пожелания — необязательно</label>
+          <textarea id="o-comment" rows="2" placeholder="Например: латте на овсяном молоке"></textarea>
+        </div>
+        <button class="btn" type="submit">Отправить заказ</button>
+        <p class="pay-note">Оплата при получении. Если планы изменятся — просто позвоните нам.</p>
+      </form>
+    </div>
+
+    <div class="done" id="done-step" hidden>
+      <div class="done-cup" aria-hidden="true">☕</div>
+      <h2>Заказ принят</h2>
+      <p id="done-text"></p>
+      <p>Номер заказа: <strong id="done-number"></strong></p>
+      <button class="btn" type="button" data-close>Хорошо</button>
+    </div>
+  </dialog>
+
+  <footer>
+    <div class="container">© 2026 Кофейня «Пенка». Демо-сайт для портфолио, кофейня вымышленная.</div>
+  </footer>
+
+  <script>
+    // ===================================================================
+    // МЕНЮ. Чтобы добавить позицию, скопируй любую строку и поменяй текст.
+    // prices — цены по размерам. Если размер один, пиши одно число.
+    // tag — метка «Хит» или «Новинка» (можно не писать)
+    // ===================================================================
+    const MENU = {
+      'Кофе': [
+        { name: 'Эспрессо', desc: 'Короткий и плотный, с карамельной сладостью в послевкусии.', prices: { S: 140 } },
+        { name: 'Американо', desc: 'Эспрессо и горячая вода. Для тех, кто любит большую чашку.', prices: { S: 160, M: 190, L: 220 } },
+        { name: 'Капучино', desc: 'Наша гордость: плотная пенка, на которой бариста рисует сердце.', prices: { S: 190, M: 230, L: 270 }, tag: 'Хит' },
+        { name: 'Латте', desc: 'Больше молока, мягкий вкус. Хорош с сиропом.', prices: { S: 200, M: 240, L: 280 } },
+        { name: 'Флэт уайт', desc: 'Двойной эспрессо и немного бархатного молока. Крепче капучино.', prices: { S: 230, M: 260 } },
+        { name: 'Раф ванильный', desc: 'Взбитые сливки, эспрессо и натуральная ваниль.', prices: { S: 240, M: 280, L: 320 } },
+        { name: 'Апельсиновый бамбл', desc: 'Свежевыжатый апельсин, лёд и эспрессо сверху. Летом — лучше всего.', prices: { M: 290 }, tag: 'Новинка' },
+        { name: 'Какао', desc: 'Настоящее, на молоке, с маршмеллоу по желанию.', prices: { S: 180, M: 220, L: 250 } },
+      ],
+      'Чай': [
+        { name: 'Чёрный с чабрецом', desc: 'Классика, как у бабушки. Чайник на двоих.', prices: { M: 220 } },
+        { name: 'Зелёный сенча', desc: 'Свежий, травянистый, без горечи.', prices: { M: 240 } },
+        { name: 'Облепиховый', desc: 'Облепиха, мёд и апельсин. Согревает лучше шарфа.', prices: { M: 290, L: 350 }, tag: 'Хит' },
+        { name: 'Матча латте', desc: 'Японский порошковый чай с молоком. Бодрит мягче кофе.', prices: { S: 260, M: 300 } },
+      ],
+      'Десерты': [
+        { name: 'Круассан', desc: 'Сливочный, хрустящий, печём каждое утро.', prices: { S: 150 } },
+        { name: 'Чизкейк Нью-Йорк', desc: 'Плотный, с ягодным соусом.', prices: { S: 290 } },
+        { name: 'Синнабон', desc: 'Булочка с корицей и сливочным кремом. Тёплая, если попросите.', prices: { S: 220 }, tag: 'Хит' },
+        { name: 'Морковный торт', desc: 'С грецким орехом и крем-чизом.', prices: { S: 270 } },
+      ],
+      'Завтраки': [
+        { name: 'Сырники', desc: 'Три штуки, со сметаной и ягодным вареньем. До 12:00.', prices: { S: 340 }, tag: 'Хит' },
+        { name: 'Овсянка', desc: 'На молоке, с бананом, орехами и мёдом.', prices: { S: 260 } },
+        { name: 'Тост с авокадо', desc: 'Цельнозерновой хлеб, авокадо, яйцо пашот.', prices: { S: 390 } },
+        { name: 'Круассан с лососем', desc: 'Слабосолёный лосось, крем-сыр и руккола.', prices: { S: 420 } },
+      ],
+    };
+
+    // ФОТО ПОЗИЦИЙ: название из меню → картинка. Позиции без фото показываются как раньше
+    const PHOTOS = {
+      'Эспрессо': 'images/menu/espresso.jpg',
+      'Американо': 'images/menu/americano.jpg',
+      'Капучино': 'images/menu/cappuccino.jpg',
+      'Латте': 'images/menu/latte.jpg',
+      'Флэт уайт': 'images/menu/flatwhite.jpg',
+      'Раф ванильный': 'images/menu/raf.jpg',
+      'Апельсиновый бамбл': 'images/menu/bumble.jpg',
+      'Какао': 'images/menu/cocoa.jpg',
+      'Чёрный с чабрецом': 'images/menu/blacktea.jpg',
+      'Зелёный сенча': 'images/menu/sencha.jpg',
+      'Облепиховый': 'images/menu/seabuckthorn.jpg',
+      'Матча латте': 'images/menu/matcha.jpg',
+      'Круассан': 'images/menu/croissant.jpg',
+      'Чизкейк Нью-Йорк': 'images/menu/cheesecake.jpg',
+      'Синнабон': 'images/menu/cinnabon.jpg',
+      'Морковный торт': 'images/menu/carrot.jpg',
+      'Сырники': 'images/menu/syrniki.jpg',
+      'Овсянка': 'images/menu/oatmeal.jpg',
+      'Тост с авокадо': 'images/menu/avotoast.jpg',
+      'Круассан с лососем': 'images/menu/salmon.jpg',
+    };
+
+    const tabsBox = document.getElementById('tabs');
+    const list = document.getElementById('menu-list');
+    let currentTab = 'Кофе';
+
+    // Рисуем вкладки
+    function renderTabs() {
+      tabsBox.innerHTML = Object.keys(MENU).map(function (name) {
+        const selected = name === currentTab;
+        return '<button class="tab" type="button" role="tab" aria-selected="' + selected + '">' + name + '</button>';
+      }).join('');
+    }
+
+    // Рисуем позиции выбранного раздела
+    function renderItems() {
+      list.innerHTML = MENU[currentTab].map(function (item, i) {
+        const sizes = Object.keys(item.prices);          // например ['S', 'M', 'L']
+        const first = sizes[0];
+        const tag = item.tag ? '<span class="item-tag">' + item.tag + '</span>' : '';
+
+        // Кнопки размеров показываем, только если размеров больше одного
+        let sizeButtons = '';
+        if (sizes.length > 1) {
+          sizeButtons = '<div class="sizes" role="group" aria-label="Размер">' +
+            sizes.map(function (s) {
+              return '<button class="size" type="button" data-item="' + i + '" data-size="' + s + '" aria-pressed="' + (s === first) + '">' + s + '</button>';
+            }).join('') + '</div>';
+        }
+
+        const photo = PHOTOS[item.name];
+        return '<li class="item' + (photo ? ' has-photo' : '') + '">' +
+          (photo ? '<img class="item-photo" src="' + photo + '" alt="" loading="lazy">' : '') +
+          '<span class="item-name">' + item.name + tag + '</span>' +
+          '<span class="item-price" id="price-' + i + '">' + item.prices[first] + ' ₽</span>' +
+          '<p class="item-desc">' + item.desc + '</p>' +
+          '<div class="item-actions">' + sizeButtons +
+            '<button class="add" type="button" data-item="' + i + '">+ В заказ</button>' +
+          '</div>' +
+        '</li>';
+      }).join('');
+    }
+
+    // Клик по вкладке — меняем раздел
+    tabsBox.addEventListener('click', function (event) {
+      const tab = event.target.closest('.tab');
+      if (!tab) return;
+      currentTab = tab.textContent;
+      renderTabs();
+      renderItems();
+    });
+
+    // Клик по размеру — меняем цену у этой позиции
+    list.addEventListener('click', function (event) {
+      const btn = event.target.closest('.size');
+      if (!btn) return;
+      const i = btn.dataset.item;
+      const size = btn.dataset.size;
+      btn.parentElement.querySelectorAll('.size').forEach(function (b) {
+        b.setAttribute('aria-pressed', b === btn);       // подсвечиваем только нажатый
+      });
+      document.getElementById('price-' + i).textContent = MENU[currentTab][i].prices[size] + ' ₽';
+    });
+
+    renderTabs();
+    renderItems();
+
+    // ===================================================================
+    // «СЕЙЧАС ОТКРЫТО» и подсветка сегодняшнего дня
+    // ===================================================================
+    // Часы работы: [открытие, закрытие] в минутах от полуночи (7:30 = 7*60+30)
+    // Номера дней: 1 — понедельник ... 7 — воскресенье
+    const HOURS = {
+      1: [450, 1260], 2: [450, 1260], 3: [450, 1260], 4: [450, 1260], 5: [450, 1260],
+      6: [540, 1260],
+      7: [540, 1200],
+    };
+
+    function toTime(minutes) {                       // 1260 → "21:00"
+      const h = Math.floor(minutes / 60);
+      const m = String(minutes % 60).padStart(2, '0');
+      return h + ':' + m;
+    }
+
+    function updateStatus() {
+      const now = new Date();
+      const day = now.getDay() || 7;                 // в JS воскресенье — 0, делаем его 7
+      const minutes = now.getHours() * 60 + now.getMinutes();
+      const [open, close] = HOURS[day];
+      const status = document.getElementById('status');
+      const text = document.getElementById('status-text');
+
+      if (minutes >= open && minutes < close) {
+        status.classList.remove('closed');
+        text.textContent = 'Открыто до ' + toTime(close);
+      } else {
+        status.classList.add('closed');
+        // Ищем, когда откроемся: сегодня позже или завтра
+        const nextDay = minutes < open ? day : (day % 7) + 1;
+        const when = minutes < open ? 'сегодня' : 'завтра';
+        text.textContent = 'Закрыто · откроемся ' + when + ' в ' + toTime(HOURS[nextDay][0]);
+      }
+
+      // Подсветка строки с сегодняшним днём в часах работы
+      document.querySelectorAll('#hours li').forEach(function (li) {
+        const days = li.dataset.days.split(',').map(Number);
+        li.classList.toggle('today', days.includes(day));
+      });
+    }
+
+    updateStatus();
+    setInterval(updateStatus, 60000);                // обновляем раз в минуту
+
+    // ===================================================================
+    // ПРЕДЗАКАЗ
+    // cart — список позиций заказа: { name, size, price, qty }
+    // ===================================================================
+    const cart = [];
+    const orderDlg = document.getElementById('order');
+
+    // «+ В заказ»: берём позицию и выбранный у неё размер
+    list.addEventListener('click', function (event) {
+      const btn = event.target.closest('.add');
+      if (!btn) return;
+      const item = MENU[currentTab][btn.dataset.item];
+      const pressed = btn.closest('.item').querySelector('.size[aria-pressed="true"]');
+      const size = pressed ? pressed.dataset.size : Object.keys(item.prices)[0];
+
+      // Если такая же позиция того же размера уже есть — просто +1
+      const same = cart.find(function (l) { return l.name === item.name && l.size === size; });
+      if (same) same.qty++;
+      else cart.push({ name: item.name, size: size, price: item.prices[size], qty: 1, sized: Object.keys(item.prices).length > 1 });
+
+      // Кнопка на секунду показывает «Добавлено ✓»
+      btn.classList.add('added');
+      btn.textContent = 'Добавлено ✓';
+      setTimeout(function () { btn.classList.remove('added'); btn.textContent = '+ В заказ'; }, 1200);
+      renderCart();
+
+    });
+
+    function cartTotal() { return cart.reduce(function (sum, l) { return sum + l.price * l.qty; }, 0); }
+    function cartCount() { return cart.reduce(function (n, l) { return n + l.qty; }, 0); }
+
+    // Слово в нужной форме: 1 позиция, 2 позиции, 5 позиций
+    function plural(n, one, few, many) {
+      const m10 = n % 10, m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return one;
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+      return many;
+    }
+
+    // Перерисовываем всё, что связано с заказом
+    function renderCart() {
+      const count = cartCount();
+      document.getElementById('cart-count').textContent = count;
+      document.getElementById('cart-bar').hidden = count === 0;
+      document.getElementById('cart-bar-text').textContent =
+        count + ' ' + plural(count, 'позиция', 'позиции', 'позиций') + ' · ' + cartTotal() + ' ₽';
+
+      document.getElementById('lines').innerHTML = cart.map(function (l, i) {
+        return '<li class="line">' +
+          '<span><span class="line-name">' + l.name + '</span>' + (l.sized ? ' <span class="line-size">' + l.size + '</span>' : '') + '</span>' +
+          '<span class="qty">' +
+            '<button type="button" data-minus="' + i + '" aria-label="Убрать одну">−</button>' +
+            '<span>' + l.qty + '</span>' +
+            '<button type="button" data-plus="' + i + '" aria-label="Добавить ещё">+</button>' +
+          '</span>' +
+          '<span class="line-sum">' + l.price * l.qty + ' ₽</span>' +
+        '</li>';
+      }).join('');
+
+      document.getElementById('total').textContent = cartTotal() + ' ₽';
+      document.getElementById('empty-cart').hidden = count > 0;
+      document.getElementById('total-row').hidden = count === 0;
+      document.getElementById('order-form').hidden = count === 0;
+    }
+
+    // Кнопки «−» и «+» в окне заказа
+    document.getElementById('lines').addEventListener('click', function (event) {
+      const plus = event.target.closest('[data-plus]');
+      const minus = event.target.closest('[data-minus]');
+      if (plus) cart[plus.dataset.plus].qty++;
+      if (minus) {
+        const i = minus.dataset.minus;
+        cart[i].qty--;
+        if (cart[i].qty === 0) cart.splice(i, 1);    // дошли до нуля — убираем строку
+      }
+      renderCart();
+    });
+
+    // --- Время получения: каждые 15 минут, только пока кофейня открыта
+    function fillPickupTimes() {
+      const select = document.getElementById('o-time');
+      select.innerHTML = '';
+      const now = new Date();
+      let day = now.getDay() || 7;
+      let start = now.getHours() * 60 + now.getMinutes() + 15;   // готовим минимум 15 минут
+      start = Math.ceil(start / 15) * 15;                          // округляем до :00, :15, :30, :45
+      let label = 'сегодня';
+
+      // Если сегодня уже не успеваем (или ещё рано) — подстраиваемся под часы работы
+      if (start > HOURS[day][1] - 15) {               // закрываемся — переносим на завтра
+        day = (day % 7) + 1;
+        start = HOURS[day][0] + 15;
+        label = 'завтра';
+      } else if (start < HOURS[day][0] + 15) {        // ещё не открылись
+        start = HOURS[day][0] + 15;
+      }
+
+      for (let t = start, n = 0; t <= HOURS[day][1] - 15 && n < 16; t += 15, n++) {
+        // Первый вариант на сегодня короче: «Как можно скорее · 9:45»
+        const text = n === 0 && label === 'сегодня' ? 'Как можно скорее · ' + toTime(t) : label + ' в ' + toTime(t);
+        select.add(new Option(text, label + ' в ' + toTime(t)));
+      }
+    }
+
+    // --- Маска телефона: 89991234567 → +7 (999) 123-45-67
+    const phone = document.getElementById('o-phone');
+    phone.addEventListener('input', function () {
+      let d = phone.value.replace(/\D/g, '');
+      if (d.startsWith('8')) d = '7' + d.slice(1);
+      if (!d.startsWith('7')) d = '7' + d;
+      d = d.slice(0, 11);
+      let out = '+7';
+      if (d.length > 1) out += ' (' + d.slice(1, 4);
+      if (d.length >= 4) out += ')';
+      if (d.length > 4) out += ' ' + d.slice(4, 7);
+      if (d.length > 7) out += '-' + d.slice(7, 9);
+      if (d.length > 9) out += '-' + d.slice(9, 11);
+      phone.value = d.length > 1 ? out : '';
+    });
+
+    function setErr(id, msg) {
+      document.getElementById(id).closest('.f').classList.toggle('invalid', !!msg);
+      document.getElementById(id + '-err').textContent = msg;
+    }
+
+    // --- Отправка заказа
+    document.getElementById('order-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+      const name = document.getElementById('o-name');
+      const nameErr = name.value.trim().length < 2 ? 'Напишите имя — так бариста позовёт вас' : '';
+      const phoneErr = phone.value.replace(/\D/g, '').length === 11 ? '' : 'Введите номер полностью';
+      setErr('o-name', nameErr);
+      setErr('o-phone', phoneErr);
+      if (nameErr) { name.focus(); return; }
+      if (phoneErr) { phone.focus(); return; }
+
+      const time = document.getElementById('o-time').value;
+      const number = Math.floor(100 + Math.random() * 900);       // номер заказа для примера
+      // ЗДЕСЬ на настоящем сайте заказ уходит в кофейню (Telegram-бот, касса или CRM)
+      console.log('Новый заказ №' + number, { cart: cart, time: time, name: name.value, phone: phone.value });
+
+      document.getElementById('done-text').textContent =
+        name.value.trim() + ', ждём вас ' + time + '. Заказ будет у стойки, оплата при получении — ' + cartTotal() + ' ₽.';
+      document.getElementById('done-number').textContent = number;
+      document.getElementById('order-step').hidden = true;
+      document.getElementById('done-step').hidden = false;
+
+      cart.length = 0;                                 // очищаем корзину
+      renderCart();
+      document.getElementById('order-form').reset();
+    });
+
+    // --- Открытие и закрытие окна
+    function openOrder() {
+      document.getElementById('order-step').hidden = false;
+      document.getElementById('done-step').hidden = true;
+      fillPickupTimes();
+      renderCart();
+      orderDlg.showModal();
+    }
+
+    document.getElementById('cart-btn').addEventListener('click', openOrder);
+    document.getElementById('cart-bar-btn').addEventListener('click', openOrder);
+    orderDlg.addEventListener('click', function (event) {
+      if (event.target === orderDlg || event.target.closest('[data-close]')) orderDlg.close();
+    });
+
+    renderCart();
+
+    // ===================================================================
+    // ОКНО «О НАС»: перехватываем клик по ссылке #about и открываем окно
+    // ===================================================================
+    const aboutDlg = document.getElementById('about');
+    document.querySelectorAll('a[href="#about"]').forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();                       // не прыгаем по странице
+        aboutDlg.showModal();
+      });
+    });
+    aboutDlg.addEventListener('click', function (event) {
+      // закрываем по крестику или по клику на затемнённый фон
+      if (event.target === aboutDlg || event.target.closest('[data-close]')) aboutDlg.close();
+    });
+
+  </script>
+</body>
+</html>

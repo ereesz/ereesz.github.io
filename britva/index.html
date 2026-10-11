@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Барбершоп «Бритва»</title>
+  <!-- Описание для поисковиков (Яндекс, Google) — показывается под ссылкой в результатах поиска -->
+  <meta name="description" content="Барбершоп и женский зал «Бритва»: стрижки для мужчин, женщин и детей, оформление бороды, окрашивание. Онлайн-запись.">
+  <!-- Цвет панели браузера на телефоне -->
+  <meta name="theme-color" content="#141414">
+  <!-- Иконка во вкладке браузера: золотая буква «Б» на тёмном фоне (рисунок прямо в коде, в формате SVG) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23141414'/%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='Georgia,serif' font-size='40' font-weight='700' fill='%23c8a46a'%3E%D0%91%3C/text%3E%3C/svg%3E">
+  <!-- Превью ссылки в Telegram, WhatsApp, VK (Open Graph).
+       В og:image и og:url нужен полный адрес сайта -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Барбершоп «Бритва»">
+  <meta property="og:description" content="Стрижки для мужчин, женщин и детей. Онлайн-запись за минуту.">
+  <meta property="og:url" content="https://ereesz.github.io/britva/">
+  <meta property="og:image" content="https://ereesz.github.io/britva/images/og-preview.jpg">
+  <!-- Шрифты Google (новое): Playfair Display для заголовков, Manrope для текста.
+       Оба поддерживают русские буквы. Если интернета нет, браузер возьмёт Georgia и Arial -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Атрибут hidden всегда прячет элемент, даже если у него в CSS задан display: grid или flex */
+    [hidden] {
+      display: none !important;
+    }
+
+    /* Плавная прокрутка при переходе по ссылкам меню (новое) */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      position: relative;             /* «якорь» для золотых полос, которые идут через всю страницу */
+      margin: 0;                      /* отступы по краям теперь даёт .container */
+      background: #141414;
+      color: #f2efe9;
+      font-family: Manrope, Arial, sans-serif;
+    }
+
+    h1 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 64px;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: #c8a46a;
+      margin: 0 0 12px;
+    }
+
+    p {
+      color: #a8a399;
+      font-size: 18px;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 14px 32px;
+      border: 2px solid #c8a46a;
+      color: #c8a46a;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-size: 14px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Если кнопка стоит сразу после другой кнопки, отодвигаем её вправо */
+    .btn + .btn {
+      margin-left: 12px;
+    }
+
+    .btn:hover {
+      background: #c8a46a;
+      color: #141414;
+    }
+
+    /* Заливная кнопка — главное действие на экране (новое) */
+    .btn-solid {
+      background: #c8a46a;
+      color: #141414;
+    }
+
+    .btn-solid:hover {
+      background: #e0bd82;            /* при наведении чуть светлее */
+      border-color: #e0bd82;
+    }
+
+    .services {
+      margin-top: 80px;
+      max-width: 720px;
+    }
+
+    /* ===== Переключатель «Мужчинам / Женщинам / Детям» (новое) ===== */
+    .switch {
+      display: inline-flex;           /* кнопки в ряд, рамка по ширине кнопок */
+      border: 1px solid #2c2a27;
+      margin-bottom: 16px;
+    }
+
+    .switch-btn {
+      padding: 12px 22px;
+      background: none;
+      border: 0;
+      color: #a8a399;
+      font-family: inherit;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .switch-btn + .switch-btn {
+      border-left: 1px solid #2c2a27; /* тонкая линия между кнопками */
+    }
+
+    .switch-btn:hover {
+      color: #f2efe9;
+    }
+
+    /* Выбранная группа: золотая заливка, как у главной кнопки */
+    .switch-btn.active {
+      background: #c8a46a;
+      color: #141414;
+    }
+
+    /* Длительность услуги — мелким серым текстом под названием */
+    .price-list small {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      color: #6f6b63;
+    }
+
+    .price-list li {
+      align-items: center;            /* цена по центру относительно названия и времени */
+    }
+
+    .price {
+      white-space: nowrap;            /* «от 4 000 ₽» не разрывается на две строки */
+    }
+
+    .services-note {
+      margin: 20px 0 0;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #6f6b63;
+    }
+
+    h2 {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 32px;
+      color: #f2efe9;
+      margin: 0 0 24px;
+    }
+
+    .price-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .price-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid #2c2a27;
+      font-size: 18px;
+    }
+
+    .price {
+      color: #c8a46a;
+    }
+
+    .masters {
+      margin-top: 80px;
+    }
+
+    .team {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 900px;
+    }
+
+    .card {
+      background: #1c1b19;
+      border: 1px solid #2c2a27;
+      padding: 28px;
+      text-align: center;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 16px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: 2px solid #c8a46a;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      color: #f2efe9;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 40px;                /* отступы по краям экрана (раньше их давал body) */
+    }
+
+    /* Когда переходишь к разделу по меню, он не прячется под прилипшей шапкой (новое) */
+    section[id] {
+      scroll-margin-top: 96px;
+    }
+
+    /* ===== Контакты ===== */
+    .contacts {
+      margin-top: 80px;               /* отступ сверху, как у других разделов */
+    }
+
+    .contacts a {
+      color: #c8a46a;                 /* золотой цвет вместо синего */
+      text-decoration: none;          /* убираем подчёркивание */
+    }
+
+    .contacts a:hover {
+      text-decoration: underline;     /* подчёркивание при наведении мышки */
+    }
+
+    /* ===================================================================
+       ШАПКА С МЕНЮ (новое)
+       =================================================================== */
+    .site-header {
+      position: sticky;               /* шапка «прилипает» к верху экрана при прокрутке */
+      top: 0;
+      z-index: 10;                    /* и лежит поверх остального содержимого */
+      background: rgba(20, 20, 20, 0.92);  /* почти непрозрачный тёмный фон */
+      backdrop-filter: blur(8px);     /* то, что под шапкой, слегка размывается */
+      border-bottom: 1px solid #2c2a27;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;            /* логотип и меню по центру по высоте */
+      justify-content: space-between; /* логотип слева, меню справа */
+      height: 72px;
+    }
+
+    .logo {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #c8a46a;
+      text-decoration: none;
+    }
+
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .menu a:not(.btn) {
+      color: #a8a399;
+      text-decoration: none;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .menu a:not(.btn):hover,
+    .menu a.active {
+      color: #c8a46a;
+    }
+
+    /* Маленькая кнопка «Записаться» в меню */
+    .btn-small {
+      margin-top: 0;
+      padding: 10px 20px;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    /* Кнопка-«бургер»: три полоски. На компьютере спрятана, показываем её только на телефоне */
+    .burger {
+      display: none;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      background: none;
+      border: 0;
+      cursor: pointer;
+    }
+
+    .burger span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      margin: 5px auto;
+      background: #f2efe9;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    /* Когда меню открыто, полоски складываются в крестик */
+    .site-header.open .burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .site-header.open .burger span:nth-child(2) { opacity: 0; }
+    .site-header.open .burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ===================================================================
+       ПЕРВЫЙ ЭКРАН (новое)
+       =================================================================== */
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 73px); /* на весь экран минус высота шапки */
+      display: flex;
+      align-items: center;            /* содержимое по центру по высоте */
+      overflow: hidden;
+      /* Фон из нескольких слоёв (верхний слой пишется первым):
+         1) тёмная заливка слева направо — под текстом темно, справа видно интерьер;
+         2) снизу плавный переход в цвет сайта, чтобы фото не обрывалось краем;
+         3) фото интерьера (images/hero.jpg). right center — кресло всегда остаётся в кадре;
+         4) запасной тёмный цвет */
+      background:
+        linear-gradient(90deg, rgba(20, 20, 20, 0.92) 30%, rgba(20, 20, 20, 0.35) 65%, rgba(20, 20, 20, 0.15)),
+        linear-gradient(to bottom, transparent 70%, #141414),
+        url("images/hero.jpg") right center / cover no-repeat,
+        #141414;
+    }
+
+    /* Золотое свечение справа: декор, чтобы первый экран не был плоским без фото */
+    .hero::before {
+      display: none;                  /* свечение больше не нужно: его заменило фото */
+      content: "";
+      position: absolute;
+      right: -200px;
+      top: 50%;
+      width: 700px;
+      height: 700px;
+      transform: translateY(-50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200, 164, 106, 0.18), transparent 65%);
+      pointer-events: none;           /* декор не мешает кликам */
+    }
+
+    /* Золотые диагональные полосы через всю страницу — намёк на барбер-столб (новое) */
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;                      /* от самого верха до самого низа страницы */
+      right: 8%;
+      width: 140px;
+      z-index: 5;                     /* поверх фона, но под карточками и шапкой */
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(200, 164, 106, 0.12) 0 2px,
+        transparent 2px 22px
+      );
+      /* Внизу полосы плавно растворяются, а не обрываются */
+      -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 240px), transparent);
+      mask-image: linear-gradient(to bottom, #000 calc(100% - 240px), transparent);
+      pointer-events: none;           /* полосы не мешают кликам */
+    }
+
+    /* Карточки лежат поверх полос, чтобы полосы не перечёркивали фото и текст */
+    .card,
+    .haircut {
+      position: relative;
+      z-index: 6;
+    }
+
+    .hero-inner {
+      position: relative;             /* текст поверх декора */
+      z-index: 1;
+      width: 100%;
+      padding-top: 80px;
+      padding-bottom: 80px;
+    }
+
+    .hero-kicker {
+      margin: 0 0 20px;
+      font-size: 13px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #c8a46a;
+    }
+
+    .hero h1 {
+      font-size: clamp(56px, 11vw, 128px);  /* размер подстраивается под ширину экрана: от 56 до 128px */
+      line-height: 1;
+      letter-spacing: 8px;
+      margin: 0 0 24px;
+    }
+
+    .hero-lead {
+      max-width: 520px;               /* короткие строки читаются легче */
+      margin: 0 0 32px;
+      font-size: 20px;
+      line-height: 1.6;
+    }
+
+    .hero-actions .btn {
+      margin-top: 0;
+    }
+
+    /* Три коротких факта внизу первого экрана */
+    .hero-facts {
+      display: flex;
+      gap: 48px;
+      list-style: none;
+      padding: 32px 0 0;
+      margin: 56px 0 0;
+      border-top: 1px solid #2c2a27;
+      max-width: 640px;
+    }
+
+    .hero-facts strong {
+      display: block;
+      font-size: 18px;
+      color: #f2efe9;
+      margin-bottom: 4px;
+    }
+
+    .hero-facts span {
+      font-size: 14px;
+      color: #a8a399;
+    }
+
+    /* Заголовок внутренней страницы (каталог) */
+    .page-head {
+      padding-top: 64px;
+    }
+
+    .page-head h1 {
+      font-size: 56px;
+    }
+
+    /* ===== Каталог стрижек (новое) ===== */
+    .catalog-section {
+      margin-top: 64px;
+    }
+
+    /* Сетка карточек: 3 колонки, как у мастеров */
+    .haircuts {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    /* Одна карточка стрижки */
+    .haircut {
+      background: #1c1b19;
+      border: 1px solid #2c2a27;
+      padding: 24px;
+      display: flex;                  /* выстраиваем содержимое карточки... */
+      flex-direction: column;         /* ...сверху вниз, а не в строку */
+    }
+
+    /* ===== Фото стрижки в карточке (новое) ===== */
+    .haircut-photo {
+      aspect-ratio: 4 / 3;            /* рамка всегда 4:3, даже если фото другого размера */
+      margin: -24px -24px 20px;       /* растягиваем фото до краёв карточки (отменяем padding) */
+      background: #2c2a27;            /* серый фон: виден, пока фото нет */
+      overflow: hidden;               /* обрезаем всё, что вылезает за рамку */
+    }
+
+    .haircut-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;              /* фото заполняет рамку без искажений, лишнее обрезается */
+      display: block;                 /* убирает лишнюю полоску под картинкой */
+    }
+
+    /* ===== Осмотр стрижки с разных сторон (новое) ===== */
+    .viewer {
+      position: relative;             /* «якорь» для фото, которые лежат друг на друге */
+      background: #c8c8cb;            /* единый серый фон, как на всех фото каталога */
+      cursor: ew-resize;              /* курсор-стрелки «влево-вправо»: подсказка, что можно водить */
+      touch-action: pan-y;            /* на телефоне палец по фото крутит ракурс, а не страницу вбок */
+    }
+
+    .viewer img {
+      position: absolute;             /* все три фото лежат стопкой в одном месте */
+      inset: 0;                       /* растянуты на всю рамку */
+      opacity: 0;                     /* по умолчанию невидимы */
+      transition: opacity 0.25s;      /* плавная смена фото */
+    }
+
+    .viewer img.active {
+      opacity: 1;                     /* видно только фото с классом active */
+    }
+
+    /* Кнопки «Спереди / Сбоку / Сзади» */
+    .views {
+      display: flex;
+      gap: 8px;
+      margin: -8px 0 16px;            /* чуть ближе к фото, отступ до заголовка снизу */
+    }
+
+    .view-btn {
+      flex: 1;                        /* три кнопки одинаковой ширины */
+      padding: 8px 0;
+      background: none;
+      border: 1px solid #2c2a27;
+      color: #a8a399;
+      font-family: inherit;           /* кнопки по умолчанию берут свой шрифт, просим взять наш */
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .view-btn:hover {
+      color: #f2efe9;
+    }
+
+    .view-btn.active {
+      border-color: #c8a46a;
+      color: #c8a46a;
+    }
+
+    .haircut h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      color: #f2efe9;
+    }
+
+    .haircut p {
+      margin: 0 0 16px;
+      font-size: 15px;
+      line-height: 1.5;               /* межстрочный интервал, чтобы текст легче читался */
+    }
+
+    .haircut .price {
+      margin-top: auto;               /* прижимает цену к низу карточки */
+      font-size: 20px;
+    }
+
+    /* ===== Подвал ===== */
+    footer {
+      margin-top: 96px;               /* отступ от последнего раздела */
+      padding: 28px 0;                /* воздух сверху и снизу */
+      border-top: 1px solid #2c2a27;  /* тонкая линия-разделитель на всю ширину */
+    }
+
+    footer p {
+      margin: 0;                      /* убираем стандартные отступы абзаца */
+      font-size: 14px;                /* мелкий текст: подвал не главное */
+      color: #6f6b63;                 /* приглушённее обычного текста */
+    }
+    /* ===================================================================
+       ОНЛАЙН-ЗАПИСЬ (новое)
+       =================================================================== */
+    /* Само окно */
+    .booking-modal {
+      width: min(820px, calc(100% - 32px));  /* 820px, но не шире экрана минус отступы */
+      max-height: calc(100vh - 48px);         /* если окно выше экрана — внутри появится прокрутка */
+      padding: 40px;
+      background: #141414;
+      color: #f2efe9;
+      border: 1px solid #c8a46a;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    /* Внутри окна форме не нужна своя рамка — рамка уже у окна */
+    .booking-modal .booking-form {
+      padding: 0;
+      background: none;
+      border: 0;
+    }
+
+    /* Затемнение всего сайта под окном */
+    .booking-modal::backdrop {
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+    }
+
+    /* Плавное появление окна: чуть снизу и из прозрачности */
+    .booking-modal[open] {
+      animation: modal-in 0.25s ease-out;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Пока окно открыто, сам сайт под ним не прокручивается */
+    html:has(.booking-modal[open]) {
+      overflow: hidden;
+    }
+
+    /* Крестик в правом верхнем углу */
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 44px;
+      height: 44px;
+      background: none;
+      border: 0;
+      color: #a8a399;
+      font-size: 32px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #c8a46a;
+    }
+
+    .modal-close:focus-visible {
+      outline: 2px solid #c8a46a;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .booking-modal[open] { animation: none; }
+    }
+
+    .booking-lead {
+      margin: -8px 0 32px;
+      line-height: 1.6;
+    }
+
+    /* Сетка формы: две колонки, поля встают парами (имя + телефон, услуга + мастер...) */
+    .booking-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 24px;
+      padding: 32px;
+      background: #1c1b19;
+      border: 1px solid #2c2a27;
+    }
+
+    .field-wide {
+      grid-column: 1 / -1;           /* поле на всю ширину: от первой колонки до последней */
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #a8a399;
+    }
+
+    .optional {
+      color: #6f6b63;
+    }
+
+    /* Общий вид полей ввода */
+    .field input[type="text"],
+    .field input[type="tel"],
+    .field input[type="date"],
+    .field select,
+    .field textarea {
+      width: 100%;
+      box-sizing: border-box;        /* ширина включает рамку и отступы — поле не вылезает за колонку */
+      padding: 13px 14px;
+      background: #141414;
+      border: 1px solid #3a3733;
+      color: #f2efe9;
+      font-family: inherit;
+      font-size: 16px;               /* 16px — иначе iPhone приближает страницу при вводе */
+      height: 48px;                  /* одна высота у всех полей, включая дату */
+      color-scheme: dark;            /* тёмный календарь и тёмные списки в браузере */
+      transition: border-color 0.2s;
+    }
+
+    .field textarea {
+      height: auto;                  /* у комментария высота задаётся числом строк (rows) */
+      resize: vertical;              /* растягивать можно только по высоте */
+      line-height: 1.5;
+    }
+
+    .field input::placeholder,
+    .field textarea::placeholder {
+      color: #6f6b63;
+    }
+
+    /* Свой значок-стрелка у выпадающих списков вместо стандартного */
+    .field select {
+      appearance: none;
+      padding-right: 40px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23c8a46a' stroke-width='1.6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+
+    .field select:disabled {
+      color: #6f6b63;
+    }
+
+    /* Поле в фокусе: золотая рамка. :focus-visible — подсветка и при управлении с клавиатуры */
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: #c8a46a;
+    }
+
+    .check input:focus-visible {
+      outline: 2px solid #c8a46a;
+      outline-offset: 2px;
+    }
+
+    /* Поле с ошибкой: красноватая рамка (класс invalid ставит скрипт) */
+    .field.invalid input,
+    .field.invalid select {
+      border-color: #d9796a;
+    }
+
+    .field-error {
+      min-height: 20px;              /* место под текст ошибки держим заранее — форма не прыгает */
+      margin: 6px 0 4px;
+      font-size: 13px;
+      color: #e8907f;
+    }
+
+    /* Галочка согласия */
+    .check {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      line-height: 1.5;
+    }
+
+    .field .check {
+      margin-bottom: 0;
+    }
+
+    .check input {
+      width: 18px;
+      height: 18px;
+      margin: 2px 0 0;
+      flex-shrink: 0;
+      accent-color: #c8a46a;         /* галочка в золотом цвете */
+    }
+
+    .booking-submit {
+      margin-top: 8px;
+      border: 2px solid #c8a46a;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* Блок «Заявка принята» */
+    .booking-done {
+      padding: 48px 32px;
+      background: #1c1b19;
+      border: 1px solid #c8a46a;
+      text-align: center;
+    }
+
+    /* Кнопка-тег <button> по умолчанию белая — делаем её как наши ссылки-кнопки */
+    .booking-done .btn {
+      background: none;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .booking-done .btn:hover {
+      background: #c8a46a;
+      color: #141414;
+    }
+
+    .booking-done:focus {
+      outline: none;
+    }
+
+    .done-mark {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 20px;
+      border: 2px solid #c8a46a;
+      border-radius: 50%;
+      color: #c8a46a;
+      font-size: 28px;
+      line-height: 52px;
+    }
+
+    .booking-done h3 {
+      margin: 0 0 12px;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 28px;
+      color: #f2efe9;
+    }
+
+    .booking-done p {
+      max-width: 460px;
+      margin: 0 auto 24px;
+      line-height: 1.6;
+    }
+
+    /* ===================================================================
+       О НАС (новое)
+       =================================================================== */
+    .about {
+      margin-top: 96px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;   /* две равные колонки: история и преимущества */
+      gap: 64px;
+      align-items: start;
+    }
+
+    .about-story p {
+      margin: 0 0 16px;
+      line-height: 1.7;                  /* длинный текст — больше воздуха между строками */
+      max-width: 34em;                   /* строка не длиннее ~70 символов, так легче читать */
+    }
+
+    .about-list {
+      position: relative;
+      z-index: 6;                        /* поверх золотых полос, чтобы они не перечёркивали текст */
+      background: #141414;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      border-top: 1px solid #2c2a27;
+    }
+
+    .about-list li {
+      padding: 22px 0 22px 24px;
+      border-bottom: 1px solid #2c2a27;
+      position: relative;
+    }
+
+    /* В окне «О нас»: чуть шире окна записи и без верхнего отступа */
+    .about-modal {
+      width: min(1000px, calc(100% - 32px));
+    }
+
+    .about-modal .about {
+      margin-top: 0;
+    }
+
+    /* Кнопка «Записаться» под историей */
+    .about-cta {
+      margin-top: 28px;
+    }
+
+    .about-cta .btn {
+      margin-top: 0;
+    }
+
+    /* Маленький золотой ромб слева от каждого пункта */
+    .about-list li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 30px;
+      width: 8px;
+      height: 8px;
+      background: #c8a46a;
+      transform: rotate(45deg);          /* квадрат, повёрнутый на 45° = ромб */
+    }
+
+    .about-list h3 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: #f2efe9;
+    }
+
+    .about-list p {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ===================================================================
+       АДАПТИВ: стили для узких экранов (новое)
+       Стоят в самом конце, чтобы перебивать обычные стили выше.
+       =================================================================== */
+
+    /* Планшеты и маленькие ноутбуки: экран не шире 900px */
+    @media (max-width: 900px) {
+      /* Меню прячется, вместо него кнопка-бургер */
+      .burger {
+        display: block;
+      }
+
+      .menu {
+        display: none;                /* по умолчанию меню скрыто */
+        position: absolute;           /* выпадает под шапкой */
+        top: 72px;
+        left: 0;
+        right: 0;
+        flex-direction: column;       /* пункты друг под другом */
+        align-items: stretch;
+        gap: 0;
+        padding: 8px 40px 24px;
+        background: #141414;
+        border-bottom: 1px solid #2c2a27;
+      }
+
+      /* Класс open добавляет скрипт при нажатии на бургер */
+      .site-header.open .menu {
+        display: flex;
+      }
+
+      .menu a:not(.btn) {
+        padding: 14px 0;
+        font-size: 17px;
+        border-bottom: 1px solid #2c2a27;
+      }
+
+      .menu .btn-small {
+        margin-top: 20px;
+        padding: 14px;
+        text-align: center;
+      }
+
+      body::after {
+        display: none;                /* полосы на узком экране мешают тексту */
+      }
+
+      .team,
+      .haircuts {
+        grid-template-columns: repeat(2, 1fr);   /* две колонки вместо трёх */
+      }
+    }
+
+    /* Телефоны: экран не шире 600px */
+    @media (max-width: 600px) {
+      /* Форма: одна колонка, меньше внутренних отступов */
+      .booking-form {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+
+      /* «О нас»: колонки друг под другом */
+      .about {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+
+      .about-cta .btn {
+        display: block;
+        text-align: center;
+      }
+
+      /* Окно на телефоне: почти на весь экран, меньше отступы */
+      .booking-modal {
+        width: calc(100% - 16px);
+        max-height: calc(100vh - 16px);
+        padding: 28px 16px 20px;
+      }
+
+
+      .booking-submit {
+        width: 100%;
+      }
+
+      .container {
+        padding: 0 20px;              /* меньше отступ по краям экрана */
+      }
+
+      .menu {
+        padding: 8px 20px 24px;
+      }
+
+      /* На телефоне текст занимает всю ширину — затемняем фото равномерно */
+      .hero {
+        background:
+          linear-gradient(rgba(20, 20, 20, 0.78), rgba(20, 20, 20, 0.9)),
+          url("images/hero.jpg") 75% center / cover no-repeat,
+          #141414;
+      }
+
+      .hero-inner {
+        padding-top: 56px;
+        padding-bottom: 56px;
+      }
+
+      .hero h1 {
+        letter-spacing: 4px;
+      }
+
+      .hero-lead {
+        font-size: 17px;
+      }
+
+      /* Факты: друг под другом, чтобы не теснились */
+      .hero-facts {
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 40px;
+      }
+
+      .page-head {
+        padding-top: 40px;
+      }
+
+      .page-head h1 {
+        font-size: 40px;
+      }
+
+      h1 {
+        font-size: 40px;              /* заголовок меньше, чтобы влез в строку */
+        letter-spacing: 3px;
+      }
+
+      h2 {
+        font-size: 26px;
+      }
+
+      p {
+        font-size: 16px;
+      }
+
+      /* Разделы ближе друг к другу: на телефоне 80px — это слишком много */
+      .services,
+      .masters,
+      .contacts,
+      .catalog-section,
+      footer {
+        margin-top: 56px;
+      }
+
+      /* Кнопки в шапке: каждая на всю ширину и друг под другом — по ним легко попасть пальцем */
+      .btn {
+        display: block;
+        text-align: center;
+        padding: 14px 16px;
+      }
+
+      .btn + .btn {
+        margin-left: 0;               /* убираем отступ слева, который был для кнопок в строку */
+        margin-top: 12px;
+      }
+
+      /* Переключатель на всю ширину, три кнопки поровну */
+      .switch {
+        display: flex;
+      }
+
+      .switch-btn {
+        flex: 1;
+        padding: 12px 6px;
+        font-size: 14px;
+      }
+
+      .price-list li {
+        font-size: 16px;
+        gap: 16px;                    /* чтобы длинное название не прилипало к цене */
+      }
+
+      /* Одна колонка: карточки друг под другом */
+      .team,
+      .haircuts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ===== Шапка с меню (новое). Прилипает к верху экрана ===== -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="logo" href="#home">Бритва</a>
+
+      <!-- Кнопка-бургер: видна только на узком экране. aria-label — подпись для незрячих пользователей -->
+      <button class="burger" type="button" aria-label="Открыть меню" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+
+      <nav class="menu">
+        <a href="#about">О нас</a>
+        <a href="#services">Услуги</a>
+        <a href="#masters">Мастера</a>
+        <a href="#catalog">Каталог</a>
+        <a href="#contacts">Контакты</a>
+        <a class="btn btn-small" href="#booking">Записаться</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== Страница 1: Главная ===== -->
+  <main class="page" id="home">
+
+    <!-- ===== Первый экран (новое). Фото фона: положи его в images/hero.jpg ===== -->
+    <section class="hero">
+      <div class="container hero-inner">
+        <p class="hero-kicker">Барбершоп и женский зал в центре города</p>
+        <h1>Бритва</h1>
+        <p class="hero-lead">Стрижки для мужчин, женщин и детей, оформление бороды, окрашивание и королевское бритьё. Без спешки, с горячим полотенцем и чашкой кофе.</p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href="#booking">Записаться</a>
+          <a class="btn" href="#catalog">Каталог стрижек</a>
+        </div>
+        <ul class="hero-facts">
+          <li><strong>ул. Ленина, 15</strong><span>центр города</span></li>
+          <li><strong>10:00 – 21:00</strong><span>без выходных</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Остальные разделы главной внутри .container, чтобы стояли по центру -->
+    <div class="container">
+      <section class="services" id="services">
+        <h2>Услуги и цены</h2>
+
+        <!-- Переключатель групп услуг (новое).
+             data-group — id списка, который покажет кнопка. aria-pressed — подсказка для экранных читалок -->
+        <div class="switch" role="group" aria-label="Для кого услуги">
+          <button class="switch-btn active" type="button" data-group="prices-men" aria-pressed="true">Мужчинам</button>
+          <button class="switch-btn" type="button" data-group="prices-women" aria-pressed="false">Женщинам</button>
+          <button class="switch-btn" type="button" data-group="prices-extra" aria-pressed="false">Детям и другое</button>
+        </div>
+
+        <!-- Три списка цен. Видно только один, остальные спрятаны атрибутом hidden -->
+        <ul class="price-list" id="prices-men">
+            <li><span>Мужская стрижка<small>45 мин</small></span><span class="price">1 500 ₽</span></li>
+            <li><span>Стрижка машинкой<small>30 мин</small></span><span class="price">900 ₽</span></li>
+            <li><span>Фейд<small>60 мин</small></span><span class="price">1 700 ₽</span></li>
+            <li><span>Оформление бороды<small>30 мин</small></span><span class="price">1 000 ₽</span></li>
+            <li><span>Королевское бритьё<small>45 мин</small></span><span class="price">1 800 ₽</span></li>
+            <li><span>Стрижка + борода<small>75 мин</small></span><span class="price">2 200 ₽</span></li>
+            <li><span>Камуфляж седины<small>30 мин</small></span><span class="price">1 200 ₽</span></li>
+        </ul>
+        <ul class="price-list" id="prices-women" hidden>
+            <li><span>Стрижка на короткие волосы<small>60 мин</small></span><span class="price">2 000 ₽</span></li>
+            <li><span>Стрижка на средние и длинные волосы<small>75 мин</small></span><span class="price">2 500 ₽</span></li>
+            <li><span>Стрижка чёлки<small>15 мин</small></span><span class="price">500 ₽</span></li>
+            <li><span>Укладка<small>45 мин</small></span><span class="price">1 500 ₽</span></li>
+            <li><span>Окрашивание в один тон<small>2 ч</small></span><span class="price">от 4 000 ₽</span></li>
+            <li><span>Мелирование<small>3 ч</small></span><span class="price">от 5 500 ₽</span></li>
+            <li><span>Восстанавливающий уход для волос<small>45 мин</small></span><span class="price">2 000 ₽</span></li>
+        </ul>
+        <ul class="price-list" id="prices-extra" hidden>
+            <li><span>Детская стрижка, до 12 лет<small>30 мин</small></span><span class="price">900 ₽</span></li>
+            <li><span>Окантовка между стрижками<small>15 мин</small></span><span class="price">500 ₽</span></li>
+            <li><span>Мытьё головы и укладка<small>20 мин</small></span><span class="price">600 ₽</span></li>
+            <li><span>Коррекция бровей<small>15 мин</small></span><span class="price">500 ₽</span></li>
+        </ul>
+        <p class="services-note">Время указано примерное. Точную стоимость окрашивания мастер назовёт после консультации — она зависит от длины и густоты волос.</p>
+      </section>
+
+      <section class="masters" id="masters">
+        <h2>Мастера</h2>
+        <div class="team">
+          <div class="card">
+            <img class="avatar" src="images/artem.jpg" alt="Мастер Артём">
+            <h3>Артём</h3>
+            <p>Мужские стрижки, фейды и королевское бритьё. Стаж 8 лет.</p>
+          </div>
+          <div class="card">
+            <img class="avatar" src="images/alina.jpg" alt="Мастер Алина">
+            <h3>Алина</h3>
+            <p>Женские стрижки, окрашивание и укладки. Стаж 5 лет.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <section class="contacts" id="contacts">
+        <h2>Контакты</h2>
+        <p>Адрес: ул. Ленина, 15</p>
+        <p>Телефон: <a href="tel:+79990000000">+7 999 000-00-00</a></p>
+        <p>Часы работы: ежедневно с 10:00 до 21:00</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- ===== Страница 2: Каталог. Атрибут hidden прячет её, пока не нажали на «Каталог» ===== -->
+  <main class="page" id="catalog" hidden>
+    <div class="container">
+      <div class="page-head">
+        <h1>Каталог</h1>
+        <p>Самые популярные стрижки сезона. Цена включает мытьё головы и укладку.</p>
+        <a class="btn btn-solid" href="#booking">Записаться</a>
+      </div>
+
+      <section class="catalog-section">
+        <h2>Мужские стрижки</h2>
+        <!-- Фото лежат в папке images/haircuts.
+             onerror="this.remove()" — если фото не нашлось, картинка удаляется
+             и вместо значка «битой» картинки остаётся аккуратный серый прямоугольник -->
+        <div class="haircuts">
+          <div class="haircut">
+            <!-- Осмотр стрижки с трёх сторон (новое). Первое фото с классом active видно сразу -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/crop-front.jpg" alt="Текстурированный кроп, вид спереди">
+              <img src="images/haircuts/crop-side.jpg" alt="Текстурированный кроп, вид сбоку">
+              <img src="images/haircuts/crop-back.jpg" alt="Текстурированный кроп, вид сзади">
+            </div>
+            <!-- Кнопки ракурсов: порядок такой же, как у фото выше -->
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Текстурированный кроп</h3>
+            <p>Короткий объёмный верх с рваной текстурой и чёлкой вперёд, бока короче.</p>
+            <span class="price">1 700 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/taper-front.jpg" alt="Низкий тейпер, вид спереди">
+              <img src="images/haircuts/taper-side.jpg" alt="Низкий тейпер, вид сбоку">
+              <img src="images/haircuts/taper-back.jpg" alt="Низкий тейпер, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Низкий тейпер</h3>
+            <p>Плавный переход от короткого к длинному только у висков и на затылке. Аккуратно и универсально.</p>
+            <span class="price">1 600 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/sidepart-front.jpg" alt="Классика с пробором, вид спереди">
+              <img src="images/haircuts/sidepart-side.jpg" alt="Классика с пробором, вид сбоку">
+              <img src="images/haircuts/sidepart-back.jpg" alt="Классика с пробором, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Классика с пробором</h3>
+            <p>Стрижка в стиле old money: боковой пробор, гладкая укладка, сдержанная длина.</p>
+            <span class="price">1 800 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/mullet-front.jpg" alt="Современный маллет, вид спереди">
+              <img src="images/haircuts/mullet-side.jpg" alt="Современный маллет, вид сбоку">
+              <img src="images/haircuts/mullet-back.jpg" alt="Современный маллет, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Современный маллет</h3>
+            <p>Короткий верх и бока, удлинённый затылок. Мягкая версия стиля 90-х.</p>
+            <span class="price">1 900 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/buzz-front.jpg" alt="Бокс, вид спереди">
+              <img src="images/haircuts/buzz-side.jpg" alt="Бокс, вид сбоку">
+              <img src="images/haircuts/buzz-back.jpg" alt="Бокс, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Бокс</h3>
+            <p>Короткая стрижка с выбритыми висками. Почти не требует укладки.</p>
+            <span class="price">1 100 ₽</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="catalog-section">
+        <h2>Женские стрижки</h2>
+        <div class="haircuts">
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/bob-front.jpg" alt="Боб-каре, вид спереди">
+              <img src="images/haircuts/bob-side.jpg" alt="Боб-каре, вид сбоку">
+              <img src="images/haircuts/bob-back.jpg" alt="Боб-каре, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Боб-каре</h3>
+            <p>Ровный срез на уровне подбородка, можно с чёлкой. Классика, которая не выходит из моды.</p>
+            <span class="price">2 500 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/longbob-front.jpg" alt="Удлинённый боб, вид спереди">
+              <img src="images/haircuts/longbob-side.jpg" alt="Удлинённый боб, вид сбоку">
+              <img src="images/haircuts/longbob-back.jpg" alt="Удлинённый боб, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Удлинённый боб</h3>
+            <p>Срез ниже подбородка, мягкая форма с лёгкой текстурой. Подходит для средней длины.</p>
+            <span class="price">2 700 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/shag-front.jpg" alt="Шегги, вид спереди">
+              <img src="images/haircuts/shag-side.jpg" alt="Шегги, вид сбоку">
+              <img src="images/haircuts/shag-back.jpg" alt="Шегги, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Шегги</h3>
+            <p>Многослойная стрижка с рваными прядями и объёмом у корней. Выглядит естественно без долгой укладки.</p>
+            <span class="price">3 000 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/pixie-front.jpg" alt="Пикси, вид спереди">
+              <img src="images/haircuts/pixie-side.jpg" alt="Пикси, вид сбоку">
+              <img src="images/haircuts/pixie-back.jpg" alt="Пикси, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Пикси</h3>
+            <p>Очень короткая стрижка с удлинённым верхом. Открывает лицо и шею.</p>
+            <span class="price">2 200 ₽</span>
+          </div>
+          <div class="haircut">
+            <!-- Осмотр с трёх сторон: спереди, сбоку, сзади -->
+            <div class="haircut-photo viewer">
+              <img class="active" src="images/haircuts/butterfly-front.jpg" alt="Бабочка, вид спереди">
+              <img src="images/haircuts/butterfly-side.jpg" alt="Бабочка, вид сбоку">
+              <img src="images/haircuts/butterfly-back.jpg" alt="Бабочка, вид сзади">
+            </div>
+            <div class="views">
+              <button class="view-btn active" type="button">Спереди</button>
+              <button class="view-btn" type="button">Сбоку</button>
+              <button class="view-btn" type="button">Сзади</button>
+            </div>
+            <h3>Бабочка</h3>
+            <p>Длинные волосы с объёмными слоями у лица и плавными «крыльями» по бокам. Лёгкая, женственная и не теряет длину.</p>
+            <span class="price">3 200 ₽</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Подвал общий для обеих страниц -->
+  <footer>
+    <div class="container">
+      <p>© 2026 Барбершоп «Бритва». Демо-сайт для портфолио, салон вымышленный.</p>
+    </div>
+  </footer>
+
+  <!-- ===================================================================
+       ОКНО «О НАС» (новое). Работает так же, как окно записи
+       =================================================================== -->
+  <dialog class="booking-modal about-modal" id="about" aria-labelledby="about-title">
+    <button class="modal-close" type="button" aria-label="Закрыть окно «О нас»">×</button>
+    <div class="about">
+          <div class="about-story">
+          <h2 id="about-title">О нас</h2>
+          <p>«Бритва» открылась в 2019 году как небольшая мужская парикмахерская на два кресла. Сегодня у нас мужской и женский зал, но подход остался прежним: работаем без спешки и думаем о том, как стрижка будет выглядеть через неделю, а не только в день визита.</p>
+          <p>Мы не стрижём «как на фото один в один». Сначала мастер смотрит на тип волос, форму лица и на то, сколько времени вы готовы тратить на укладку, и только потом предлагает стрижку.</p>
+          <div class="about-cta">
+            <a class="btn btn-solid" href="#booking">Записаться</a>
+          </div>
+        </div>
+
+        <!-- Список преимуществ. ul — потому что это действительно список -->
+        <ul class="about-list">
+          <li>
+            <h3>Консультация перед стрижкой</h3>
+            <p>Пять минут разговора, чтобы результат подошёл именно вам. Бесплатно, даже если в итоге вы передумаете.</p>
+          </li>
+          <li>
+            <h3>Горячее полотенце и кофе</h3>
+            <p>Входят в каждую услугу без доплаты. Можно просто подождать мастера в кресле с чашкой эспрессо.</p>
+          </li>
+          <li>
+            <h3>Чистые инструменты</h3>
+            <p>Дезинфицируем после каждого клиента, лезвия и воротнички — одноразовые.</p>
+          </li>
+          <li>
+            <h3>Коррекция за наш счёт</h3>
+            <p>Если в течение семи дней что-то не понравилось — поправим бесплатно.</p>
+          </li>
+        </ul>
+    </div>
+  </dialog>
+
+  <!-- ===================================================================
+       ОКНО ОНЛАЙН-ЗАПИСИ (новое)
+       <dialog> — встроенное в браузер всплывающее окно.
+       Открывается методом showModal() (см. скрипт), закрывается крестиком,
+       клавишей Esc или кликом по затемнённому фону.
+       =================================================================== -->
+  <dialog class="booking-modal" id="booking" aria-labelledby="booking-title">
+    <button class="modal-close" type="button" aria-label="Закрыть окно записи">×</button>
+          <h2 id="booking-title">Онлайн-запись</h2>
+          <p class="booking-lead">Оставьте заявку — администратор перезвонит в течение 15 минут и подтвердит время.</p>
+
+          <form class="booking-form" id="booking-form" novalidate>
+            <div class="field">
+              <label for="b-name">Ваше имя</label>
+              <input id="b-name" name="name" type="text" autocomplete="name" placeholder="Например, Андрей" aria-describedby="b-name-err">
+              <p class="field-error" id="b-name-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="b-phone">Телефон</label>
+              <!-- inputmode="tel" — на телефоне откроется цифровая клавиатура -->
+              <input id="b-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (999) 000-00-00" aria-describedby="b-phone-err">
+              <p class="field-error" id="b-phone-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="b-service">Услуга</label>
+              <!-- optgroup — группа пунктов в выпадающем списке -->
+              <select id="b-service" name="service" aria-describedby="b-service-err">
+                <option value="">Выберите услугу</option>
+                <optgroup label="Мужчинам">
+                  <option>Мужская стрижка — 1 500 ₽</option>
+                  <option>Стрижка машинкой — 900 ₽</option>
+                  <option>Фейд — 1 700 ₽</option>
+                  <option>Оформление бороды — 1 000 ₽</option>
+                  <option>Королевское бритьё — 1 800 ₽</option>
+                  <option>Стрижка + борода — 2 200 ₽</option>
+                  <option>Камуфляж седины — 1 200 ₽</option>
+                </optgroup>
+                <optgroup label="Женщинам">
+                  <option>Стрижка на короткие волосы — 2 000 ₽</option>
+                  <option>Стрижка на средние и длинные волосы — 2 500 ₽</option>
+                  <option>Стрижка чёлки — 500 ₽</option>
+                  <option>Укладка — 1 500 ₽</option>
+                  <option>Окрашивание в один тон — от 4 000 ₽</option>
+                  <option>Мелирование — от 5 500 ₽</option>
+                  <option>Восстанавливающий уход — 2 000 ₽</option>
+                </optgroup>
+                <optgroup label="Детям и другое">
+                  <option>Детская стрижка, до 12 лет — 900 ₽</option>
+                  <option>Окантовка между стрижками — 500 ₽</option>
+                  <option>Мытьё головы и укладка — 600 ₽</option>
+                  <option>Коррекция бровей — 500 ₽</option>
+                </optgroup>
+              </select>
+              <p class="field-error" id="b-service-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="b-master">Мастер</label>
+              <select id="b-master" name="master">
+                <option>Любой свободный мастер</option>
+                <option>Артём — мужские стрижки и бритьё</option>
+                <option>Алина — женские стрижки и окрашивание</option>
+              </select>
+              <p class="field-error"></p> <!-- пустая строка под полем — чтобы отступы были как у соседей -->
+            </div>
+
+            <div class="field">
+              <label for="b-date">Дата</label>
+              <input id="b-date" name="date" type="date" aria-describedby="b-date-err">
+              <p class="field-error" id="b-date-err"></p>
+            </div>
+
+            <div class="field">
+              <label for="b-time">Время</label>
+              <!-- Пункты времени добавляет скрипт: прошедшие часы на сегодня он отключает -->
+              <select id="b-time" name="time" aria-describedby="b-time-err">
+                <option value="">Сначала выберите дату</option>
+              </select>
+              <p class="field-error" id="b-time-err"></p>
+            </div>
+
+            <div class="field field-wide">
+              <label for="b-comment">Комментарий <span class="optional">— необязательно</span></label>
+              <textarea id="b-comment" name="comment" rows="3" placeholder="Например: хочу как на фото в каталоге"></textarea>
+            </div>
+
+            <div class="field field-wide">
+              <label class="check">
+                <input id="b-agree" name="agree" type="checkbox" aria-describedby="b-agree-err">
+                <span>Согласен на обработку персональных данных для записи</span>
+              </label>
+              <p class="field-error" id="b-agree-err"></p>
+            </div>
+
+            <div class="field-wide">
+              <button class="btn btn-solid booking-submit" type="submit">Записаться</button>
+            </div>
+          </form>
+
+          <!-- Сообщение после отправки. Пока спрятано атрибутом hidden -->
+          <div class="booking-done" id="booking-done" hidden tabindex="-1">
+            <div class="done-mark" aria-hidden="true">✓</div>
+            <h3>Заявка принята</h3>
+            <p id="booking-done-text"></p>
+            <button class="btn" type="button" id="booking-again">Записаться ещё раз</button>
+          </div>
+  </dialog>
+
+  <!-- ===== Скрипты ===== -->
+  <script>
+    const header = document.querySelector('.site-header');
+    const burger = document.querySelector('.burger');
+
+    // ===== Бургер-меню (новое) =====
+    // Открывает или закрывает меню на телефоне
+    function toggleMenu(open) {
+      header.classList.toggle('open', open);         // класс open показывает меню (см. CSS)
+      burger.setAttribute('aria-expanded', open);    // подсказка для экранных читалок
+    }
+
+    burger.addEventListener('click', function () {
+      toggleMenu(!header.classList.contains('open')); // было закрыто — открываем, и наоборот
+    });
+
+    // ===== Переключение страниц: главная и каталог =====
+    // Показывает страницу с нужным id и прячет другую
+    function showPage(id) {
+      document.querySelectorAll('.page').forEach(function (page) {
+        page.hidden = page.id !== id;
+      });
+
+      // Подсвечиваем «Каталог» в меню, когда открыт каталог
+      document.querySelectorAll('.menu a').forEach(function (link) {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+      });
+    }
+
+    // Переход по любой ссылке, которая начинается с # (меню, логотип, кнопки)
+    function goTo(id) {
+      if (id === 'about') {                                 // «О нас» — тоже окно
+        toggleMenu(false);
+        document.getElementById('about').showModal();
+        return;
+      }
+      if (id === 'booking') {
+        const about = document.getElementById('about');
+        if (about.open) about.close();                      // из окна «О нас» переходим в окно записи                               // «Записаться» — открываем окно, никуда не едем
+        toggleMenu(false);
+        openBooking();
+        return;
+      }
+      const pageId = id === 'catalog' ? 'catalog' : 'home'; // каталог — отдельная страница, всё остальное на главной
+      const pageChanged = document.getElementById(pageId).hidden;
+
+      showPage(pageId);
+      toggleMenu(false);                                    // закрываем меню на телефоне
+
+      if (id === 'home' || id === 'catalog') {
+        window.scrollTo({ top: 0, behavior: pageChanged ? 'instant' : 'smooth' });
+      } else {
+        if (pageChanged) window.scrollTo({ top: 0, behavior: 'instant' });
+        document.getElementById(id).scrollIntoView();       // плавно едем к разделу (smooth задан в CSS)
+      }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();                             // отменяем обычный переход браузера
+        goTo(link.getAttribute('href').slice(1));           // "#masters" -> "masters"
+      });
+    });
+
+    // ===== Переключатель групп услуг (новое) =====
+    const switchButtons = document.querySelectorAll('.switch-btn');
+
+    switchButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        switchButtons.forEach(function (other) {
+          const isThis = other === button;                       // это нажатая кнопка?
+          other.classList.toggle('active', isThis);              // подсвечиваем только её
+          other.setAttribute('aria-pressed', isThis);
+          // dataset.group — значение атрибута data-group, то есть id списка цен
+          document.getElementById(other.dataset.group).hidden = !isThis;
+        });
+      });
+    });
+
+    // ===== Осмотр стрижки с разных сторон (новое) =====
+    // Перебираем все карточки стрижек
+    document.querySelectorAll('.haircut').forEach(function (card) {
+      const viewer = card.querySelector('.viewer');
+      if (!viewer) return;            // в карточке нет осмотра — пропускаем её
+
+      const photos = viewer.querySelectorAll('img');
+      const buttons = card.querySelectorAll('.view-btn');
+
+      // Показывает фото номер n (0 — спереди, 1 — сбоку, 2 — сзади) и подсвечивает кнопку
+      function setView(n) {
+        photos.forEach(function (photo, i) {
+          photo.classList.toggle('active', i === n);
+        });
+        buttons.forEach(function (button, i) {
+          button.classList.toggle('active', i === n);
+        });
+      }
+
+      // Клик по кнопке показывает её ракурс
+      buttons.forEach(function (button, i) {
+        button.addEventListener('click', function () {
+          setView(i);
+        });
+      });
+
+      // Ведёшь мышкой (или пальцем) по фото — ракурс меняется.
+      // Делим фото на три полосы: левая — спереди, средняя — сбоку, правая — сзади.
+      viewer.addEventListener('pointermove', function (event) {
+        const box = viewer.getBoundingClientRect();         // где фото на экране
+        const part = (event.clientX - box.left) / box.width; // от 0 (левый край) до 1 (правый)
+        const n = Math.min(photos.length - 1, Math.floor(part * photos.length));
+        setView(n);
+      });
+    });
+
+    // ===================================================================
+    // ОНЛАЙН-ЗАПИСЬ (новое)
+    // ===================================================================
+    const form = document.getElementById('booking-form');
+    const done = document.getElementById('booking-done');
+    const phoneInput = document.getElementById('b-phone');
+    const dateInput = document.getElementById('b-date');
+    const timeSelect = document.getElementById('b-time');
+
+    // --- Маска телефона: пока человек вводит цифры, превращаем их в +7 (999) 000-00-00
+    phoneInput.addEventListener('input', function () {
+      let digits = phoneInput.value.replace(/\D/g, '');     // оставляем только цифры
+      if (digits.startsWith('8')) digits = '7' + digits.slice(1); // 8 999... → 7 999...
+      if (!digits.startsWith('7')) digits = '7' + digits;
+      digits = digits.slice(0, 11);                          // в российском номере 11 цифр
+
+      let out = '+7';
+      if (digits.length > 1) out += ' (' + digits.slice(1, 4);
+      if (digits.length >= 4) out += ')';
+      if (digits.length > 4) out += ' ' + digits.slice(4, 7);
+      if (digits.length > 7) out += '-' + digits.slice(7, 9);
+      if (digits.length > 9) out += '-' + digits.slice(9, 11);
+      phoneInput.value = digits.length > 1 ? out : '';
+    });
+
+    // --- Дата: выбрать можно только с сегодняшнего дня и на 30 дней вперёд
+    function toISODate(d) {                                  // дата → строка "2026-10-08"
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return d.getFullYear() + '-' + m + '-' + day;
+    }
+    const today = new Date();
+    const lastDay = new Date(); lastDay.setDate(today.getDate() + 30);
+    dateInput.min = toISODate(today);
+    dateInput.max = toISODate(lastDay);
+
+    // --- Время: каждый час с 10:00 до 20:00. На сегодня прошедшие часы недоступны
+    function fillTimes() {
+      timeSelect.innerHTML = '';
+      if (!dateInput.value) {
+        timeSelect.add(new Option('Сначала выберите дату', ''));
+        return;
+      }
+      timeSelect.add(new Option('Выберите время', ''));
+      const isToday = dateInput.value === toISODate(new Date());
+      const nowHour = new Date().getHours();
+      for (let h = 10; h <= 20; h++) {
+        const label = h + ':00';
+        const option = new Option(label, label);
+        if (isToday && h <= nowHour) {                       // этот час уже прошёл
+          option.disabled = true;
+          option.text = label + ' — уже прошло';
+        }
+        timeSelect.add(option);
+      }
+    }
+    dateInput.addEventListener('change', fillTimes);
+    fillTimes();
+
+    // --- Показ и сброс ошибки у поля
+    function setError(input, message) {
+      const field = input.closest('.field');
+      field.classList.toggle('invalid', Boolean(message));
+      input.setAttribute('aria-invalid', Boolean(message));
+      document.getElementById(input.id + '-err').textContent = message;
+    }
+
+    // --- Проверка всех полей. Возвращает первое поле с ошибкой (или null, если всё хорошо)
+    function validate() {
+      const checks = [
+        ['b-name',    v => v.trim().length >= 2 ? '' : 'Напишите, как к вам обращаться'],
+        ['b-phone',   v => v.replace(/\D/g, '').length === 11 ? '' : 'Введите номер полностью: +7 и ещё 10 цифр'],
+        ['b-service', v => v ? '' : 'Выберите услугу'],
+        ['b-date',    v => !v ? 'Выберите дату'
+                         : (v < dateInput.min || v > dateInput.max) ? 'Запись открыта на ближайшие 30 дней' : ''],
+        ['b-time',    v => v ? '' : 'Выберите время'],
+      ];
+      let firstBad = null;
+      checks.forEach(function ([id, rule]) {
+        const input = document.getElementById(id);
+        const message = rule(input.value);
+        setError(input, message);
+        if (message && !firstBad) firstBad = input;
+      });
+      const agree = document.getElementById('b-agree');
+      setError(agree, agree.checked ? '' : 'Нужно ваше согласие, чтобы мы могли перезвонить');
+      if (!agree.checked && !firstBad) firstBad = agree;
+      return firstBad;
+    }
+
+    // Как только человек исправляет поле с ошибкой — ошибка сразу пропадает
+    form.addEventListener('input', function (event) {
+      if (event.target.closest('.field.invalid')) validate();
+    });
+    form.addEventListener('change', function (event) {
+      if (event.target.closest('.field.invalid')) validate();
+    });
+
+    // --- Отправка формы
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();                                // не перезагружаем страницу
+      const firstBad = validate();
+      if (firstBad) {
+        firstBad.focus();                                    // ставим курсор в первое поле с ошибкой
+        return;
+      }
+
+      const data = Object.fromEntries(new FormData(form));   // все ответы формы одним объектом
+      // ЗДЕСЬ на настоящем сайте заявка уходит владельцу: в Telegram, на почту или в CRM.
+      // Для портфолио просто выводим её в консоль браузера (F12 → Console).
+      console.log('Новая заявка:', data);
+
+      const [y, m, d] = data.date.split('-');
+      document.getElementById('booking-done-text').textContent =
+        data.name.trim() + ', спасибо! Ждём вас ' + d + '.' + m + ' в ' + data.time +
+        '. Администратор перезвонит на ' + data.phone + ' и подтвердит запись.';
+
+      form.hidden = true;
+      done.hidden = false;
+      done.focus();                                          // экранные читалки сразу озвучат сообщение
+    });
+
+    // --- Всплывающее окно записи (новое)
+    const modal = document.getElementById('booking');
+
+    function openBooking() {
+      // Если в прошлый раз заявку уже отправили — показываем чистую форму
+      if (form.hidden) resetBooking();
+      modal.showModal();                                     // открыть окно поверх сайта
+      document.getElementById('b-name').focus();             // курсор сразу в поле «Имя»
+    }
+
+    // Для всех окон сразу: крестик и клик по затемнённому фону закрывают окно
+    document.querySelectorAll('dialog').forEach(function (dialog) {
+      dialog.querySelector('.modal-close').addEventListener('click', function () {
+        dialog.close();
+      });
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) dialog.close();       // кликнули мимо окна, по фону
+      });
+    });
+
+    // --- «Записаться ещё раз»: очищаем форму и показываем её снова
+    function resetBooking() {
+      form.reset();
+      fillTimes();
+      form.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+      form.querySelectorAll('.field-error').forEach(p => p.textContent = '');
+      done.hidden = true;
+      form.hidden = false;
+      document.getElementById('b-name').focus();
+    }
+
+    document.getElementById('booking-again').addEventListener('click', resetBooking);
+
+    // При загрузке страницы показываем главную
+    showPage('home');
+  </script>
+</body>
+</html>

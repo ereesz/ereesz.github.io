@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Halden Voss — часы, собранные вручную</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root { --accent: #d8d3c8; --ink: #f2efe9; --muted: #a8a399; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; background: #07080a; color: var(--ink);
+    font-family: "Jost", system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+  }
+
+  /* ====== Фоновые сцены: у каждой коллекции свой фон и гигантское слово ====== */
+  .bg { position: fixed; inset: 0; z-index: 0; opacity: 0; transition: opacity 1.4s ease; }
+  .bg.on { opacity: 1; }
+  .bg .ghost {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%);
+    font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; font-weight: 500;
+    font-size: clamp(110px, 27vw, 430px); line-height: 1; white-space: nowrap;
+    color: rgba(255, 255, 255, 0.055); letter-spacing: -0.02em; user-select: none;
+  }
+
+  /* ====== Холст с часами ====== */
+  #stage { position: fixed; inset: 0; z-index: 2; opacity: 0; transition: opacity 1.6s ease; }
+  #stage.ready { opacity: 1; }
+  #stage canvas { display: block; touch-action: none; cursor: grab; }
+
+  /* ====== Интерфейс поверх ====== */
+  .ui { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+  /* ====== Шапка: одна на обе страницы ====== */
+  .topbar {
+    position: fixed; z-index: 30; top: calc(22px + env(safe-area-inset-top, 0px)); left: 6vw; right: 6vw;
+    display: flex; align-items: center; justify-content: space-between; pointer-events: none;
+  }
+  .topbar button { pointer-events: auto; font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 6px 0; }
+  .brand {
+    font-family: "Cormorant Garamond", Georgia, serif !important; font-weight: 600 !important; font-size: 15px !important;
+    letter-spacing: 0.34em; text-transform: uppercase; color: var(--ink);
+  }
+  .topnav { display: flex; gap: 28px; }
+  .topnav button {
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
+    border-bottom: 1px solid transparent; transition: color 0.3s, border-color 0.5s;
+  }
+  .topnav button:hover { color: var(--ink); }
+  .topnav button.active { color: var(--ink); border-bottom-color: var(--accent); }
+
+  .panel {
+    position: absolute; top: 50%; width: min(400px, 38vw);
+    opacity: 0; transform: translateY(-44%); pointer-events: none;
+    transition: opacity 0.6s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .panel.left { left: 6vw; }
+  .panel.right { right: 8vw; }
+  .panel.hero { left: 6vw; top: auto; bottom: calc(15vh + env(safe-area-inset-bottom, 0px)); width: min(340px, 30vw); transform: translateY(24px); }
+  .panel.show { opacity: 1; transform: translateY(-50%); }
+  .panel.hero.show { transform: translateY(0); }
+  .panel.show .cta { pointer-events: auto; }
+
+  .tag { font-size: 12px; letter-spacing: 0.22em; color: var(--accent); transition: color 0.9s ease; }
+  .panel h1 {
+    font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500;
+    font-size: clamp(54px, 7.4vw, 112px); line-height: 0.92; margin: 10px 0 18px; letter-spacing: -0.01em;
+  }
+  .panel.hero h1 { font-size: clamp(46px, 5.6vw, 84px); }
+  .panel p { font-size: 16px; line-height: 1.65; font-weight: 300; color: var(--muted); margin: 0 0 22px; }
+  .specs { list-style: none; margin: 0; padding: 0; }
+  .specs li {
+    display: flex; justify-content: space-between; gap: 16px; padding: 9px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.12); font-size: 13px; color: var(--muted);
+  }
+  .specs b { color: var(--ink); font-weight: 400; }
+  .cta {
+    margin-top: 26px; font: inherit; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink); background: none; border: 1px solid var(--accent); padding: 13px 24px;
+    border-radius: 999px; cursor: pointer; transition: background 0.3s, color 0.3s; pointer-events: none;
+  }
+  .cta:hover { background: var(--accent); color: #0a0a0a; }
+
+  .dots {
+    position: absolute; right: calc(26px + env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 16px; pointer-events: auto;
+  }
+  .dots button {
+    width: 10px; height: 10px; border-radius: 50%; padding: 0; cursor: pointer;
+    border: 1.5px solid rgba(255, 255, 255, 0.4); background: transparent; transition: all 0.5s ease;
+  }
+  .dots button.active { background: var(--accent); border-color: var(--accent); transform: scale(1.35); }
+
+  .next {
+    position: absolute; bottom: calc(26px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%);
+    pointer-events: auto; font: inherit; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--muted); background: none; border: 0; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 8px; transition: color 0.3s;
+  }
+  .next:hover { color: var(--ink); }
+  .next i { display: block; width: 1px; height: 26px; background: linear-gradient(var(--accent), transparent); animation: drip 2.2s ease-in-out infinite; }
+  @keyframes drip { 0%, 100% { opacity: 0.35; transform: scaleY(0.7); } 50% { opacity: 1; transform: scaleY(1); } }
+
+  .foot {
+    position: absolute; left: 6vw; bottom: calc(26px + env(safe-area-inset-bottom, 0px));
+    font-size: 11px; line-height: 1.7; color: #6f6b63; letter-spacing: 0.04em;
+  }
+  .toast {
+    position: fixed; z-index: 50; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 10px);
+    background: rgba(20, 20, 20, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 20px;
+    border-radius: 12px; font-size: 14px; opacity: 0; transition: opacity 0.4s, transform 0.4s; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+  #nogl { display: none; position: fixed; inset: 0; z-index: 9; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--muted); }
+
+  @media (max-width: 760px), (max-aspect-ratio: 1/1) {
+    .panel, .panel.left, .panel.right, .panel.hero {
+      left: 24px; right: 24px; width: auto; top: auto; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); transform: translateY(18px);
+    }
+    .panel.show, .panel.hero.show { transform: none; }
+    .panel h1, .panel.hero h1 { font-size: clamp(40px, 12vw, 64px); margin-bottom: 12px; }
+    .panel p { font-size: 14px; margin-bottom: 14px; }
+    .specs li:nth-child(n+3) { display: none; }
+    .topbar { left: 24px; right: 24px; }
+    .topnav { gap: 18px; }
+    .foot { display: none; }
+    .dots { right: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+
+  /* ======================================================================
+     ГЛАВНАЯ СТРАНИЦА: лежит поверх витрины, листается обычной прокруткой
+     ====================================================================== */
+  #home {
+    position: fixed; inset: 0; z-index: 20; overflow-y: auto; overflow-x: hidden; outline: none;
+    background: #07080a; scroll-snap-type: y proximity; -webkit-overflow-scrolling: touch;
+    transition: opacity 0.7s ease, visibility 0s linear 0s;
+  }
+  body.view-showcase #home { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.7s ease, visibility 0s linear 0.7s; }
+  .hsec {
+    position: relative; min-height: 100vh; min-height: 100svh; scroll-snap-align: start; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: calc(104px + env(safe-area-inset-top, 0px)) 8vw calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+  .hsec .ghost {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -54%); pointer-events: none; user-select: none;
+    font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; font-weight: 500; white-space: nowrap;
+    font-size: clamp(110px, 27vw, 430px); line-height: 1; color: rgba(255, 255, 255, 0.05); letter-spacing: -0.02em;
+  }
+  .inner { position: relative; z-index: 1; width: 100%; max-width: 1180px; margin: 0 auto; }
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.9s ease, transform 1s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .hsec.visible .reveal { opacity: 1; transform: none; }
+  .hsec h1, .hsec h2 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; letter-spacing: -0.01em; margin: 10px 0 20px; }
+  .hsec h1 { font-size: clamp(56px, 8vw, 124px); line-height: 0.9; }
+  .hsec h2 { font-size: clamp(40px, 5.2vw, 76px); line-height: 0.95; max-width: 16ch; }
+  .hsec p { font-size: 17px; line-height: 1.7; font-weight: 300; color: var(--muted); margin: 0 0 16px; max-width: 54ch; }
+  .lead { font-family: "Cormorant Garamond", Georgia, serif; font-style: italic; font-size: clamp(24px, 2.4vw, 34px) !important; color: var(--ink) !important; line-height: 1.3 !important; }
+
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 6vw; align-items: center; }
+  .hero-dial { width: 100%; max-width: 460px; max-height: 62vh; justify-self: center; overflow: visible; }
+  .hero-dial .ring { fill: none; stroke: var(--ink); stroke-opacity: 0.55; stroke-width: 1.4; }
+  .hero-dial .ring.thin { stroke-opacity: 0.25; stroke-width: 1; }
+  .hero-dial .tick { stroke: var(--ink); stroke-opacity: 0.45; stroke-width: 1.2; }
+  .hero-dial .tick.big { stroke-opacity: 0.9; stroke-width: 3.2; }
+  .hero-dial .gear { fill: none; stroke: var(--accent); stroke-opacity: 0.28; stroke-width: 1.2; transform-box: view-box; transform-origin: 0 0; animation: gearspin 120s linear infinite; }
+  @keyframes gearspin { to { transform: rotate(360deg); } }
+  .hero-dial .dial-brand { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: 17px; letter-spacing: 5px; fill: var(--ink); text-anchor: middle; }
+  .hero-dial .dial-sub { font-family: "Jost", Arial, sans-serif; font-size: 8.5px; letter-spacing: 3px; fill: var(--muted); text-anchor: middle; }
+  .hero-dial .hand { stroke: var(--ink); stroke-linecap: round; }
+  .hero-dial .hand.sec { stroke: #e0553a; }
+  .hero-dial .pin { fill: var(--ink); }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; margin-top: 28px; }
+  .btn {
+    font: inherit; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink); cursor: pointer;
+    background: none; border: 1px solid var(--accent); padding: 14px 26px; border-radius: 999px; transition: background 0.3s, color 0.3s;
+  }
+  .btn:hover { background: var(--accent); color: #0a0a0a; }
+  .textlink { font: inherit; font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); background: none; border: 0; cursor: pointer; padding: 6px 0; }
+  .textlink:hover { color: var(--ink); }
+
+  .timeline { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px; margin-top: 46px; }
+  .timeline::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: rgba(255, 255, 255, 0.16); }
+  .tl-item { position: relative; padding-top: 34px; }
+  .tl-item::before { content: ""; position: absolute; left: 0; top: 2px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); }
+  .tl-year { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; font-size: clamp(34px, 3.4vw, 50px); line-height: 1; color: var(--accent); }
+  .tl-title { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; margin: 12px 0 8px; }
+  .tl-text { font-size: 14px; line-height: 1.6; font-weight: 300; color: var(--muted); }
+
+  .numbers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 44px; }
+  .numbers div { border-top: 1px solid rgba(255, 255, 255, 0.14); padding-top: 18px; }
+  .numbers b { display: block; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: clamp(60px, 7.6vw, 116px); line-height: 0.9; }
+  .numbers span { display: block; margin-top: 10px; font-size: 13px; color: var(--muted); }
+
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 40px; }
+  .card {
+    text-align: left; font: inherit; color: inherit; cursor: pointer; padding: 26px 22px 22px; border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); transition: border-color 0.35s, transform 0.35s, background 0.35s;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .card:hover { border-color: var(--c); transform: translateY(-4px); background: rgba(255, 255, 255, 0.05); }
+  .swatch { width: 54px; height: 54px; border-radius: 50%; border: 2px solid var(--c); box-shadow: inset 0 0 0 4px rgba(0, 0, 0, 0.25); margin-bottom: 6px; }
+  .swatch.rect { width: 42px; height: 54px; border-radius: 6px; }
+  .swatch.barrel { width: 46px; height: 56px; border-radius: 42% / 20%; }
+  .card .tag { color: var(--c); }
+  .card h3 { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 34px; line-height: 1; margin: 0; }
+  .card p { font-size: 14px; line-height: 1.6; margin: 0; color: var(--muted); flex: 1; }
+  .card .more { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c); margin-top: 8px; }
+
+  .contact-grid { display: grid; grid-template-columns: 1fr 0.9fr; gap: 6vw; align-items: end; }
+  .smallprint { margin-top: 56px; font-size: 11px; letter-spacing: 0.04em; color: #6f6b63; }
+
+  @media (max-width: 1000px) {
+    .timeline { grid-template-columns: 1fr; gap: 26px; margin-left: 6px; }
+    .timeline::before { top: 0; bottom: 0; left: 5px; right: auto; width: 1px; height: auto; }
+    .tl-item { padding: 0 0 0 30px; }
+    .tl-item::before { top: 10px; }
+    .numbers, .cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 760px), (max-aspect-ratio: 1/1) {
+    .hsec { padding: calc(88px + env(safe-area-inset-top, 0px)) 24px calc(64px + env(safe-area-inset-bottom, 0px)); }
+    .hero-grid, .contact-grid { grid-template-columns: 1fr; gap: 28px; }
+    .hero-dial { max-width: 300px; max-height: 38vh; order: -1; }
+    .hsec p { font-size: 15px; }
+  }
+  @media (max-width: 520px) { .cards, .numbers { grid-template-columns: 1fr; } }
+
+  /* ====== Интерактивные точки на часах и подсказка ====== */
+  .hotspots { position: absolute; inset: 0; transition: opacity 0.4s ease; }
+  .hotspots.off { opacity: 0; }
+  .hs {
+    position: absolute; left: 0; top: 0; width: 30px; height: 30px; margin: -15px 0 0 -15px; padding: 0; border: 0;
+    background: none; cursor: pointer; pointer-events: none; opacity: 0; transition: opacity 0.35s ease; will-change: transform;
+  }
+  .hs.on { opacity: 1; pointer-events: auto; }
+  .hotspots.off .hs { pointer-events: none; }
+  .hs::before {                                   /* пульсирующее кольцо */
+    content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1.5px solid var(--accent);
+    animation: hsPulse 2.2s ease-out infinite;
+  }
+  .hs::after {                                    /* сама светящаяся точка */
+    content: ""; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%;
+    background: #fff; box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25), 0 0 14px var(--accent); transition: background 0.3s;
+  }
+  .hs.active::after, .hs:hover::after { background: var(--accent); }
+  .hs:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 50%; }
+  @keyframes hsPulse { 0% { transform: scale(0.6); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+  .hs-tip {
+    position: absolute; left: 0; top: 0; width: min(280px, calc(100vw - 32px)); padding: 16px 18px 17px; border-radius: 14px;
+    background: rgba(12, 13, 16, 0.88); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.14); pointer-events: auto; opacity: 0; visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+  }
+  .hs-tip.show { opacity: 1; visibility: visible; transition: opacity 0.25s ease, visibility 0s; }
+  .hs-tip .tag { font-size: 11px; }
+  .hs-tip b { display: block; font-family: "Cormorant Garamond", Georgia, serif; font-weight: 500; font-size: 25px; line-height: 1.05; margin: 6px 0 8px; color: var(--ink); }
+  .hs-tip p { margin: 0; font-size: 14px; line-height: 1.55; font-weight: 300; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<div id="bgs"></div>
+<div id="stage"></div>
+
+<div class="ui">
+  <div id="panels"></div>
+  <nav class="dots" id="dots" aria-label="Коллекции"></nav>
+  <div class="hotspots off" id="hotspots"></div>
+  <div class="hs-tip" id="hsTip" role="dialog" aria-live="polite"><span class="tag" id="hsTipNum"></span><b id="hsTipTitle"></b><p id="hsTipText"></p></div>
+  <div class="foot">Зажмите левую кнопку мыши и покрутите часы · нажмите на светящиеся точки<br>Вымышленный бренд · учебная витрина</div>
+  <button class="next" id="next" type="button"><span id="nextLabel">Далее</span><i></i></button>
+</div>
+<div id="nogl">Для этой страницы нужен WebGL, а ваш браузер его не поддерживает.</div>
+
+<!-- ============================ ГЛАВНАЯ СТРАНИЦА ============================ -->
+<main id="home" tabindex="-1">
+
+  <section class="hsec" data-bg="0">
+    <span class="ghost">1927</span>
+    <div class="inner hero-grid">
+      <div>
+        <span class="tag reveal">МАНУФАКТУРА · БЕРГЕН · С 1927</span>
+        <h1 class="reveal" id="homeBrand" style="transition-delay:.08s"></h1>
+        <p class="lead reveal" style="transition-delay:.16s">Время, собранное вручную.</p>
+        <p class="reveal" style="transition-delay:.24s">Почти сто лет мы делаем механические часы так же, как в первый день: одни часы собирает один мастер, от первой детали до последней проверки.</p>
+        <div class="actions reveal" style="transition-delay:.32s">
+          <button class="btn" type="button" data-open="1">Смотреть коллекции</button>
+          <button class="textlink" type="button" data-scroll="1">Наша история ↓</button>
+        </div>
+      </div>
+      <svg class="hero-dial reveal" viewBox="-200 -200 400 400" aria-hidden="true" style="transition-delay:.2s">
+        <path class="gear" id="heroGear"></path>
+        <circle class="ring" r="160"></circle>
+        <circle class="ring thin" r="148"></circle>
+        <g id="heroTicks"></g>
+        <text class="dial-brand" id="heroDialBrand" y="-62"></text>
+        <text class="dial-sub" y="78">MANUFACTURE · 1927</text>
+        <line class="hand" id="heroHour" x1="0" y1="14" x2="0" y2="-74" stroke-width="6"></line>
+        <line class="hand" id="heroMin" x1="0" y1="18" x2="0" y2="-118" stroke-width="3.6"></line>
+        <line class="hand sec" id="heroSec" x1="0" y1="30" x2="0" y2="-132" stroke-width="1.4"></line>
+        <circle class="pin" r="6"></circle>
+      </svg>
+    </div>
+  </section>
+
+  <section class="hsec" data-bg="1">
+    <span class="ghost">История</span>
+    <div class="inner">
+      <span class="tag reveal">01 · ИСТОРИЯ</span>
+      <h2 class="reveal" style="transition-delay:.08s">Два имени на одном циферблате</h2>
+      <p class="reveal" style="transition-delay:.16s">В 1927 году в Бергене часовщик Эйрик Халден и гравёр Маргит Восс поставили два верстака в одной комнате над лодочной мастерской. Он собирал механизмы, она отделывала корпуса, и каждые часы подписывали оба.</p>
+      <p class="reveal" style="transition-delay:.24s">Отсюда и название: два имени на одном циферблате. Мастерская давно стала мануфактурой, но правило осталось прежним: никто не торопит мастера.</p>
+    </div>
+  </section>
+
+  <section class="hsec" data-bg="2">
+    <span class="ghost">Хроника</span>
+    <div class="inner">
+      <span class="tag reveal">02 · ХРОНИКА</span>
+      <h2 class="reveal" style="transition-delay:.08s">Почти век без спешки</h2>
+      <div class="timeline" id="timeline"></div>
+    </div>
+  </section>
+
+  <section class="hsec" data-bg="3">
+    <span class="ghost">Ремесло</span>
+    <div class="inner">
+      <span class="tag reveal">03 · РЕМЕСЛО</span>
+      <h2 class="reveal" style="transition-delay:.08s">Медленно — значит точно</h2>
+      <div class="numbers" id="numbers"></div>
+    </div>
+  </section>
+
+  <section class="hsec" data-bg="4">
+    <span class="ghost">Коллекции</span>
+    <div class="inner">
+      <span class="tag reveal">04 · КОЛЛЕКЦИИ</span>
+      <h2 class="reveal" style="transition-delay:.08s">Четыре характера</h2>
+      <div class="cards" id="cards"></div>
+    </div>
+  </section>
+
+  <section class="hsec" data-bg="0">
+    <span class="ghost">Бутик</span>
+    <div class="inner contact-grid">
+      <div>
+        <span class="tag reveal">05 · БУТИК</span>
+        <h2 class="reveal" style="transition-delay:.08s">Приходите посмотреть</h2>
+        <p class="reveal" style="transition-delay:.16s">Мастерская открыта по записи: можно увидеть, как собирают механизм, и примерить любую модель.</p>
+        <div class="actions reveal" style="transition-delay:.24s">
+          <button class="btn" type="button" id="homeCta">Записаться в бутик</button>
+        </div>
+      </div>
+      <ul class="specs reveal" id="boutique" style="transition-delay:.2s"></ul>
+    </div>
+    <div class="inner smallprint">Halden Voss — вымышленный бренд. Учебный проект: история, люди и адреса придуманы.</div>
+  </section>
+</main>
+
+<header class="topbar">
+  <button class="brand" id="brand" type="button" data-view="home"></button>
+  <nav class="topnav" aria-label="Разделы сайта">
+    <button type="button" data-view="home">Главная</button>
+    <button type="button" data-view="showcase">Коллекции</button>
+  </nav>
+</header>
+<div class="toast" id="toast">Бутика не существует: это учебная витрина</div>
+
+<script>
+/* ========================================================================
+   1. НАСТРОЙКИ, КОТОРЫЕ УДОБНО МЕНЯТЬ РУКАМИ
+   ======================================================================== */
+var BRAND = "Halden Voss";          // название бренда (меняется здесь, и везде сразу)
+var MADE_IN = "Made in Norway";     // страна изготовителя: гравируется на задней крышке
+var TRANSITION_MS = 1900;           // длительность перехода между коллекциями
+var FIXED_TIME = "15:25";           // на каком времени стоят часовая и минутная стрелки (null = настоящее время)
+var CAM_FOV = 32, CAM_DIST = 6;     // камера: угол обзора и расстояние до часов
+
+var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* Цвета каждой коллекции: циферблат, метки, ремешок, акцент интерфейса, фон страницы */
+var DIALS = [
+  { base: "#15171b", mark: "#e9e6df", text: "#cfcac0", hand: 0xe6e3dc, strap: 0x1c1a18, accent: "#d8d3c8",
+    bg: "radial-gradient(ellipse 70% 60% at 50% 45%, #232930 0%, #0a0b0e 72%)" },
+  { base: "#1b1e23", mark: "#ffffff", text: "#e8ebef", hand: 0xe6e9ed, strap: 0x17181c, accent: "#a78bfa",
+    bg: "radial-gradient(ellipse 80% 60% at 60% 30%, #1d4a5a 0%, #22184a 42%, #07070f 80%)" },
+  { base: "#bfe1da", mark: "#2b3d3c", text: "#2b3d3c", hand: 0xdfe3e8, strap: 0x9aa3ab, accent: "#9fe3dc",
+    bg: "radial-gradient(ellipse 70% 60% at 40% 45%, #2b5e62 0%, #061315 74%)" },
+  { base: "#d8c29c", mark: "#3a2a20", text: "#4a392c", hand: 0x2e2018, strap: 0x6b4630, accent: "#f0b27a",
+    bg: "radial-gradient(ellipse 80% 70% at 60% 30%, #a2653b 0%, #2a1612 56%, #0e0707 100%)" },
+  { base: "#ece5d2", mark: "#17130f", text: "#17130f", hand: 0x1c3f9e, strap: 0x16120f, accent: "#e3c070",
+    bg: "radial-gradient(ellipse 70% 60% at 42% 45%, #3a2c12 0%, #0b0806 74%)" }
+];
+
+/* Тексты и расположение. side: с какой стороны текст (часы встанут с другой) */
+var STAGES = [
+  { model: "round", ghost: "Время", tag: "МАНУФАКТУРА · С 1927", title: BRAND, side: "hero",
+    text: "Каждые часы собирает один мастер: 312 деталей и 41 день работы. Мы не торопимся, чтобы вы никуда не опаздывали.",
+    specs: [["Моделей", "4"], ["Деталей в механизме", "312"]] },
+  { model: "tonneau", ghost: "Сияние", tag: "HV-01", title: "Сияние", side: "left",
+    text: "Прозрачный дымчатый корпус, скелетон с тремя малыми циферблатами и радужный флянец — как северное сияние над Бергеном.",
+    specs: [["Корпус", "44 × 51 мм · дымчатый полимер"], ["Механизм", "автоподзавод, скелетон"], ["Малые циферблаты", "24 часа · день · дата"], ["Ремешок", "силикон с перфорацией"]] },
+  { model: "steel", ghost: "Фьорд", tag: "HV-02", title: "Фьорд", side: "right",
+    text: "Ледяной циферблат с открытым «сердцем»: в окошке на девяти часах бьётся баланс. Стальной браслет и прозрачная задняя крышка.",
+    specs: [["Корпус", "39 мм · сталь"], ["Механизм", "автоподзавод, открытый баланс"], ["Запас хода", "50 часов"], ["Браслет", "сталь, раскладная застёжка"]] },
+  { model: "round", ghost: "Рассвет", tag: "HV-03", title: "Рассвет", side: "left",
+    text: "Шампань и мягкое золото первого света. Самая тихая модель коллекции.",
+    specs: [["Корпус", "39 мм · сталь"], ["Ремешок", "телячья кожа"], ["Запас хода", "72 часа"], ["Стекло", "сапфировое"]] },
+  { model: "tank", ghost: "Ивори", tag: "HV-04", title: "Ивори", side: "right", cta: true,
+    text: "Прямоугольник, в котором нет ничего лишнего: римские цифры, слоновая кость и синие стрелки. Сапфир на короне.",
+    specs: [["Корпус", "26 × 34 мм · золото"], ["Механизм", "ручной завод"], ["Запас хода", "38 часов"], ["Стекло", "сапфировое, выпуклое"]] }
+];
+
+/* Тексты главной страницы: хроника, цифры ремесла и бутик */
+var HISTORY = [
+  ["1927", "Мастерская", "Два верстака, одна комната и первый заказ: карманные часы для капитана парома."],
+  ["1938", "Первые наручные", "Модель, из которой потом вырос «Рассвет»."],
+  ["1974", "Остались механикой", "В годы кварцевого кризиса отказались от батареек и сохранили мастеров."],
+  ["2009", "Свой механизм", "Калибр HV-1: 312 деталей, собранных в Бергене."],
+  ["2026", "Четыре модели", "Сияние, Фьорд, Рассвет и прямоугольная Ивори."]
+];
+var CRAFT = [["312", "деталей в механизме"], ["41", "день на одни часы"], ["1", "мастер от начала до конца"], ["99", "лет без конвейера"]];
+var BOUTIQUE = [["Где", "Берген, Норвегия"], ["Визиты", "по записи"], ["Почта", "hello@halden-voss.example"]];
+
+/* Интерактивные точки на часах.
+   pos: где точка на модели (x — вправо, y — вверх, z — к зрителю; часы примерно от -1 до 1).
+   normal: куда «смотрит» деталь. Точка видна, только когда эта сторона повёрнута к вам. */
+var HOTSPOTS = {
+  round: [
+    { title: "Сапфировое стекло", pos: [-0.45, 0.45, 0.2], normal: [-0.15, 0.15, 1],
+      text: "Выпуклое, с антибликовым слоем изнутри. Поцарапать его может разве что алмаз." },
+    { title: "Заводная головка", pos: [1.12, 0, 0], normal: [0.7, 0, 0.7],
+      text: "Ею заводят механизм и переводят стрелки. Утоплена в корпус ровно настолько, чтобы не цеплять манжету." },
+    { title: "Окно в механизм", pos: [0, -0.324, 0.075], normal: [0, 0, 1],
+      text: "Сквозь маленькое стекло видно калибр HV-1: латунные колёса крутятся, на осях стоят рубиновые камни." },
+    { title: "Цельный корпус", pos: [0.48, 1.25, 0.045], normal: [0, 0, 1],
+      text: "Корпус и рога — одна деталь, без швов и винтов. Ремешок крепится прямо между рогами." },
+    { title: "Стрелки", pos: [0, 0, 0.13], normal: [0, 0, 1],
+      text: "Полированная сталь и тонкая красная секундная. Она скользит плавно, а не прыгает: так выглядит механический ход." },
+    { title: "Задняя крышка", pos: [0, 0.25, -0.15], normal: [0, 0, -1],
+      text: "Гравировка мануфактуры и страны изготовления. Каждую крышку подписывает мастер, который собирал часы." }
+  ],
+  tank: [
+    { title: "Выпуклое стекло", pos: [-0.3, 0.35, 0.13], normal: [0, 0, 1],
+      text: "Изогнуто по высоте и ширине, как у прямоугольных часов начала прошлого века. Блики бегут по нему при каждом повороте руки." },
+    { title: "Корона с кабошоном", pos: [0.9, 0.12, -0.03], normal: [0.7, 0, 0.7],
+      text: "Синий сапфир, отшлифованный гладким куполом, без граней." },
+    { title: "Брусья корпуса", pos: [-0.62, -0.85, 0.115], normal: [0, 0, 1],
+      text: "Боковые брусья переходят в крепления ремешка: корпус и ушки — одно целое." },
+    { title: "Римские цифры", pos: [0.371, 0, 0.025], normal: [0, 0, 1],
+      text: "Цифры по периметру повёрнуты верхом наружу, а внутри идёт «железнодорожная» дорожка минут." },
+    { title: "Синие стрелки", pos: [0, 0, 0.08], normal: [0, 0, 1],
+      text: "Сталь, прокалённая до синего цвета: так её защищали от ржавчины задолго до современных покрытий." },
+    { title: "Золотая крышка", pos: [0, 0.3, -0.172], normal: [0, 0, -1],
+      text: "18-каратное золото с гравировкой мануфактуры и страны изготовления." }
+  ],
+  steel: [
+    { title: "Открытое сердце", pos: [-0.378, 0, 0.07], normal: [0, 0, 1],
+      text: "В окошке на девяти часах бьётся баланс — «сердце» механизма. Он качается туда-обратно несколько раз в секунду и отмеряет время." },
+    { title: "Ледяной циферблат", pos: [0.32, 0.4, 0.07], normal: [0, 0, 1],
+      text: "Холодный мятный цвет с лучистой фактурой и накладными полированными метками, которые ловят свет." },
+    { title: "Заводная головка", pos: [1.14, 0, 0], normal: [0.7, 0, 0.7],
+      text: "Крупная, с удобным хватом. Механизм заводится и сам, от движений руки, но иногда приятно подкрутить." },
+    { title: "Стальной браслет", pos: [0, -1.3, 0.012], normal: [0, 0, 1],
+      text: "Три ряда звеньев: матовые по краям, полированные в центре. Звенья подвижны и мягко облегают запястье." },
+    { title: "Стрелки «дофин»", pos: [0, 0, 0.13], normal: [0, 0, 1],
+      text: "Полированные гранёные стрелки: одна грань всегда блестит, поэтому время читается под любым углом." },
+    { title: "Прозрачная крышка", pos: [0.25, 0.25, -0.17], normal: [0, 0, -1],
+      text: "Сквозь сапфировое стекло виден механизм с ротором: он вращается от движений руки и сам заводит пружину." }
+  ],
+  tonneau: [
+    { title: "Прозрачный корпус", pos: [0.7, -0.45, 0.12], normal: [0.25, 0, 1],
+      text: "Дымчатый полимер, сквозь который видна внутренняя стальная рамка. Корпус лёгкий, а часы при этом выглядят массивно." },
+    { title: "Винты корпуса", pos: [0.64, 0.62, 0.14], normal: [0, 0, 1],
+      text: "Восемь стальных винтов держат корпус. Их не прячут, а показывают — как в спортивных автомобилях." },
+    { title: "Три малых циферблата", pos: [0, -0.27, 0.04], normal: [0, 0, 1],
+      text: "24 часа, день недели и дата. Малые стрелки показывают настоящий сегодняшний день и число." },
+    { title: "Радужный флянец", pos: [-0.47, 0.45, 0.03], normal: [0, 0, 1],
+      text: "Кольцо вокруг циферблата переливается от синего к оранжевому, как северное сияние над фьордами." },
+    { title: "Ремешок с перфорацией", pos: [0, -1.35, -0.005], normal: [0, 0, 1],
+      text: "Мягкий силикон с отверстиями, чтобы рука дышала, и строчкой двух цветов: бирюзовой и фиолетовой." },
+    { title: "Стальная крышка", pos: [0, 0.3, -0.27], normal: [0, 0, -1],
+      text: "Привинчена четырьмя винтами. На ней логотип мануфактуры, название, водозащита и страна изготовления." }
+  ]
+};
+
+/* ========================================================================
+   2. МАЛЕНЬКИЕ ПОМОЩНИКИ
+   ======================================================================== */
+function lerp(a, b, t) { return a + (b - a) * t; }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+function smoothstep(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+function normalizeAngle(a) { var TWO = Math.PI * 2; return ((a + Math.PI) % TWO + TWO) % TWO - Math.PI; }
+
+/* ========================================================================
+   3. СТРАНИЦА: фоны, тексты, точки-навигация (обычный HTML, без 3D)
+   ======================================================================== */
+var stageIndex = 0;
+var elBgs = document.getElementById("bgs");
+var elPanels = document.getElementById("panels");
+var elDots = document.getElementById("dots");
+var elNext = document.getElementById("next");
+var elNextLabel = document.getElementById("nextLabel");
+var elToast = document.getElementById("toast");
+document.getElementById("brand").textContent = BRAND;
+
+var bgNodes = [], panelNodes = [], dotNodes = [];
+
+STAGES.forEach(function (s, i) {
+  var bg = document.createElement("div");
+  bg.className = "bg";
+  bg.style.background = DIALS[i].bg;
+  bg.innerHTML = '<span class="ghost">' + s.ghost + "</span>";
+  elBgs.appendChild(bg);
+  bgNodes.push(bg);
+
+  var panel = document.createElement("div");
+  panel.className = "panel " + s.side;
+  var specs = s.specs.map(function (r) { return "<li><span>" + r[0] + "</span><b>" + r[1] + "</b></li>"; }).join("");
+  panel.innerHTML =
+    '<span class="tag">' + s.tag + "</span><h1>" + s.title + "</h1><p>" + s.text + "</p>" +
+    '<ul class="specs">' + specs + "</ul>" +
+    (s.cta ? '<button class="cta" type="button">Записаться в бутик</button>' : "");
+  elPanels.appendChild(panel);
+  panelNodes.push(panel);
+
+  var dot = document.createElement("button");
+  dot.type = "button";
+  dot.setAttribute("aria-label", "Раздел " + (i + 1));
+  dot.addEventListener("click", function () { goToStage(i); });
+  elDots.appendChild(dot);
+  dotNodes.push(dot);
+});
+
+var ctaBtn = document.querySelector(".cta");
+if (ctaBtn) ctaBtn.addEventListener("click", function () {
+  elToast.classList.add("show");
+  setTimeout(function () { elToast.classList.remove("show"); }, 2800);
+});
+
+function setAccent(i) { document.documentElement.style.setProperty("--accent", DIALS[i].accent); }
+function updateDots(i) {
+  dotNodes.forEach(function (d, k) { d.classList.toggle("active", k === i); });
+  elNextLabel.textContent = (i === STAGES.length - 1) ? "К началу" : "Далее";
+}
+
+/* ========================================================================
+   3б. ГЛАВНАЯ СТРАНИЦА и переключение «Главная / Коллекции»
+   ======================================================================== */
+var VIEW = "home";
+var elHome = document.getElementById("home");
+var viewButtons = Array.prototype.slice.call(document.querySelectorAll("[data-view]"));
+
+document.getElementById("homeBrand").textContent = BRAND;
+document.getElementById("heroDialBrand").textContent = BRAND.toUpperCase();
+
+var homeSections = Array.prototype.slice.call(elHome.querySelectorAll(".hsec"));
+homeSections.forEach(function (sec) { sec.style.background = DIALS[+sec.getAttribute("data-bg")].bg; });   // фоны те же, что у коллекций
+
+document.getElementById("timeline").innerHTML = HISTORY.map(function (h, i) {
+  return '<div class="tl-item reveal" style="transition-delay:' + (0.15 + i * 0.08).toFixed(2) + 's"><div class="tl-year">' + h[0] +
+    '</div><div class="tl-title">' + h[1] + '</div><div class="tl-text">' + h[2] + "</div></div>";
+}).join("");
+document.getElementById("numbers").innerHTML = CRAFT.map(function (c, i) {
+  return '<div class="reveal" style="transition-delay:' + (0.15 + i * 0.08).toFixed(2) + 's"><b>' + c[0] + "</b><span>" + c[1] + "</span></div>";
+}).join("");
+document.getElementById("boutique").innerHTML = BOUTIQUE.map(function (b) { return "<li><span>" + b[0] + "</span><b>" + b[1] + "</b></li>"; }).join("");
+
+var cardsHtml = "";                                       // карточки коллекций берутся прямо из данных витрины
+STAGES.forEach(function (st, i) {
+  if (i === 0) return;
+  var d = DIALS[i];
+  cardsHtml += '<button class="card reveal" type="button" data-open="' + i + '" style="--c:' + d.accent + ";transition-delay:" + (0.12 + i * 0.07).toFixed(2) + 's">' +
+    '<span class="swatch' + (st.model === "tank" ? " rect" : st.model === "tonneau" ? " barrel" : "") + '" style="background:' + d.base + '"></span>' +
+    '<span class="tag">' + st.tag + "</span><h3>" + st.title + "</h3><p>" + st.text + '</p><span class="more">Открыть в витрине →</span></button>';
+});
+document.getElementById("cards").innerHTML = cardsHtml;
+
+/* циферблат-рисунок на первом экране */
+var ticks = "";
+for (var ti = 0; ti < 60; ti++) {
+  var big = ti % 5 === 0, ta = ti / 60 * Math.PI * 2, r1 = big ? 128 : 136, r2 = 144;
+  ticks += '<line class="tick' + (big ? " big" : "") + '" x1="' + (Math.sin(ta) * r1).toFixed(2) + '" y1="' + (-Math.cos(ta) * r1).toFixed(2) +
+    '" x2="' + (Math.sin(ta) * r2).toFixed(2) + '" y2="' + (-Math.cos(ta) * r2).toFixed(2) + '"></line>';
+}
+document.getElementById("heroTicks").innerHTML = ticks;
+var gearD = "";                                           // шестерёнка вокруг циферблата
+for (var gi = 0; gi < 48; gi++) {
+  var step = Math.PI * 2 / 48, g0 = gi * step;
+  [[g0, 178], [g0 + step * 0.18, 188], [g0 + step * 0.5, 188], [g0 + step * 0.68, 178]].forEach(function (pt, k) {
+    gearD += (gi === 0 && k === 0 ? "M" : "L") + (Math.sin(pt[0]) * pt[1]).toFixed(2) + " " + (-Math.cos(pt[0]) * pt[1]).toFixed(2) + " ";
+  });
+}
+document.getElementById("heroGear").setAttribute("d", gearD + "Z");
+
+var elHeroHour = document.getElementById("heroHour"), elHeroMin = document.getElementById("heroMin"), elHeroSec = document.getElementById("heroSec");
+function heroClock() {                                   // те же правила времени, что у 3D-часов
+  requestAnimationFrame(heroClock);
+  if (VIEW !== "home") return;
+  var now = new Date(), s = now.getSeconds() + now.getMilliseconds() / 1000, m, h;
+  if (FIXED_TIME) { var pr = FIXED_TIME.split(":"); m = parseInt(pr[1], 10); h = (parseInt(pr[0], 10) % 12) + m / 60; }
+  else { m = now.getMinutes() + s / 60; h = (now.getHours() % 12) + m / 60; }
+  elHeroHour.setAttribute("transform", "rotate(" + (h * 30).toFixed(3) + ")");
+  elHeroMin.setAttribute("transform", "rotate(" + (m * 6).toFixed(3) + ")");
+  elHeroSec.setAttribute("transform", "rotate(" + (s * 6).toFixed(3) + ")");
+}
+
+/* плавное появление секций при прокрутке */
+if ("IntersectionObserver" in window) {
+  var homeObserver = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { if (en.isIntersecting) en.target.classList.add("visible"); });
+  }, { root: elHome, threshold: 0.25 });
+  homeSections.forEach(function (sec) { homeObserver.observe(sec); });
+} else {
+  homeSections.forEach(function (sec) { sec.classList.add("visible"); });
+}
+
+function setView(v) {
+  hotspotsClose();
+  VIEW = v;
+  document.body.classList.toggle("view-showcase", v === "showcase");
+  viewButtons.forEach(function (b) { if (!b.classList.contains("brand")) b.classList.toggle("active", b.getAttribute("data-view") === v); });
+  setAccent(v === "home" ? 0 : stageIndex);
+  if (v === "home" && elHome.focus) elHome.focus({ preventScroll: true });
+}
+function openShowcase(i) {
+  setView("showcase");
+  if (typeof i === "number" && i !== stageIndex) setTimeout(function () { goToStage(i); }, 450);
+}
+viewButtons.forEach(function (b) { b.addEventListener("click", function () { setView(b.getAttribute("data-view")); }); });
+Array.prototype.slice.call(document.querySelectorAll("[data-open]")).forEach(function (b) {
+  b.addEventListener("click", function () { openShowcase(+b.getAttribute("data-open")); });
+});
+Array.prototype.slice.call(document.querySelectorAll("[data-scroll]")).forEach(function (b) {
+  b.addEventListener("click", function () { var t = homeSections[+b.getAttribute("data-scroll")]; if (t && t.scrollIntoView) t.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" }); });
+});
+document.getElementById("homeCta").addEventListener("click", function () {
+  elToast.classList.add("show");
+  setTimeout(function () { elToast.classList.remove("show"); }, 2800);
+});
+
+/* ========================================================================
+   4. 3D-СЦЕНА (Three.js) — всё внутри init(), чтобы при сбое показать понятное сообщение
+   ======================================================================== */
+var goToStage = function () {};   // настоящая функция появится после init()
+var hotspotsClose = function () {};   // закрыть подсказку у точки (настоящая функция тоже появится в init)
+
+function init() {
+  var wrap = document.getElementById("stage");
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x000000, 0);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  wrap.appendChild(renderer.domElement);
+  var dom = renderer.domElement;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(CAM_FOV, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, CAM_DIST);
+  camera.lookAt(0, 0, 0);
+
+  /* ---------- 4.1 Окружение для металла: рисуем «студию» на canvas ---------- */
+  function makeEnvironment() {
+    var c = document.createElement("canvas");
+    c.width = 1024; c.height = 512;
+    var x = c.getContext("2d");
+    var bg = x.createLinearGradient(0, 0, 0, 512);
+    bg.addColorStop(0, "#3a3f48"); bg.addColorStop(0.5, "#14161a"); bg.addColorStop(1, "#050506");
+    x.fillStyle = bg; x.fillRect(0, 0, 1024, 512);
+    function softbox(cx, cy, w, h, color, alpha) {      // мягкий светлый прямоугольник-«софтбокс»
+      x.save(); x.translate(cx, cy); x.scale(w, h);
+      var g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g.addColorStop(0, "rgba(" + color + "," + alpha + ")");
+      g.addColorStop(0.6, "rgba(" + color + "," + (alpha * 0.45) + ")");
+      g.addColorStop(1, "rgba(" + color + ",0)");
+      x.fillStyle = g; x.beginPath(); x.arc(0, 0, 1, 0, Math.PI * 2); x.fill(); x.restore();
+    }
+    softbox(740, 150, 170, 90, "255,244,230", 0.95);    // главный свет сверху-спереди
+    softbox(250, 190, 90, 150, "170,200,255", 0.75);    // холодная вертикальная полоса
+    softbox(500, 300, 220, 40, "255,230,200", 0.5);     // тёплый блик пониже
+    softbox(960, 120, 60, 130, "255,255,255", 0.6);
+    var tex = new THREE.CanvasTexture(c);
+    tex.mapping = THREE.EquirectangularReflectionMapping;
+    var pm = new THREE.PMREMGenerator(renderer);
+    var rt = pm.fromEquirectangular(tex);
+    pm.dispose(); tex.dispose();
+    return rt.texture;
+  }
+  var env = null;
+  try { env = makeEnvironment(); } catch (err) { console.warn("Окружение не создалось, металл будет проще:", err); }
+
+  function metal(color, rough) {
+    var m = new THREE.MeshStandardMaterial({ color: color, metalness: env ? 1 : 0.7, roughness: env ? rough : rough + 0.15 });
+    if (env) { m.envMap = env; m.envMapIntensity = 1.5; }
+    return m;
+  }
+
+  /* ---------- 4.2 Свет ---------- */
+  scene.add(new THREE.HemisphereLight(0xcfd8ff, 0x1a1410, 0.55));
+  var KEY_BASE = 1.1;
+  var key = new THREE.DirectionalLight(0xfff1e0, KEY_BASE);
+  key.position.set(-3, 4, 5);
+  scene.add(key);
+  var rim = new THREE.DirectionalLight(0x9db8ff, 0.8);
+  rim.position.set(4, -1, -3);
+  scene.add(rim);
+
+  /* Размеры циферблата и окошка с механизмом (окошко: на сколько ниже центра и какого размера, в долях радиуса) */
+  var DIAL_R = 0.9;
+  var WIN = { y: 0.36, r: 0.17 };
+
+  /* ---------- 4.3 Циферблаты: четыре картинки, нарисованные кодом ---------- */
+  function drawDial(canvas, d) {
+    var S = canvas.width, C = S / 2, R = S / 2, i, a;
+    var ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, S, S);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(C, C, R, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = d.base; ctx.fillRect(0, 0, S, S);
+
+    for (i = 0; i < 720; i++) {                     // лучистая «солнечная» фактура
+      a = i / 720 * Math.PI * 2;
+      ctx.strokeStyle = "rgba(255,255,255," + (0.012 + 0.035 * Math.abs(Math.sin(i * 0.9))).toFixed(3) + ")";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(C, C); ctx.lineTo(C + Math.cos(a) * R, C + Math.sin(a) * R); ctx.stroke();
+    }
+    var g = ctx.createRadialGradient(C, C * 0.8, R * 0.1, C, C, R);   // объём: светлее в центре, темнее по краю
+    g.addColorStop(0, "rgba(255,255,255,0.10)"); g.addColorStop(0.6, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0.38)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+
+    ctx.strokeStyle = d.mark; ctx.lineWidth = 3; ctx.globalAlpha = 0.75;   // минутные штрихи
+    for (i = 0; i < 60; i++) {
+      if (i % 5 === 0) continue;
+      a = i / 60 * Math.PI * 2 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.moveTo(C + Math.cos(a) * R * 0.915, C + Math.sin(a) * R * 0.915);
+      ctx.lineTo(C + Math.cos(a) * R * 0.965, C + Math.sin(a) * R * 0.965);
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = d.mark;                         // часовые метки: простые чёрточки
+    for (i = 0; i < 12; i++) {
+      ctx.save(); ctx.translate(C, C); ctx.rotate(i / 12 * Math.PI * 2);
+      ctx.fillRect(-8, -R * 0.93, 16, R * 0.15);
+      ctx.restore();
+    }
+
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = d.text;   // надписи
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "9px";
+    ctx.font = '500 46px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText(BRAND.toUpperCase(), C, C - R * 0.40);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "6px";
+    ctx.font = '400 22px "Jost", Arial, sans-serif';
+    ctx.fillText("AUTOMATIC", C, C + R * 0.66);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+
+    ctx.globalCompositeOperation = "destination-out";       // окошко: стираем круг, чтобы стал виден механизм под ним
+    ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.arc(C, C + R * WIN.y, R * WIN.r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.restore();
+  }
+  /* Циферблат прямоугольных часов: слоновая кость, римские цифры по периметру, «железнодорожная» дорожка минут */
+  function drawTankDial(canvas, d) {
+    var W = canvas.width, H = canvas.height, ctx = canvas.getContext("2d"), i;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = d.base; ctx.fillRect(0, 0, W, H);
+    var g = ctx.createRadialGradient(W / 2, H * 0.45, H * 0.1, W / 2, H / 2, H * 0.72);     // лёгкий объём
+    g.addColorStop(0, "rgba(255,255,255,0.08)"); g.addColorStop(1, "rgba(90,70,30,0.16)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    var x0 = W * 0.25, x1 = W * 0.75, y0 = H * 0.215, y1 = H * 0.785, ins = W * 0.024;      // дорожка минут
+    ctx.strokeStyle = d.mark; ctx.lineWidth = 3;
+    ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.strokeRect(x0 + ins, y0 + ins, x1 - x0 - 2 * ins, y1 - y0 - 2 * ins);
+    var pw = x1 - x0 - ins, ph = y1 - y0 - ins, perim = 2 * (pw + ph), cx = x0 + ins / 2, cy = y0 + ins / 2;
+    ctx.lineWidth = 2;
+    for (i = 0; i < 60; i++) {                                                               // 60 штрихов между двумя рамками
+      var t = i / 60 * perim, px, py, nx = 0, ny = 0;
+      if (t < pw) { px = cx + t; py = cy; ny = 1; }
+      else if (t < pw + ph) { px = cx + pw; py = cy + (t - pw); nx = -1; }
+      else if (t < 2 * pw + ph) { px = cx + pw - (t - pw - ph); py = cy + ph; ny = -1; }
+      else { px = cx; py = cy + ph - (t - 2 * pw - ph); nx = 1; }
+      ctx.beginPath(); ctx.moveTo(px - nx * ins / 2, py - ny * ins / 2); ctx.lineTo(px + nx * ins / 2, py + ny * ins / 2); ctx.stroke();
+    }
+
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = d.mark; ctx.strokeStyle = d.mark;
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.font = "600 " + Math.round(H * 0.078) + 'px "Cormorant Garamond", "Times New Roman", serif';
+    ctx.lineWidth = 2;
+    var cols = [0.15, 0.5, 0.85], rows = [0.135, 0.31, 0.5, 0.69, 0.865], PI = Math.PI;
+    [["XI", 0, 0, 0], ["XII", 1, 0, 0], ["I", 2, 0, 0],                                      // [цифра, колонка, строка, поворот]
+     ["II", 2, 1, PI / 2], ["III", 2, 2, PI / 2], ["IIII", 2, 3, PI / 2],                    // цифры по периметру повёрнуты верхом наружу
+     ["V", 2, 4, PI], ["VI", 1, 4, PI], ["VII", 0, 4, PI],
+     ["VIII", 0, 3, -PI / 2], ["IX", 0, 2, -PI / 2], ["X", 0, 1, -PI / 2]].forEach(function (n) {
+      ctx.save(); ctx.translate(cols[n[1]] * W, rows[n[2]] * H); ctx.rotate(n[3]);
+      ctx.fillText(n[0], 0, 0); ctx.strokeText(n[0], 0, 0);
+      ctx.restore();
+    });
+
+    ctx.fillStyle = d.text;
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "6px";
+    ctx.font = '600 34px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText(BRAND.toUpperCase(), W / 2, H * 0.345);
+    ctx.font = '400 16px "Jost", Arial, sans-serif';
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "5px";
+    ctx.fillText("MANUFACTURE", W / 2, H * 0.948);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  }
+
+  /* Циферблат «Фьорда»: ледяной, с лучами; метки накладные (объёмные, см. ниже); окно «открытого сердца» на 9 часах */
+  var HEART = { x: -0.42, r: 0.21 };                         // окно сердца: смещение влево и размер, в долях радиуса
+  function drawSteelDial(canvas, d) {
+    var S = canvas.width, C = S / 2, R = S / 2, i, a, ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, S, S);
+    ctx.save();
+    ctx.beginPath(); ctx.arc(C, C, R, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = d.base; ctx.fillRect(0, 0, S, S);
+    for (i = 0; i < 720; i++) {                              // лучистая фактура
+      a = i / 720 * Math.PI * 2;
+      ctx.strokeStyle = "rgba(255,255,255," + (0.02 + 0.05 * Math.abs(Math.sin(i * 0.9))).toFixed(3) + ")";
+      ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(C, C); ctx.lineTo(C + Math.cos(a) * R, C + Math.sin(a) * R); ctx.stroke();
+    }
+    var g = ctx.createRadialGradient(C, C * 0.8, R * 0.1, C, C, R);
+    g.addColorStop(0, "rgba(255,255,255,0.18)"); g.addColorStop(0.65, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(20,50,50,0.30)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+    ctx.strokeStyle = d.mark; ctx.globalAlpha = 0.55; ctx.lineWidth = 2.5;   // минутная дорожка
+    for (i = 0; i < 60; i++) {
+      a = i / 60 * Math.PI * 2 - Math.PI / 2;
+      var r1 = R * (i % 5 === 0 ? 0.9 : 0.925);
+      ctx.beginPath(); ctx.moveTo(C + Math.cos(a) * r1, C + Math.sin(a) * r1); ctx.lineTo(C + Math.cos(a) * R * 0.965, C + Math.sin(a) * R * 0.965); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = d.text;
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "9px";
+    ctx.font = '500 44px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText(BRAND.toUpperCase(), C, C - R * 0.4);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "6px";
+    ctx.font = '400 21px "Jost", Arial, sans-serif';
+    ctx.fillText("AUTOMATIC", C, C + R * 0.5);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.globalCompositeOperation = "destination-out";         // окно «открытого сердца»
+    ctx.fillStyle = "#000";
+    ctx.beginPath(); ctx.arc(C + R * HEART.x, C, R * HEART.r, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.restore();
+  }
+  /* Форма «бочка» (тонно): бока выпуклые, верх и низ прямые, углы скруглены. Возвращает список точек [x, y] */
+  function tonneauOutline(ht, hm, hy, r) {
+    var pts = [], N = 40, y0 = -hy + r, y1 = hy - r, i, y;
+    function f(yy) { return ht + (hm - ht) * (1 - (yy / hy) * (yy / hy)); }
+    function quad(x0, yA, cx, cy, x1, yB, steps) {
+      for (var k = 1; k <= steps; k++) { var t = k / steps, u = 1 - t; pts.push([u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * yA + 2 * u * t * cy + t * t * yB]); }
+    }
+    pts.push([-ht + r, -hy]); pts.push([ht - r, -hy]);                  // низ
+    quad(ht - r, -hy, ht, -hy, f(y0), y0, 6);                           // правый нижний угол
+    for (i = 1; i <= N; i++) { y = y0 + (y1 - y0) * i / N; pts.push([f(y), y]); }       // правый бок
+    quad(f(y1), y1, ht, hy, ht - r, hy, 6);                             // правый верхний угол
+    pts.push([-ht + r, hy]);                                            // верх
+    quad(-ht + r, hy, -ht, hy, -f(y1), y1, 6);                          // левый верхний угол
+    for (i = 1; i <= N; i++) { y = y1 - (y1 - y0) * i / N; pts.push([-f(y), y]); }      // левый бок
+    quad(-f(y0), y0, -ht, -hy, -ht + r, -hy, 6);                        // левый нижний угол
+    pts.pop();                                                          // последняя точка совпадает с первой
+    return pts;
+  }
+  function insideTonneau(x, y, ht, hm, hy) { return Math.abs(y) <= hy && Math.abs(x) <= ht + (hm - ht) * (1 - (y / hy) * (y / hy)); }
+  function tonneauRay(a, ht, hm, hy) {                                  // как далеко от центра до края «бочки» в направлении a
+    var lo = 0, hi = 2;
+    for (var k = 0; k < 24; k++) { var mid = (lo + hi) / 2; if (insideTonneau(Math.sin(a) * mid, Math.cos(a) * mid, ht, hm, hy)) lo = mid; else hi = mid; }
+    return lo;
+  }
+
+  /* Циферблат «Сияния»: скелетон, три малых циферблата, радужный флянец */
+  var TON = { w: 1.28, h: 1.40, dial: [0.52, 0.64, 0.70, 0.08], flangeOut: [0.50, 0.62, 0.68, 0.07], flangeIn: [0.38, 0.50, 0.56, 0.06],
+              subs: [[-0.26, 0.02], [0.26, 0.02], [0, -0.27]], subR: 0.13 };
+  function drawTonneauDial(canvas, d) {
+    var W = canvas.width, H = canvas.height, ctx = canvas.getContext("2d"), K = W / TON.w, i, a;
+    function X(x) { return (x + TON.w / 2) * K; }
+    function Y(y) { return (TON.h / 2 - y) * K; }
+    function tracePath(o) { var pts = tonneauOutline(o[0], o[1], o[2], o[3]); ctx.moveTo(X(pts[0][0]), Y(pts[0][1])); for (var k = 1; k < pts.length; k++) ctx.lineTo(X(pts[k][0]), Y(pts[k][1])); ctx.closePath(); }
+    ctx.clearRect(0, 0, W, H);
+    ctx.save();
+    ctx.beginPath(); tracePath(TON.dial); ctx.clip();                 // всё, что вне «бочки», останется прозрачным
+    ctx.fillStyle = d.base; ctx.fillRect(0, 0, W, H);
+
+    function gear(x, y, r, teeth, fill) {                             // силуэт шестерёнки скелетона
+      ctx.beginPath();
+      for (var k = 0; k < teeth * 2; k++) { var ga = k / (teeth * 2) * Math.PI * 2, gr = (k % 2 ? r * 0.86 : r); ctx.lineTo(X(x + Math.cos(ga) * gr), Y(y + Math.sin(ga) * gr)); }
+      ctx.closePath(); ctx.fillStyle = fill; ctx.fill(); ctx.strokeStyle = "#4b525b"; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = "#0d0f12"; ctx.beginPath(); ctx.arc(X(x), Y(y), r * 0.35 * K, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.strokeStyle = "#353b43"; ctx.lineCap = "round"; ctx.lineWidth = 0.07 * K;     // мосты скелетона
+    [[-0.34, 0.3, 0.3, -0.18], [-0.3, -0.36, 0.34, 0.24]].forEach(function (b) { ctx.beginPath(); ctx.moveTo(X(b[0]), Y(b[1])); ctx.lineTo(X(b[2]), Y(b[3])); ctx.stroke(); });
+    gear(0.06, 0.16, 0.17, 18, "#2d3239"); gear(-0.13, -0.1, 0.1, 12, "#2a2f36"); gear(0.17, -0.13, 0.08, 10, "#2a2f36");
+    [[0.06, 0.16], [-0.13, -0.1], [0.17, -0.13], [-0.3, 0.32]].forEach(function (r) { ctx.fillStyle = "#b3122f"; ctx.beginPath(); ctx.arc(X(r[0]), Y(r[1]), 0.012 * K, 0, Math.PI * 2); ctx.fill(); });
+
+    var grad = ctx.createConicGradient ? ctx.createConicGradient(-Math.PI / 2, X(0), Y(0)) : ctx.createLinearGradient(0, 0, W, H);
+    [[0, "#3b82f6"], [0.22, "#8b5cf6"], [0.45, "#ec4899"], [0.65, "#f97316"], [0.85, "#06b6d4"], [1, "#3b82f6"]].forEach(function (c) { grad.addColorStop(c[0], c[1]); });
+    ctx.beginPath(); tracePath(TON.flangeOut); tracePath(TON.flangeIn); ctx.fillStyle = grad; ctx.fill("evenodd");   // радужный флянец
+    ctx.strokeStyle = "rgba(255,255,255,0.9)"; ctx.lineCap = "butt";
+    for (i = 0; i < 60; i++) {                                        // минутные штрихи на флянце
+      a = i / 60 * Math.PI * 2;
+      var ro = tonneauRay(a, TON.flangeOut[0], TON.flangeOut[1], TON.flangeOut[2]) - 0.012, len = i % 5 === 0 ? 0.06 : 0.03;
+      ctx.lineWidth = i % 5 === 0 ? 4 : 2;
+      ctx.beginPath(); ctx.moveTo(X(Math.sin(a) * ro), Y(Math.cos(a) * ro)); ctx.lineTo(X(Math.sin(a) * (ro - len)), Y(Math.cos(a) * (ro - len))); ctx.stroke();
+    }
+
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.font = "600 " + Math.round(0.13 * K) + 'px "Jost", Arial, sans-serif';
+    ctx.lineWidth = 6; ctx.strokeStyle = "#0d0f12"; ctx.fillStyle = d.mark;
+    [["12", 0, 0.44], ["3", 0.45, 0], ["6", 0, -0.47], ["9", -0.45, 0]].forEach(function (n) { ctx.strokeText(n[0], X(n[1]), Y(n[2])); ctx.fillText(n[0], X(n[1]), Y(n[2])); });
+    ctx.lineWidth = 0.022 * K; ctx.strokeStyle = d.mark; ctx.lineCap = "round";
+    for (i = 0; i < 12; i++) {                                        // остальные часы — короткие белые метки
+      if (i % 3 === 0) continue;
+      a = i / 12 * Math.PI * 2;
+      var ri = tonneauRay(a, TON.flangeIn[0], TON.flangeIn[1], TON.flangeIn[2]) - 0.02;
+      ctx.beginPath(); ctx.moveTo(X(Math.sin(a) * ri), Y(Math.cos(a) * ri)); ctx.lineTo(X(Math.sin(a) * (ri - 0.06)), Y(Math.cos(a) * (ri - 0.06))); ctx.stroke();
+    }
+
+    var subLabels = [[["24", 0], ["6", 0.25], ["12", 0.5], ["18", 0.75]],
+                     [["MO", 0], ["TU", 1 / 7], ["WE", 2 / 7], ["TH", 3 / 7], ["FR", 4 / 7], ["SA", 5 / 7], ["SU", 6 / 7]],
+                     [["1", 0], ["5", 4 / 31], ["10", 9 / 31], ["15", 14 / 31], ["20", 19 / 31], ["25", 24 / 31], ["31", 30 / 31]]];
+    TON.subs.forEach(function (c, si) {                               // малые циферблаты
+      ctx.fillStyle = "#121417"; ctx.beginPath(); ctx.arc(X(c[0]), Y(c[1]), TON.subR * K, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.75)"; ctx.lineWidth = 2.5; ctx.stroke();
+      ctx.fillStyle = "#cfd4da"; ctx.font = "500 " + Math.round(0.034 * K) + 'px "Jost", Arial, sans-serif';
+      subLabels[si].forEach(function (L) { var la = L[1] * Math.PI * 2; ctx.fillText(L[0], X(c[0] + Math.sin(la) * TON.subR * 0.66), Y(c[1] + Math.cos(la) * TON.subR * 0.66)); });
+    });
+
+    ctx.fillStyle = d.text;
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "5px";
+    ctx.font = '600 ' + Math.round(0.042 * K) + 'px "Cormorant Garamond", Georgia, serif';
+    ctx.fillText(BRAND.toUpperCase(), X(0), Y(0.28));
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.restore();
+  }
+  function dialDrawer(model) { return model === "tank" ? drawTankDial : model === "steel" ? drawSteelDial : model === "tonneau" ? drawTonneauDial : drawDial; }
+
+  var dialCanvases = [], dialTex = [];
+  DIALS.forEach(function (d, i) {
+    var cv = document.createElement("canvas");
+    var isTank = STAGES[i].model === "tank";
+    var isTon = STAGES[i].model === "tonneau";
+    cv.width = isTank ? 776 : isTon ? 914 : 1024; cv.height = isTank ? 1000 : isTon ? 1000 : 1024;
+    dialCanvases.push(cv);
+    dialTex.push(new THREE.CanvasTexture(cv));
+  });
+  function redrawDials() {
+    DIALS.forEach(function (d, i) {
+      dialDrawer(STAGES[i].model)(dialCanvases[i], d);
+      dialTex[i].needsUpdate = true;
+    });
+  }
+  redrawDials();
+  if (document.fonts && document.fonts.load) {         // когда шрифты догрузятся, перерисуем надписи
+    Promise.all([document.fonts.load('500 40px "Cormorant Garamond"'), document.fonts.load('400 20px "Jost"')])
+      .then(function () { redrawDials(); redrawBacks(); redrawSteelBack(); redrawTonneauBack(); }).catch(function () {});   // и гравировку на крышках тоже
+  }
+
+  /* ---------- 4.4 Сами часы ---------- */
+  var root = new THREE.Group();       // положение и размер (его двигают переходы)
+  var tilt = new THREE.Group();       // лёгкий наклон за курсором
+  var spinGroup = new THREE.Group();  // вращение мышью
+  root.add(tilt); tilt.add(spinGroup); scene.add(root);
+  var roundGroup = new THREE.Group();   // круглые часы (коллекции 1-4)
+  spinGroup.add(roundGroup);
+
+  /* Корпус: ОДНО цельное тело вместе с «рогами», рога вырастают из самого корпуса.
+     Сверху у него нет глухой крышки: циферблат виден сквозь стекло. */
+  function caseOutlinePoints() {
+    var pts = [], PI = Math.PI, Rc = 0.98, xo = 0.60, xi = 0.37;
+    var yo = Math.sqrt(Rc * Rc - xo * xo), yi = Math.sqrt(Rc * Rc - xi * xi);
+    var ao = Math.atan2(yo, xo), ai = Math.atan2(yi, xi);
+    function arc(a0, a1, skipLast) {                       // дуга корпуса, точка примерно на каждый градус
+      var n = Math.max(2, Math.ceil(Math.abs(a1 - a0) / (PI / 180)));
+      for (var i = 0; i <= n - (skipLast ? 1 : 0); i++) {
+        var a = a0 + (a1 - a0) * i / n; pts.push([Math.cos(a) * Rc, Math.sin(a) * Rc]);
+      }
+    }
+    var horn = [[0.59, 1.00], [0.58, 1.22]];               // профиль рога: от внешнего края к внутреннему
+    for (var q = 1; q <= 6; q++) {                         // закруглённый кончик рога
+      var t = q / 6, u = 1 - t;
+      horn.push([u * u * 0.58 + 2 * u * t * 0.56 + t * t * 0.44, u * u * 1.22 + 2 * u * t * 1.44 + t * t * 1.44]);
+    }
+    horn.push([xi, 1.42]);
+    function addHorn(sx, sy, reversed) {
+      var list = reversed ? horn.slice().reverse() : horn;
+      list.forEach(function (p) { pts.push([p[0] * sx, p[1] * sy]); });
+    }
+    arc(0, ao);                    addHorn(1, 1, false);    // справа, правый верхний рог
+    arc(ai, PI - ai);              addHorn(-1, 1, true);    // сверху, левый верхний рог
+    arc(PI - ao, PI + ao);         addHorn(-1, -1, false);  // слева, левый нижний рог
+    arc(PI + ai, 2 * PI - ai);     addHorn(1, -1, true);    // снизу, правый нижний рог
+    arc(2 * PI - ao, 2 * PI, true);                          // замыкаем контур
+    return pts;
+  }
+  var bodyShape = new THREE.Shape(caseOutlinePoints().map(function (p) { return new THREE.Vector2(p[0], p[1]); }));
+  var bodyGeo = new THREE.ExtrudeGeometry(bodyShape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.02, bevelSegments: 4 });
+  bodyGeo.translate(0, 0, -0.11);                          // тело занимает высоту от -0.14 до 0.04
+  roundGroup.add(new THREE.Mesh(bodyGeo, metal(0xcfd3da, 0.3)));
+
+  var wallGeo = new THREE.CylinderGeometry(1.0, 1.0, 0.10, 96, 1, true);   // стенка под ободком, без крышки
+  wallGeo.rotateX(Math.PI / 2);
+  var wallMat = metal(0xcfd3da, 0.3); wallMat.side = THREE.DoubleSide;
+  var wall = new THREE.Mesh(wallGeo, wallMat);
+  wall.position.z = 0.09; roundGroup.add(wall);
+
+  var bezel = new THREE.Mesh(new THREE.TorusGeometry(0.94, 0.06, 20, 120), metal(0xdfe2e8, 0.16));
+  bezel.position.z = 0.14; roundGroup.add(bezel);
+
+  var crown = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.14, 28), metal(0xcfd3da, 0.28));
+  crown.rotation.z = Math.PI / 2; crown.position.set(1.04, 0, 0); roundGroup.add(crown);
+
+
+  /* ======================================================================
+     ИЗГИБ РЕМЕШКА: у корпуса прямо, дальше плавно уходит назад —
+     по той же дуге, что и браслет «Фьорда» (straight — прямой участок, bend — радиус дуги)
+     ====================================================================== */
+  var STRAP_BEND = { straight: 0.6, bend: 3.0 };
+  function bendGeometry(g, len, o) {                         // o: { y0 — где начинается ремешок, z — его середина по глубине, lift — для накладок сверху }
+    var pos = g.attributes.position, straight = STRAP_BEND.straight, R = STRAP_BEND.bend, lift = o.lift || 0;
+    for (var i = 0; i < pos.count; i++) {
+      var sAlong = pos.getY(i) + len / 2, t = pos.getZ(i) + lift, y, z;
+      if (sAlong <= straight) { y = o.y0 + sAlong; z = o.z + t; }
+      else {
+        var phi = (sAlong - straight) / R;                       // насколько уже загнулись
+        y = o.y0 + straight + R * Math.sin(phi) + t * Math.sin(phi);
+        z = o.z - R * (1 - Math.cos(phi)) + t * Math.cos(phi);
+      }
+      pos.setY(i, y); pos.setZ(i, z);
+    }
+    pos.needsUpdate = true;
+    g.computeVertexNormals();
+    return g;
+  }
+  function bentStrap(w, len, th, o) { return bendGeometry(new THREE.BoxGeometry(w, len, th, 1, 48, 1), len, o); }   // 48 отрезков по длине — изгиб получается гладким
+  function addStrapPair(group, geo, mat) {                   // верхний ремешок и такой же нижний (повёрнутый на 180°)
+    return [0, Math.PI].map(function (rz) { var m = new THREE.Mesh(geo, mat); m.rotation.z = rz; group.add(m); return m; });
+  }
+
+  var strapMat = new THREE.MeshStandardMaterial({ color: DIALS[0].strap, roughness: 0.72, metalness: 0 });
+  var roundStrapGeo = bentStrap(0.72, 3.4, 0.09, { y0: 0.95, z: -0.02 });
+  var roundStraps = addStrapPair(roundGroup, roundStrapGeo, strapMat);
+
+  function dialMaterial(transparent) {
+    var m = new THREE.MeshStandardMaterial({ map: dialTex[0], metalness: 0.35, roughness: 0.6, transparent: transparent, opacity: transparent ? 0 : 1,
+      alphaTest: transparent ? 0 : 0.5, depthWrite: !transparent });   // alphaTest: там, где окошко, диск «исчезает»
+    if (env) { m.envMap = env; m.envMapIntensity = 0.45; }
+    return m;
+  }
+  var dialGeo = new THREE.CircleGeometry(DIAL_R, 96);
+  var dialA = new THREE.Mesh(dialGeo, dialMaterial(false));
+  dialA.position.z = 0.06; roundGroup.add(dialA);
+  var dialB = new THREE.Mesh(dialGeo, dialMaterial(true));     // второй диск плавно проявляется при смене коллекции
+  dialB.position.z = 0.0615; dialB.renderOrder = 1; roundGroup.add(dialB);
+
+  /* ---------- Механизм в окошке: латунные шестерёнки, которые крутятся ---------- */
+  var WIN_Y = -WIN.y * DIAL_R, WIN_R = WIN.r * DIAL_R;     // где окошко на часах (в единицах сцены)
+  var mech = new THREE.Group();
+  mech.position.set(0, WIN_Y, 0);
+  roundGroup.add(mech);
+
+  var plate = new THREE.Mesh(new THREE.CircleGeometry(WIN_R + 0.01, 64),
+    new THREE.MeshStandardMaterial({ color: 0x0c0d10, metalness: 0.6, roughness: 0.55 }));
+  plate.position.z = 0.044; mech.add(plate);
+
+  function makeGear(teeth, rOut, rIn, spokes) {            // шестерёнка: контур с зубьями + круглые отверстия-«спицы»
+    var pts = [], pitch = Math.PI * 2 / teeth;
+    for (var k = 0; k < teeth; k++) {
+      var a0 = k * pitch;
+      [[a0 - 0.24 * pitch, rIn], [a0 - 0.13 * pitch, rOut], [a0 + 0.13 * pitch, rOut], [a0 + 0.24 * pitch, rIn]].forEach(function (p) {
+        pts.push(new THREE.Vector2(Math.cos(p[0]) * p[1], Math.sin(p[0]) * p[1]));
+      });
+    }
+    var shape = new THREE.Shape(pts);
+    for (var j = 0; j < spokes; j++) {
+      var b = j / spokes * Math.PI * 2, hole = new THREE.Path();
+      hole.absarc(Math.cos(b) * rIn * 0.55, Math.sin(b) * rIn * 0.55, rIn * 0.2, 0, Math.PI * 2, true);
+      shape.holes.push(hole);
+    }
+    var axle = new THREE.Path(); axle.absarc(0, 0, rIn * 0.16, 0, Math.PI * 2, true); shape.holes.push(axle);
+    return new THREE.ExtrudeGeometry(shape, { depth: 0.01, bevelEnabled: false, curveSegments: 16 });
+  }
+  var goldMat = new THREE.MeshStandardMaterial({ color: 0xc9a24d, metalness: 1, roughness: 0.32 });
+  if (env) { goldMat.envMap = env; goldMat.envMapIntensity = 1.2; }
+  var bigGear = new THREE.Mesh(makeGear(20, 0.105, 0.088, 5), goldMat);
+  bigGear.position.set(-0.02, 0.012, 0.05); mech.add(bigGear);
+  var smallGear = new THREE.Mesh(makeGear(10, 0.056, 0.044, 0), goldMat);
+  smallGear.position.set(0.112, -0.05, 0.05); mech.add(smallGear);
+
+  var rubyMat = new THREE.MeshStandardMaterial({ color: 0xb3122f, metalness: 0.1, roughness: 0.25 });
+  [bigGear, smallGear].forEach(function (g) {              // рубиновые камни на осях
+    var ruby = new THREE.Mesh(new THREE.SphereGeometry(0.014, 16, 12), rubyMat);
+    ruby.position.set(g.position.x, g.position.y, 0.058); mech.add(ruby);
+  });
+
+  var winRing = new THREE.Mesh(new THREE.TorusGeometry(WIN_R + 0.004, 0.007, 14, 72), metal(0xe0c27a, 0.2));   // золотистый ободок окошка
+  winRing.position.z = 0.062; mech.add(winRing);
+  var winGlassMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.02, transparent: true, opacity: 0.12, depthWrite: false });
+  if (env) { winGlassMat.envMap = env; winGlassMat.envMapIntensity = 1.4; }
+  var winGlass = new THREE.Mesh(new THREE.CircleGeometry(WIN_R, 48), winGlassMat);   // маленькое стёклышко над механизмом
+  winGlass.position.z = 0.066; winGlass.renderOrder = 3; mech.add(winGlass);
+
+  function updateMech(ts, spin) {                          // шестерёнки крутятся в разные стороны; при переходе раскручиваются
+    var a = (reduceMotion ? 0 : ts * 0.0009) + spin * Math.PI * 6;
+    bigGear.rotation.z = a;
+    smallGear.rotation.z = 2.1364 - 2 * a;                 // малая вдвое быстрее и в обратную сторону (зубья попадают во впадины)
+    if (steelBalance) steelBalance.rotation.z = reduceMotion ? 0 : 2.2 * Math.sin(ts * 0.0157);   // баланс «Фьорда» качается ~2.5 раза в секунду
+    if (steelRotor) steelRotor.rotation.z = (reduceMotion ? 0 : ts * 0.0004) + spin * Math.PI * 4;   // ротор на задней крышке
+  }
+
+  function makeHand(len, tail, w, tip, color, z) {
+    var s = new THREE.Shape();
+    s.moveTo(-w, -tail); s.lineTo(w, -tail); s.lineTo(w * 0.55, len * 0.92); s.lineTo(0, len + tip); s.lineTo(-w * 0.55, len * 0.92);
+    var geo = new THREE.ExtrudeGeometry(s, { depth: 0.008, bevelEnabled: false });
+    var mat = new THREE.MeshStandardMaterial({ color: color, metalness: 0.7, roughness: 0.35 });
+    if (env) { mat.envMap = env; mat.envMapIntensity = 0.8; }
+    var m = new THREE.Mesh(geo, mat); m.position.z = z; roundGroup.add(m);
+    return m;
+  }
+  var hourHand = makeHand(0.5, 0.1, 0.05, 0.04, DIALS[0].hand, 0.076);
+  var minuteHand = makeHand(0.78, 0.12, 0.034, 0.04, DIALS[0].hand, 0.088);
+  var secondHand = makeHand(0.82, 0.22, 0.008, 0.02, 0xe0553a, 0.1);
+  var capGeo = new THREE.CylinderGeometry(0.045, 0.045, 0.05, 32); capGeo.rotateX(Math.PI / 2);
+  var cap = new THREE.Mesh(capGeo, metal(0xdfe2e8, 0.2)); cap.position.z = 0.1; roundGroup.add(cap);
+
+  var CR = 0.9, SR = 3, th = Math.asin(CR / SR);                 // выпуклое сапфировое стекло
+  var crystalGeo = new THREE.SphereGeometry(SR, 72, 18, 0, Math.PI * 2, 0, th);
+  crystalGeo.rotateX(Math.PI / 2); crystalGeo.translate(0, 0, -SR * Math.cos(th));
+  var crystalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.03, transparent: true, opacity: 0.16, depthWrite: false });
+  if (env) { crystalMat.envMap = env; crystalMat.envMapIntensity = 1.2; }
+  var crystal = new THREE.Mesh(crystalGeo, crystalMat);
+  crystal.position.z = 0.13; crystal.renderOrder = 2; roundGroup.add(crystal);
+
+  var handMats = [hourHand.material, minuteHand.material];
+
+  /* ======================================================================
+     МОДЕЛЬ HV-04: прямоугольные часы в духе классических «танков».
+     Не копия чьих-то часов: свои пропорции и надписи, бренд Halden Voss.
+     ====================================================================== */
+  var tankGroup = new THREE.Group();
+  tankGroup.visible = false;
+  spinGroup.add(tankGroup);
+  var MODEL_GROUPS = { round: roundGroup, tank: tankGroup };   // сюда добавляется каждая новая форма часов
+  function setModel(m) { Object.keys(MODEL_GROUPS).forEach(function (k) { MODEL_GROUPS[k].visible = (k === m); }); }
+
+  function roundedRectPts(x0, y0, x1, y1, r) {              // скруглённый прямоугольник: список точек
+    var pts = [], n = 6;
+    [[x1 - r, y1 - r, 0], [x0 + r, y1 - r, Math.PI / 2], [x0 + r, y0 + r, Math.PI], [x1 - r, y0 + r, Math.PI * 1.5]].forEach(function (c) {
+      for (var i = 0; i <= n; i++) {
+        var a = c[2] + (Math.PI / 2) * i / n;
+        pts.push(new THREE.Vector2(c[0] + Math.cos(a) * r, c[1] + Math.sin(a) * r));
+      }
+    });
+    return pts;
+  }
+  function tankOutlinePts() {   // два боковых «бруса» во всю высоту + две перемычки; между брусьями сверху и снизу проходит ремешок
+    var pts = [], PI = Math.PI, xo = 0.725, xi = 0.52, yt = 1.0, yc = 0.75, r = 0.06;
+    function P(x, y) { pts.push(new THREE.Vector2(x, y)); }
+    function A(cx, cy, a0, a1) { for (var i = 0; i <= 8; i++) { var a = a0 + (a1 - a0) * i / 8; P(cx + Math.cos(a) * r, cy + Math.sin(a) * r); } }
+    P(-xo + r, -yt);
+    A(-xi - r, -yt + r, -PI / 2, 0);      // нижний левый брус, угол у ремешка
+    P(-xi, -yc); P(xi, -yc);              // нижняя перемычка
+    A(xi + r, -yt + r, PI, PI * 1.5);     // нижний правый брус, угол у ремешка
+    A(xo - r, -yt + r, -PI / 2, 0);       // нижний правый, внешний угол
+    A(xo - r, yt - r, 0, PI / 2);         // верхний правый, внешний
+    A(xi + r, yt - r, PI / 2, PI);        // верхний правый, угол у ремешка
+    P(xi, yc); P(-xi, yc);                // верхняя перемычка
+    A(-xi - r, yt - r, 0, PI / 2);        // верхний левый, угол у ремешка
+    A(-xo + r, yt - r, PI / 2, PI);       // верхний левый, внешний
+    A(-xo + r, -yt + r, PI, PI * 1.5);    // нижний левый, внешний (замыкает контур)
+    pts.pop();                            // последняя точка совпадает с первой
+    return pts;
+  }
+  var tankShape = new THREE.Shape(tankOutlinePts());
+  tankShape.holes.push(new THREE.Path(roundedRectPts(-0.5, -0.66, 0.5, 0.66, 0.05)));   // окно под циферблат (сквозное, крышки нет)
+  var tankGeo = new THREE.ExtrudeGeometry(tankShape, { depth: 0.2, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: 5 });
+  tankGeo.translate(0, 0, -0.13);                           // по глубине от -0.17 до 0.11
+  var gold = metal(0xd9b256, 0.24);
+  tankGroup.add(new THREE.Mesh(tankGeo, gold));
+
+  var tankBack = new THREE.Mesh(new THREE.BoxGeometry(1.1, 1.4, 0.04), metal(0xd9b256, 0.3));   // задняя крышка
+  tankBack.position.z = -0.14; tankGroup.add(tankBack);
+
+  var TANK_IDX = 0;
+  STAGES.forEach(function (s, i) { if (s.model === "tank") TANK_IDX = i; });
+  var tankDialMat = new THREE.MeshStandardMaterial({ map: dialTex[TANK_IDX], metalness: 0.1, roughness: 0.7 });
+  if (env) { tankDialMat.envMap = env; tankDialMat.envMapIntensity = 0.25; }
+  var tankDial = new THREE.Mesh(new THREE.PlaneGeometry(1.06, 1.36), tankDialMat);
+  tankDial.position.z = 0.02; tankGroup.add(tankDial);
+
+  var tcGeo = new THREE.PlaneGeometry(1.04, 1.34, 24, 32);   // выпуклое стекло: середина приподнята, края лежат под ободком
+  var tcp = tcGeo.attributes.position;
+  for (var vi = 0; vi < tcp.count; vi++) {
+    var vx = tcp.getX(vi) / 0.52, vy = tcp.getY(vi) / 0.67;
+    tcp.setZ(vi, 0.09 + 0.035 * (1 - vy * vy) + 0.02 * (1 - vx * vx));
+  }
+  tcGeo.computeVertexNormals();
+  var tankCrystalMat = new THREE.MeshPhysicalMaterial({ color: 0xffffff, metalness: 0, roughness: 0.03, transparent: true, opacity: 0.14, depthWrite: false });
+  if (env) { tankCrystalMat.envMap = env; tankCrystalMat.envMapIntensity = 1.2; }
+  var tankCrystal = new THREE.Mesh(tcGeo, tankCrystalMat);
+  tankCrystal.renderOrder = 2; tankGroup.add(tankCrystal);
+
+  var tankStrapMat = new THREE.MeshStandardMaterial({ color: 0x16120f, roughness: 0.5, metalness: 0 });   // чёрная гладкая кожа
+  var tankStrapGeo = bentStrap(1.0, 3.4, 0.1, { y0: 0.70, z: -0.03 });
+  var tankStraps = addStrapPair(tankGroup, tankStrapGeo, tankStrapMat);
+
+  var tCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.12, 32), gold);   // корона с синим кабошоном
+  tCrown.rotation.z = Math.PI / 2; tCrown.position.set(0.78, 0.12, -0.03); tankGroup.add(tCrown);
+  var cabGeo = new THREE.SphereGeometry(0.058, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2);
+  cabGeo.rotateZ(-Math.PI / 2);                                // купол смотрит вправо
+  var sapphire = new THREE.MeshStandardMaterial({ color: 0x1d3d96, metalness: 0.15, roughness: 0.12 });
+  if (env) { sapphire.envMap = env; sapphire.envMapIntensity = 1.6; }
+  var cab = new THREE.Mesh(cabGeo, sapphire); cab.position.set(0.84, 0.12, -0.03); tankGroup.add(cab);
+
+  var tankHandMat = new THREE.MeshStandardMaterial({ color: 0x1c3f9e, metalness: 0.8, roughness: 0.3 });   // синие стальные стрелки
+  if (env) { tankHandMat.envMap = env; tankHandMat.envMapIntensity = 1.0; }
+  function tankHand(len, tail, w, z) {
+    var sh = new THREE.Shape();
+    sh.moveTo(-w, -tail); sh.lineTo(w, -tail); sh.lineTo(w * 0.7, len * 0.85); sh.lineTo(0, len); sh.lineTo(-w * 0.7, len * 0.85);
+    var m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.008, bevelEnabled: false }), tankHandMat);
+    m.position.z = z; tankGroup.add(m);
+    return m;
+  }
+  var tankHour = tankHand(0.28, 0.06, 0.028, 0.035);     // часовая доходит до дорожки минут
+  var tankMinute = tankHand(0.46, 0.07, 0.022, 0.046);    // минутная чуть длиннее, но не заходит на цифры
+  var tCapGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.03, 32); tCapGeo.rotateX(Math.PI / 2);
+  var tCap = new THREE.Mesh(tCapGeo, tankHandMat); tCap.position.z = 0.062; tankGroup.add(tCap);
+
+  /* ======================================================================
+     МОДЕЛЬ HV-02 «Фьорд»: сталь, ледяной циферблат, открытое «сердце»
+     на 9 часах, прозрачная задняя крышка и стальной браслет
+     ====================================================================== */
+  var steelGroup = new THREE.Group();
+  steelGroup.visible = false;
+  spinGroup.add(steelGroup);
+  MODEL_GROUPS.steel = steelGroup;
+  var STEEL_IDX = 0;
+  STAGES.forEach(function (st, i) { if (st.model === "steel") STEEL_IDX = i; });
+
+  steelGroup.add(new THREE.Mesh(bodyGeo, metal(0xd5d9df, 0.22)));          // корпус той же цельной формы, но полированнее
+  var sWall = new THREE.Mesh(wallGeo, wallMat); sWall.position.z = 0.09; steelGroup.add(sWall);
+  var sBezel = new THREE.Mesh(new THREE.TorusGeometry(0.94, 0.066, 20, 120), metal(0xe6e9ed, 0.1));   // широкий полированный ободок
+  sBezel.position.z = 0.145; steelGroup.add(sBezel);
+  var sCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.15, 36), metal(0xd5d9df, 0.25));
+  sCrown.rotation.z = Math.PI / 2; sCrown.position.set(1.05, 0, 0); steelGroup.add(sCrown);
+  var sCrystal = new THREE.Mesh(crystalGeo, crystalMat); sCrystal.position.z = 0.13; sCrystal.renderOrder = 2; steelGroup.add(sCrystal);
+
+  var steelDialMat = new THREE.MeshStandardMaterial({ map: dialTex[STEEL_IDX], metalness: 0.35, roughness: 0.5, alphaTest: 0.5 });
+  if (env) { steelDialMat.envMap = env; steelDialMat.envMapIntensity = 0.5; }
+  var steelDial = new THREE.Mesh(dialGeo, steelDialMat); steelDial.position.z = 0.06; steelGroup.add(steelDial);
+
+  var indexMat = metal(0xeef1f4, 0.12), indexGeo = new THREE.BoxGeometry(0.034, 0.12, 0.014);   // накладные метки
+  for (var ii = 0; ii < 12; ii++) {
+    var ia = ii / 12 * Math.PI * 2;
+    (ii === 0 ? [-0.03, 0.03] : [0]).forEach(function (off) {
+      var mk = new THREE.Mesh(indexGeo, indexMat);
+      mk.position.set(Math.sin(ia) * 0.7 + Math.cos(ia) * off, Math.cos(ia) * 0.7 - Math.sin(ia) * off, 0.067);
+      mk.rotation.z = -ia; steelGroup.add(mk);
+    });
+  }
+
+  /* «Открытое сердце»: баланс качается под окошком на 9 часах */
+  var HEART_X = HEART.x * DIAL_R, HEART_R = HEART.r * DIAL_R;
+  var heart = new THREE.Group(); heart.position.set(HEART_X, 0, 0); steelGroup.add(heart);
+  var hPlate = new THREE.Mesh(new THREE.CircleGeometry(HEART_R + 0.01, 64), new THREE.MeshStandardMaterial({ color: 0x23262b, metalness: 0.6, roughness: 0.5 }));
+  hPlate.position.z = 0.044; heart.add(hPlate);
+  var spiral = [];                                           // волосок баланса (спираль)
+  for (var sp = 0; sp <= 160; sp++) { var st2 = sp / 160, sa = st2 * Math.PI * 2 * 4.5, sr = 0.015 + st2 * 0.06; spiral.push(new THREE.Vector3(Math.cos(sa) * sr, Math.sin(sa) * sr, 0.049)); }
+  heart.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(spiral), new THREE.LineBasicMaterial({ color: 0xa8b4c2 })));
+  var steelBalance = new THREE.Group(); steelBalance.position.z = 0.052; heart.add(steelBalance);
+  steelBalance.add(new THREE.Mesh(new THREE.TorusGeometry(0.115, 0.01, 10, 56), goldMat));
+  for (var sk = 0; sk < 3; sk++) {
+    var ska = sk / 3 * Math.PI * 2, spoke = new THREE.Mesh(new THREE.BoxGeometry(0.115, 0.012, 0.006), goldMat);
+    spoke.position.set(Math.cos(ska) * 0.0575, Math.sin(ska) * 0.0575, 0); spoke.rotation.z = ska; steelBalance.add(spoke);
+  }
+  var cock = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.04, 0.008), metal(0xc9ced4, 0.25));   // мостик баланса
+  cock.rotation.z = 0.5; cock.position.z = 0.058; heart.add(cock);
+  var hRuby = new THREE.Mesh(new THREE.SphereGeometry(0.012, 14, 10), rubyMat); hRuby.position.z = 0.063; heart.add(hRuby);
+  var hRing = new THREE.Mesh(new THREE.TorusGeometry(HEART_R + 0.004, 0.007, 12, 64), metal(0xe6e9ed, 0.12)); hRing.position.z = 0.062; heart.add(hRing);
+  var hGlass = new THREE.Mesh(new THREE.CircleGeometry(HEART_R, 48), winGlassMat); hGlass.position.z = 0.066; hGlass.renderOrder = 3; heart.add(hGlass);
+
+  /* Стрелки «дофин» */
+  function steelHand(len, tail, w, tip, mat, z) {
+    var sh = new THREE.Shape();
+    sh.moveTo(-w * 0.35, -tail); sh.lineTo(w * 0.35, -tail); sh.lineTo(w, len * 0.25); sh.lineTo(0, len + tip); sh.lineTo(-w, len * 0.25);
+    var m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.01, bevelEnabled: false }), mat);
+    m.position.z = z; steelGroup.add(m);
+    return m;
+  }
+  var steelHandMat = metal(0xe2e6eb, 0.16);
+  var steelHour = steelHand(0.46, 0.08, 0.05, 0.02, steelHandMat, 0.076);
+  var steelMinute = steelHand(0.74, 0.1, 0.038, 0.02, steelHandMat, 0.089);
+  var steelSecond = steelHand(0.8, 0.2, 0.008, 0.01, metal(0xc5cad0, 0.2), 0.102);
+  var sCap = new THREE.Mesh(capGeo, metal(0xe6e9ed, 0.15)); sCap.position.z = 0.1; steelGroup.add(sCap);
+
+  /* Стальной браслет: ряды по три звена, у корпуса прямо, дальше плавно уходит назад, как вокруг запястья */
+  function linkGeo(w, h, r) {
+    var g = new THREE.ExtrudeGeometry(new THREE.Shape(roundedRectPts(-w / 2, -h / 2, w / 2, h / 2, r)),
+      { depth: 0.05, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.01, bevelSegments: 2 });
+    g.translate(0, 0, -0.025);
+    return g;
+  }
+  var outerLinkGeo = linkGeo(0.2, 0.15, 0.025), centerLinkGeo = linkGeo(0.28, 0.15, 0.025);
+  var brushedSteel = metal(0xcfd4da, 0.38), polishedSteel = metal(0xe6e9ed, 0.14);
+  var BR = { pitch: 0.17, rows: 20, straight: 0.6, bend: 3.0, y0: 1.0, z: -0.03 };
+  var braceletRows = [];
+  [1, -1].forEach(function (sgn) {
+    for (var r = 0; r < BR.rows; r++) {
+      var sArc = r * BR.pitch + BR.pitch / 2, y, z, phi = 0;
+      if (sArc <= BR.straight) { y = BR.y0 + sArc; z = BR.z; }
+      else { phi = (sArc - BR.straight) / BR.bend; y = BR.y0 + BR.straight + BR.bend * Math.sin(phi); z = BR.z - BR.bend * (1 - Math.cos(phi)); }
+      var row = new THREE.Group();
+      row.position.set(0, sgn * y, z);
+      row.rotation.x = -sgn * phi;
+      [[-0.248, outerLinkGeo, brushedSteel], [0, centerLinkGeo, polishedSteel], [0.248, outerLinkGeo, brushedSteel]].forEach(function (L) {
+        var link = new THREE.Mesh(L[1], L[2]); link.position.x = L[0]; row.add(link);
+      });
+      steelGroup.add(row); braceletRows.push(row);
+    }
+  });
+
+  /* Прозрачная задняя крышка: гравированное кольцо, механизм с «женевскими полосами», ротор и стекло */
+  function drawSteelRing(canvas) {
+    var S = canvas.width, C = S / 2, R = S / 2, ctx = canvas.getContext("2d");
+    var dark = "rgba(38,40,44,0.78)", light = "rgba(255,255,255,0.35)";
+    ctx.clearRect(0, 0, S, S);
+    ctx.lineWidth = 3;
+    [0.97, 0.76].forEach(function (k) {
+      ctx.strokeStyle = light; ctx.beginPath(); ctx.arc(C + 1.5, C + 1.5, R * k, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = dark; ctx.beginPath(); ctx.arc(C, C, R * k, 0, Math.PI * 2); ctx.stroke();
+    });
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.font = '500 30px "Jost", Arial, sans-serif';
+    textOnRing(ctx, BRAND.toUpperCase() + " · " + MADE_IN.toUpperCase() + " · STAINLESS STEEL · SAPPHIRE CRYSTAL BACK · WATER RESISTANT 100 M · ", C, R * 0.865, dark, light);
+  }
+  function drawMovement(canvas) {
+    var S = canvas.width, C = S / 2, R = S / 2, ctx = canvas.getContext("2d"), i;
+    ctx.clearRect(0, 0, S, S);
+    ctx.save(); ctx.beginPath(); ctx.arc(C, C, R, 0, Math.PI * 2); ctx.clip();
+    ctx.fillStyle = "#aeb4bc"; ctx.fillRect(0, 0, S, S);
+    ctx.save(); ctx.translate(C, C); ctx.rotate(-0.5);       // «женевские полосы»
+    for (i = -12; i < 12; i++) { ctx.fillStyle = i % 2 ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.07)"; ctx.fillRect(i * 46, -R * 1.5, 46, R * 3); }
+    ctx.restore();
+    [[0.35, -0.45], [-0.5, 0.2], [0.55, 0.35], [-0.15, 0.6]].forEach(function (p) {   // рубины и винты
+      ctx.fillStyle = "#b3122f"; ctx.beginPath(); ctx.arc(C + p[0] * R, C + p[1] * R, 13, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#e8ebee"; ctx.beginPath(); ctx.arc(C + p[0] * R + 52, C + p[1] * R + 10, 16, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#6c737b"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(C + p[0] * R + 40, C + p[1] * R + 10); ctx.lineTo(C + p[0] * R + 64, C + p[1] * R + 10); ctx.stroke();
+    });
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "6px";
+    ctx.font = '500 26px "Jost", Arial, sans-serif';
+    engrave(ctx, "CALIBRE HV-2 · 24 JEWELS", C, C + R * 0.78, "rgba(40,44,50,0.8)", "rgba(255,255,255,0.4)");
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.restore();
+  }
+  var steelRingCanvas = document.createElement("canvas"); steelRingCanvas.width = 1024; steelRingCanvas.height = 1024;
+  var movementCanvas = document.createElement("canvas"); movementCanvas.width = 1024; movementCanvas.height = 1024;
+  var steelRingTex = new THREE.CanvasTexture(steelRingCanvas), movementTex = new THREE.CanvasTexture(movementCanvas);
+  function redrawSteelBack() {
+    drawSteelRing(steelRingCanvas); steelRingTex.needsUpdate = true;
+    drawMovement(movementCanvas); movementTex.needsUpdate = true;
+  }
+  redrawSteelBack();
+  var sRing = new THREE.Mesh(new THREE.CircleGeometry(0.95, 96), new THREE.MeshStandardMaterial({ map: steelRingTex, transparent: true, depthWrite: false,
+    metalness: 0.4, roughness: 0.55, polygonOffset: true, polygonOffsetFactor: -2 }));
+  sRing.position.z = -0.1415; sRing.rotation.y = Math.PI; steelGroup.add(sRing);
+  var movementMat = new THREE.MeshStandardMaterial({ map: movementTex, metalness: 0.5, roughness: 0.45 });
+  if (env) { movementMat.envMap = env; movementMat.envMapIntensity = 0.6; }
+  var movement = new THREE.Mesh(new THREE.CircleGeometry(0.64, 96), movementMat);
+  movement.position.z = -0.147; movement.rotation.y = Math.PI; steelGroup.add(movement);
+  var rotorPts = [], ri;                                     // ротор: полумесяц, который вращается вокруг центра
+  for (ri = 0; ri <= 32; ri++) { var ra = ri / 32 * Math.PI; rotorPts.push(new THREE.Vector2(Math.cos(ra) * 0.6, Math.sin(ra) * 0.6)); }
+  for (ri = 16; ri >= 0; ri--) { var rb = ri / 16 * Math.PI; rotorPts.push(new THREE.Vector2(Math.cos(rb) * 0.1, Math.sin(rb) * 0.1)); }
+  var steelRotor = new THREE.Mesh(new THREE.ExtrudeGeometry(new THREE.Shape(rotorPts), { depth: 0.008, bevelEnabled: false }), metal(0xd6dade, 0.22));
+  steelRotor.position.z = -0.158; steelGroup.add(steelRotor);
+  var rotorHubGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.012, 28); rotorHubGeo.rotateX(Math.PI / 2);
+  var rotorHub = new THREE.Mesh(rotorHubGeo, metal(0xe6e9ed, 0.15)); rotorHub.position.z = -0.161; steelGroup.add(rotorHub);
+  var backBezel = new THREE.Mesh(new THREE.TorusGeometry(0.655, 0.03, 14, 96), metal(0xe6e9ed, 0.12)); backBezel.position.z = -0.152; steelGroup.add(backBezel);
+  var backGlass = new THREE.Mesh(new THREE.CircleGeometry(0.64, 96), winGlassMat);
+  backGlass.position.z = -0.168; backGlass.rotation.y = Math.PI; backGlass.renderOrder = 3; steelGroup.add(backGlass);
+
+  /* ======================================================================
+     МОДЕЛЬ HV-01 «Сияние»: прозрачный дымчатый корпус «бочкой», винты,
+     скелетон с тремя малыми циферблатами и силиконовый ремешок
+     ====================================================================== */
+  var tonGroup = new THREE.Group();
+  tonGroup.visible = false;
+  spinGroup.add(tonGroup);
+  MODEL_GROUPS.tonneau = tonGroup;
+  var TON_IDX = 0;
+  STAGES.forEach(function (st, i) { if (st.model === "tonneau") TON_IDX = i; });
+  function v2(pts) { return pts.map(function (p) { return new THREE.Vector2(p[0], p[1]); }); }
+  function tonShape(o, hole) {                                         // фигура «бочка», при желании с отверстием
+    var sh = new THREE.Shape(v2(tonneauOutline(o[0], o[1], o[2], o[3])));
+    if (hole) sh.holes.push(new THREE.Path(v2(tonneauOutline(hole[0], hole[1], hole[2], hole[3]))));
+    return sh;
+  }
+  var TON_CASE = [0.66, 0.80, 1.0, 0.12], TON_HOLE = [0.48, 0.60, 0.66, 0.08];
+  var TON_FRAME = [0.58, 0.72, 0.86, 0.1], TON_FRAME_HOLE = [0.50, 0.62, 0.68, 0.06];
+
+  var tonCaseGeo = new THREE.ExtrudeGeometry(tonShape(TON_CASE, TON_HOLE), { depth: 0.24, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.03, bevelSegments: 4 });
+  tonCaseGeo.translate(0, 0, -0.17);                                   // по глубине от -0.22 до 0.12
+  var smoke = new THREE.MeshPhysicalMaterial({ color: 0x2e3238, metalness: 0, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.1,
+    transparent: true, opacity: 0.9, depthWrite: false, side: THREE.DoubleSide });   // дымчатый прозрачный полимер
+  if (env) { smoke.envMap = env; smoke.envMapIntensity = 1.3; }
+  var tonCase = new THREE.Mesh(tonCaseGeo, smoke); tonCase.renderOrder = 1; tonGroup.add(tonCase);
+
+  var tonFrameGeo = new THREE.ExtrudeGeometry(tonShape(TON_FRAME, TON_FRAME_HOLE), { depth: 0.06, bevelEnabled: false });
+  tonFrameGeo.translate(0, 0, -0.09);                                  // внутренняя стальная рамка, видна сквозь корпус
+  tonGroup.add(new THREE.Mesh(tonFrameGeo, metal(0x5d636b, 0.3)));
+  var brightSteel = metal(0xdfe3e8, 0.15);
+  function slot(w, h, x, y, z) {                                       // светлые вставки внутри корпуса
+    var g = new THREE.ExtrudeGeometry(new THREE.Shape(roundedRectPts(-w / 2, -h / 2, w / 2, h / 2, Math.min(w, h) * 0.45)), { depth: 0.02, bevelEnabled: false });
+    var m = new THREE.Mesh(g, brightSteel); m.position.set(x, y, z); tonGroup.add(m); return m;
+  }
+  var tonSlots = [slot(0.07, 0.4, 0.72, 0.33, -0.02), slot(0.07, 0.4, 0.72, -0.33, -0.02), slot(0.07, 0.4, -0.72, 0.33, -0.02), slot(0.07, 0.4, -0.72, -0.33, -0.02),
+                  slot(0.5, 0.08, 0, 0.86, 0.03), slot(0.5, 0.08, 0, -0.86, 0.03)];
+
+  var screwGeo = new THREE.CylinderGeometry(0.042, 0.042, 0.022, 20); screwGeo.rotateX(Math.PI / 2);
+  var screwSlotGeo = new THREE.BoxGeometry(0.06, 0.012, 0.006), screwSlotMat = new THREE.MeshStandardMaterial({ color: 0x222428, roughness: 0.6 });
+  var TON_SCREWS = [[0.64, 0.62], [-0.64, 0.62], [0.64, -0.62], [-0.64, -0.62], [0.71, 0.1], [-0.71, 0.1], [0.71, -0.1], [-0.71, -0.1]];
+  TON_SCREWS.forEach(function (p, k) {                                 // восемь открытых винтов
+    var head = new THREE.Mesh(screwGeo, brightSteel); head.position.set(p[0], p[1], 0.128); tonGroup.add(head);
+    var sl = new THREE.Mesh(screwSlotGeo, screwSlotMat); sl.position.set(p[0], p[1], 0.141); sl.rotation.z = 0.6 + k * 0.7; tonGroup.add(sl);
+  });
+
+  var tonDialMat = new THREE.MeshStandardMaterial({ map: dialTex[TON_IDX], metalness: 0.3, roughness: 0.55, alphaTest: 0.5 });
+  if (env) { tonDialMat.envMap = env; tonDialMat.envMapIntensity = 0.35; }
+  var tonDial = new THREE.Mesh(new THREE.PlaneGeometry(TON.w, TON.h), tonDialMat);
+  tonDial.position.z = 0.02; tonGroup.add(tonDial);
+  var tonCrystal = new THREE.Mesh(new THREE.ShapeGeometry(tonShape([0.5, 0.62, 0.68, 0.07])), winGlassMat);
+  tonCrystal.position.z = 0.105; tonCrystal.renderOrder = 3; tonGroup.add(tonCrystal);
+
+  var tonCrown = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.14, 8), brightSteel);   // гранёная головка
+  tonCrown.rotation.z = Math.PI / 2; tonCrown.position.set(0.86, 0, -0.05); tonGroup.add(tonCrown);
+
+  function tonHand(len, tail, w, z, tipColor) {                        // ажурная стрелка с цветным кончиком
+    var sh = new THREE.Shape(v2([[-w, -tail], [w, -tail], [w * 0.8, len * 0.8], [0, len], [-w * 0.8, len * 0.8]]));
+    sh.holes.push(new THREE.Path(v2([[-w * 0.45, len * 0.12], [w * 0.45, len * 0.12], [w * 0.4, len * 0.7], [0, len * 0.76], [-w * 0.4, len * 0.7]])));
+    var m = new THREE.Mesh(new THREE.ExtrudeGeometry(sh, { depth: 0.01, bevelEnabled: false }), brightSteel);
+    m.position.z = z; tonGroup.add(m);
+    if (tipColor) {
+      var tip = new THREE.Mesh(new THREE.ExtrudeGeometry(new THREE.Shape(v2([[w * 0.72, len * 0.8], [0, len], [-w * 0.72, len * 0.8]])), { depth: 0.004, bevelEnabled: false }),
+        new THREE.MeshStandardMaterial({ color: tipColor, roughness: 0.4, emissive: tipColor, emissiveIntensity: 0.25 }));
+      tip.position.z = 0.009; m.add(tip);                              // кончик крутится вместе со стрелкой
+    }
+    return m;
+  }
+  var tonHour = tonHand(0.34, 0.06, 0.05, 0.05, 0xff7a2f);
+  var tonMinute = tonHand(0.5, 0.08, 0.04, 0.064, 0x3fd0e0);
+  var tonSecond = tonHand(0.52, 0.14, 0.01, 0.078, 0);
+  function subHand(c) { var m = tonHand(0.1, 0.02, 0.012, 0.036, 0); m.position.x = c[0]; m.position.y = c[1]; return m; }
+  var tonSub24 = subHand(TON.subs[0]), tonSubDay = subHand(TON.subs[1]), tonSubDate = subHand(TON.subs[2]);
+  var tCap2Geo = new THREE.CylinderGeometry(0.035, 0.035, 0.03, 24); tCap2Geo.rotateX(Math.PI / 2);
+  var tonCap = new THREE.Mesh(tCap2Geo, brightSteel); tonCap.position.z = 0.085; tonGroup.add(tonCap);
+
+  /* Силиконовый ремешок с перфорацией и строчкой двух цветов */
+  var strapCanvas = document.createElement("canvas"); strapCanvas.width = 256; strapCanvas.height = 1024;
+  var strapTex = new THREE.CanvasTexture(strapCanvas);
+  strapTex.wrapS = THREE.RepeatWrapping; strapTex.wrapT = THREE.RepeatWrapping; strapTex.repeat.set(1, 3);
+  function drawRubberStrap() {
+    var c = strapCanvas.getContext("2d"), W = strapCanvas.width, H = strapCanvas.height, k;
+    c.fillStyle = "#17181c"; c.fillRect(0, 0, W, H);
+    c.fillStyle = "#070708";
+    for (k = 0; k < 8; k++) { [0.32, 0.68].forEach(function (xx) { c.beginPath(); c.ellipse(xx * W, (k + 0.5) * H / 8, 20, 46, 0, 0, Math.PI * 2); c.fill(); }); }
+    c.lineWidth = 5;
+    [[0.1, "#4fb6c2"], [0.9, "#8b5cf6"]].forEach(function (st) {
+      c.strokeStyle = st[1];
+      for (k = 0; k < H; k += 28) { c.beginPath(); c.moveTo(st[0] * W, k); c.lineTo(st[0] * W, k + 18); c.stroke(); }
+    });
+    strapTex.needsUpdate = true;
+  }
+  drawRubberStrap();
+  var rubber = new THREE.MeshStandardMaterial({ color: 0x17181c, roughness: 0.85, metalness: 0 });
+  var rubberTop = new THREE.MeshStandardMaterial({ map: strapTex, roughness: 0.85, metalness: 0 });
+  var tonStrapGeo = bentStrap(1.0, 3.4, 0.1, { y0: 0.9, z: -0.06 });
+  var tonStrapFaceGeo = bendGeometry(new THREE.PlaneGeometry(1.0, 3.4, 1, 48), 3.4, { y0: 0.9, z: -0.06, lift: 0.051 });   // узор лежит на 0.001 выше ремешка и гнётся вместе с ним
+  var tonStraps = addStrapPair(tonGroup, tonStrapGeo, rubber).concat(addStrapPair(tonGroup, tonStrapFaceGeo, rubberTop));
+
+  /* Стальная задняя крышка «бочкой» на четырёх винтах: логотип, бренд, водозащита, страна */
+  var tonBackGeo = new THREE.ExtrudeGeometry(tonShape([0.56, 0.68, 0.84, 0.1]), { depth: 0.02, bevelEnabled: true, bevelThickness: 0.01, bevelSize: 0.01, bevelSegments: 2 });
+  tonBackGeo.translate(0, 0, -0.25);                                   // от -0.26 до -0.22, вплотную к корпусу
+  tonGroup.add(new THREE.Mesh(tonBackGeo, metal(0xd5d9df, 0.3)));
+  [[0.5, 0.7], [-0.5, 0.7], [0.5, -0.7], [-0.5, -0.7]].forEach(function (p) {
+    var h2 = new THREE.Mesh(screwGeo, brightSteel); h2.position.set(p[0], p[1], -0.268); tonGroup.add(h2);
+  });
+  function drawEmblem(ctx, x, y, r, dark, light) {                    // логотип Halden Voss: кольцо, монограмма HV и волна фьорда
+    ctx.save();
+    ctx.lineWidth = Math.max(2, r * 0.08);
+    [[light, 1.5], [dark, 0]].forEach(function (pp) {
+      var o = pp[1]; ctx.strokeStyle = pp[0];
+      ctx.beginPath(); ctx.arc(x + o, y + o, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x - r * 0.55 + o, y + r * 0.55 + o);
+      ctx.quadraticCurveTo(x - r * 0.27 + o, y + r * 0.35 + o, x + o, y + r * 0.55 + o);
+      ctx.quadraticCurveTo(x + r * 0.27 + o, y + r * 0.75 + o, x + r * 0.55 + o, y + r * 0.55 + o); ctx.stroke();
+    });
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.font = "600 " + Math.round(r * 0.9) + 'px "Cormorant Garamond", Georgia, serif';
+    engrave(ctx, "HV", x, y - r * 0.1, dark, light);
+    ctx.restore();
+  }
+  var tonBackCanvas = document.createElement("canvas"); tonBackCanvas.width = 736; tonBackCanvas.height = 1000;
+  var tonBackTex = new THREE.CanvasTexture(tonBackCanvas);
+  function redrawTonneauBack() {
+    var ctx = tonBackCanvas.getContext("2d"), W = tonBackCanvas.width, K = W / 1.0;
+    var dark = "rgba(38,40,44,0.78)", light = "rgba(255,255,255,0.35)";
+    function X(x) { return (x + 0.5) * K; }
+    function Y(y) { return (0.68 - y) * K; }
+    ctx.clearRect(0, 0, W, tonBackCanvas.height);
+    var border = tonneauOutline(0.4, 0.47, 0.62, 0.06);
+    [[light, 1.5], [dark, 0]].forEach(function (pp) {                  // гравированная рамка «бочкой»
+      ctx.strokeStyle = pp[0]; ctx.lineWidth = 3; ctx.beginPath();
+      border.forEach(function (pt, k) { (k ? ctx.lineTo : ctx.moveTo).call(ctx, X(pt[0]) + pp[1], Y(pt[1]) + pp[1]); });
+      ctx.closePath(); ctx.stroke();
+    });
+    drawEmblem(ctx, X(0), Y(0.38), 0.075 * K, dark, light);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "8px";
+    ctx.font = '600 50px "Cormorant Garamond", Georgia, serif';
+    engrave(ctx, BRAND.toUpperCase(), X(0), Y(0.24), dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "3px";
+    ctx.font = '400 26px "Jost", Arial, sans-serif';
+    engrave(ctx, "100 METERS / 330 FEET", X(0), Y(0.04), dark, light);
+    engrave(ctx, "WATER RESISTANT", X(0), Y(-0.04), dark, light);
+    engrave(ctx, "STAINLESS STEEL BACK", X(0), Y(-0.12), dark, light);
+    ctx.font = '400 22px "Jost", Arial, sans-serif';
+    engrave(ctx, "HV-01", X(0), Y(-0.22), dark, light);
+    ctx.font = '500 24px "Jost", Arial, sans-serif';
+    engrave(ctx, MADE_IN.toUpperCase(), X(0), Y(-0.48), dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    tonBackTex.needsUpdate = true;
+    drawRubberStrap();
+  }
+  redrawTonneauBack();
+  var tonBackDecal = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.36), new THREE.MeshStandardMaterial({ map: tonBackTex, transparent: true, depthWrite: false,
+    metalness: 0.4, roughness: 0.55, polygonOffset: true, polygonOffsetFactor: -2 }));
+  tonBackDecal.position.z = -0.2615; tonBackDecal.rotation.y = Math.PI; tonGroup.add(tonBackDecal);
+
+  /* ======================================================================
+     ГРАВИРОВКА НА ЗАДНИХ КРЫШКАХ: бренд и страна изготовителя
+     (тонкая «наклейка» с текстом прямо поверх крышки, смотрит назад)
+     ====================================================================== */
+  function engrave(ctx, text, x, y, dark, light) {          // эффект гравировки: светлая кромка + тёмный текст поверх
+    ctx.fillStyle = light; ctx.fillText(text, x + 1.5, y + 1.5);
+    ctx.fillStyle = dark; ctx.fillText(text, x, y);
+  }
+  function textOnRing(ctx, text, C, r, dark, light) {       // текст по кругу, буквами наружу, ровно на весь круг
+    var chars = text.split("");
+    var widths = chars.map(function (ch) { return ctx.measureText(ch).width; });
+    var total = widths.reduce(function (a, b) { return a + b; }, 0);
+    var extra = (Math.PI * 2 * r - total) / chars.length;
+    var a = -Math.PI / 2;
+    chars.forEach(function (ch, i) {
+      var adv = (widths[i] + extra) / r;
+      ctx.save(); ctx.translate(C, C); ctx.rotate(a + adv / 2 + Math.PI / 2);
+      engrave(ctx, ch, 0, -r, dark, light);
+      ctx.restore();
+      a += adv;
+    });
+  }
+  function drawRoundBack(canvas) {
+    var S = canvas.width, C = S / 2, R = S / 2, ctx = canvas.getContext("2d");
+    var dark = "rgba(38,40,44,0.78)", light = "rgba(255,255,255,0.35)";
+    ctx.clearRect(0, 0, S, S);
+    ctx.lineWidth = 3;
+    [0.95, 0.68].forEach(function (k) {                      // два гравированных кольца
+      ctx.strokeStyle = light; ctx.beginPath(); ctx.arc(C + 1.5, C + 1.5, R * k, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = dark; ctx.beginPath(); ctx.arc(C, C, R * k, 0, Math.PI * 2); ctx.stroke();
+    });
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+    ctx.font = '500 30px "Jost", Arial, sans-serif';
+    textOnRing(ctx, "AUTOMATIC · STAINLESS STEEL · SAPPHIRE CRYSTAL · WATER RESISTANT 100 M · ", C, R * 0.815, dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "12px";
+    ctx.font = '600 64px "Cormorant Garamond", Georgia, serif';
+    engrave(ctx, BRAND.toUpperCase(), C, C - R * 0.1, dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "8px";
+    ctx.font = '500 32px "Jost", Arial, sans-serif';
+    engrave(ctx, MADE_IN.toUpperCase(), C, C + R * 0.12, dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  }
+  function drawTankBack(canvas) {
+    var W = canvas.width, H = canvas.height, ctx = canvas.getContext("2d"), m = W * 0.06;
+    var dark = "rgba(70,48,14,0.75)", light = "rgba(255,240,200,0.4)";
+    ctx.clearRect(0, 0, W, H);
+    ctx.lineWidth = 3;                                        // гравированная рамка
+    ctx.strokeStyle = light; ctx.strokeRect(m + 1.5, m + 1.5, W - 2 * m, H - 2 * m);
+    ctx.strokeStyle = dark; ctx.strokeRect(m, m, W - 2 * m, H - 2 * m);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "10px";
+    ctx.font = '600 58px "Cormorant Garamond", Georgia, serif';
+    engrave(ctx, BRAND.toUpperCase(), W / 2, H * 0.42, dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "7px";
+    ctx.font = '500 28px "Jost", Arial, sans-serif';
+    engrave(ctx, MADE_IN.toUpperCase(), W / 2, H * 0.52, dark, light);
+    ctx.font = '400 22px "Jost", Arial, sans-serif';
+    engrave(ctx, "18K GOLD · 750", W / 2, H * 0.62, dark, light);
+    engrave(ctx, "HAND-WOUND", W / 2, H * 0.67, dark, light);
+    if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  }
+
+  var roundBackCanvas = document.createElement("canvas"); roundBackCanvas.width = 1024; roundBackCanvas.height = 1024;
+  var tankBackCanvas = document.createElement("canvas"); tankBackCanvas.width = 744; tankBackCanvas.height = 1000;
+  var roundBackTex = new THREE.CanvasTexture(roundBackCanvas), tankBackTex = new THREE.CanvasTexture(tankBackCanvas);
+  function redrawBacks() {
+    drawRoundBack(roundBackCanvas); roundBackTex.needsUpdate = true;
+    drawTankBack(tankBackCanvas); tankBackTex.needsUpdate = true;
+  }
+  redrawBacks();
+  function backMaterial(tex) {
+    return new THREE.MeshStandardMaterial({ map: tex, transparent: true, depthWrite: false, metalness: 0.4, roughness: 0.55,
+      polygonOffset: true, polygonOffsetFactor: -2 });
+  }
+  var roundBackDecal = new THREE.Mesh(new THREE.CircleGeometry(0.8, 96), backMaterial(roundBackTex));
+  roundBackDecal.position.z = -0.1415;                      // чуть позади крышки круглого корпуса (она на -0.14)
+  roundBackDecal.rotation.y = Math.PI;                      // разворачиваем «лицом» назад, текст не будет зеркальным
+  roundGroup.add(roundBackDecal);
+  var tankBackDecal = new THREE.Mesh(new THREE.PlaneGeometry(0.93, 1.25), backMaterial(tankBackTex));
+  tankBackDecal.position.z = -0.1615;                       // чуть позади золотой крышки (она на -0.16)
+  tankBackDecal.rotation.y = Math.PI;
+  tankGroup.add(tankBackDecal);
+
+  /* ======================================================================
+     ИНТЕРАКТИВНЫЕ ТОЧКИ: якорь на детали часов → положение на экране
+     ====================================================================== */
+  var elHotspots = document.getElementById("hotspots"), elTip = document.getElementById("hsTip");
+  var elTipNum = document.getElementById("hsTipNum"), elTipTitle = document.getElementById("hsTipTitle"), elTipText = document.getElementById("hsTipText");
+  var HS_GROUPS = MODEL_GROUPS;
+  var hotspots = [], openSpot = null;
+  Object.keys(HOTSPOTS).forEach(function (model) {
+    HOTSPOTS[model].forEach(function (h, i) {
+      var anchor = new THREE.Object3D();                   // невидимая метка, прикреплённая к часам: крутится вместе с ними
+      anchor.position.set(h.pos[0], h.pos[1], h.pos[2]);
+      HS_GROUPS[model].add(anchor);
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "hs";
+      btn.setAttribute("aria-label", h.title);
+      elHotspots.appendChild(btn);
+      var spot = { model: model, data: h, anchor: anchor, el: btn, index: i, total: HOTSPOTS[model].length, x: 0, y: 0, visible: false,
+        normal: new THREE.Vector3(h.normal[0], h.normal[1], h.normal[2]).normalize() };
+      btn.addEventListener("click", function (e) { if (e && e.stopPropagation) e.stopPropagation(); toggleTip(spot); });
+      hotspots.push(spot);
+    });
+  });
+
+  function two(n) { return (n < 10 ? "0" : "") + n; }
+  function openTip(sp) {
+    if (openSpot) openSpot.el.classList.remove("active");
+    openSpot = sp; sp.el.classList.add("active");
+    elTipNum.textContent = two(sp.index + 1) + " / " + two(sp.total);
+    elTipTitle.textContent = sp.data.title;
+    elTipText.textContent = sp.data.text;
+    elTip.classList.add("show");
+    placeTip(sp);
+  }
+  function closeTip() {
+    if (!openSpot) return;
+    openSpot.el.classList.remove("active"); openSpot = null;
+    elTip.classList.remove("show");
+  }
+  function toggleTip(sp) { if (openSpot === sp) closeTip(); else openTip(sp); }
+  hotspotsClose = closeTip;
+
+  function placeTip(sp) {                                  // подсказку ставим рядом с точкой, с той стороны, где нет текста коллекции
+    var W = window.innerWidth, H = window.innerHeight;
+    var tw = elTip.offsetWidth || 280, th = elTip.offsetHeight || 130, gap = 22, x, y;
+    if (W <= 760 || W / H <= 1) {                          // телефон: под точкой
+      x = sp.x - tw / 2; y = sp.y + gap;
+      if (y + th > H - 12) y = sp.y - gap - th;
+    } else {
+      var toRight = STAGES[stageIndex].side !== "right";
+      x = toRight ? sp.x + gap : sp.x - gap - tw;
+      if (x + tw > W - 12) x = sp.x - gap - tw;            // не влезает справа: переносим влево
+      if (x < 12) x = sp.x + gap;                          // и наоборот
+      y = sp.y - th / 2;
+    }
+    x = clamp(x, 12, W - tw - 12); y = clamp(y, 72, H - th - 12);   // 72px сверху оставляем под шапку
+    sp.tipX = x; sp.tipY = y;
+    elTip.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0)";
+  }
+
+  var _wp = new THREE.Vector3(), _n = new THREE.Vector3(), _toCam = new THREE.Vector3(), _ndc = new THREE.Vector3(), _q = new THREE.Quaternion();
+  function updateHotspots() {                              // вызывается каждый кадр после отрисовки
+    var hide = !!trans, model = STAGES[stageIndex].model, W = window.innerWidth, H = window.innerHeight;
+    elHotspots.classList.toggle("off", hide);
+    hotspots.forEach(function (sp) {
+      var vis = false;
+      if (!hide && sp.model === model) {
+        sp.anchor.getWorldPosition(_wp);
+        sp.anchor.getWorldQuaternion(_q);
+        _n.copy(sp.normal).applyQuaternion(_q);           // куда сейчас смотрит деталь
+        _toCam.copy(camera.position).sub(_wp).normalize(); // где камера относительно детали
+        vis = _n.dot(_toCam) > 0.12;                       // деталь повёрнута к нам — точку показываем
+        _ndc.copy(_wp).project(camera);                    // 3D → координаты экрана
+        sp.x = (_ndc.x * 0.5 + 0.5) * W;
+        sp.y = (-_ndc.y * 0.5 + 0.5) * H;
+        if (vis) sp.el.style.transform = "translate3d(" + sp.x.toFixed(1) + "px," + sp.y.toFixed(1) + "px,0)";
+      }
+      if (vis !== sp.visible) { sp.visible = vis; sp.el.classList.toggle("on", vis); }
+    });
+    if (openSpot) { if (!openSpot.visible) closeTip(); else placeTip(openSpot); }
+  }
+
+  function updateHands(spin) {             // spin — «перемотка» при переходах
+    var now = new Date();
+    var s = now.getSeconds() + now.getMilliseconds() / 1000;     // секундная стрелка всегда идёт по настоящему времени
+    var m, h;
+    if (FIXED_TIME) {                      // «витринное» время: часовая и минутная стоят на заданном
+      var parts = FIXED_TIME.split(":");
+      var fh = parseInt(parts[0], 10) % 12, fm = parseInt(parts[1], 10);
+      m = fm; h = fh + fm / 60;
+    } else {                               // настоящее время
+      m = now.getMinutes() + s / 60;
+      h = (now.getHours() % 12) + m / 60;
+    }
+    var T = Math.PI * 2;
+    hourHand.rotation.z = -(h / 12 * T + spin * T * 1);
+    minuteHand.rotation.z = -(m / 60 * T + spin * T * 12);
+    secondHand.rotation.z = -(s / 60 * T + spin * T * 60);
+    tankHour.rotation.z = -(h / 12 * T + spin * T * 1);        // у прямоугольных часов секундной стрелки нет
+    tankMinute.rotation.z = -(m / 60 * T + spin * T * 12);
+    steelHour.rotation.z = -(h / 12 * T + spin * T * 1);
+    steelMinute.rotation.z = -(m / 60 * T + spin * T * 12);
+    steelSecond.rotation.z = -(s / 60 * T + spin * T * 60);
+    tonHour.rotation.z = -(h / 12 * T + spin * T * 1);
+    tonMinute.rotation.z = -(m / 60 * T + spin * T * 12);
+    tonSecond.rotation.z = -(s / 60 * T + spin * T * 60);
+    var h24 = FIXED_TIME ? (parseInt(FIXED_TIME.split(":")[0], 10) % 24) + m / 60 : now.getHours() + m / 60;   // малые циферблаты «Сияния»
+    tonSub24.rotation.z = -(h24 / 24 * T);
+    tonSubDay.rotation.z = -(((now.getDay() + 6) % 7) / 7 * T);      // понедельник = 0
+    tonSubDate.rotation.z = -((now.getDate() - 1) / 31 * T);
+  }
+
+  /* ---------- 4.5 Расположение часов на экране для каждой коллекции ---------- */
+  function layoutFor(i) {
+    var aspect = window.innerWidth / window.innerHeight;
+    var halfH = Math.tan(CAM_FOV * Math.PI / 360) * CAM_DIST;
+    var halfW = halfH * aspect;
+    var side = STAGES[i].side;
+    if (window.innerWidth <= 760 || aspect <= 1) return { x: 0, y: halfH * 0.36, s: Math.min(0.85, halfW * 0.66) };   // телефон: часы сверху (те же условия, что в CSS)
+    var x = side === "left" ? halfW * 0.46 : side === "right" ? -halfW * 0.46 : 0;
+    return { x: x, y: 0, s: 1 };
+  }
+  var cur = layoutFor(0);
+
+  /* ---------- 4.6 Управление мышью и пальцем ---------- */
+  var userRot = { x: 0, y: 0, vx: 0, vy: 0 };
+  var dragging = false, lastX = 0, lastY = 0, lastInteract = 0, lastTs = 0;
+  var pointer = { x: 0, y: 0 };
+  var trans = null, intro = null, spin = 0;
+
+  dom.addEventListener("pointerdown", function (e) {
+    closeTip();                                            // начали крутить часы — подсказку убираем
+    if (trans) return;
+    dragging = true; lastX = e.clientX; lastY = e.clientY; userRot.vx = 0; userRot.vy = 0;
+    if (dom.setPointerCapture) dom.setPointerCapture(e.pointerId);
+    dom.style.cursor = "grabbing";
+  });
+  dom.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    var dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    userRot.y += dx * 0.008;
+    userRot.x = clamp(userRot.x + dy * 0.006, -0.8, 0.8);
+    userRot.vy = dx * 0.008; userRot.vx = dy * 0.006;
+  });
+  function endDrag() { dragging = false; dom.style.cursor = "grab"; lastInteract = lastTs; }
+  dom.addEventListener("pointerup", endDrag);
+  dom.addEventListener("pointercancel", endDrag);
+  window.addEventListener("pointermove", function (e) {
+    pointer.x = (e.clientX / window.innerWidth - 0.5) * 2;
+    pointer.y = (e.clientY / window.innerHeight - 0.5) * 2;
+  });
+
+  /* ---------- 4.7 Переход между коллекциями ---------- */
+  goToStage = function (index) {
+    index = clamp(index, 0, STAGES.length - 1);
+    if (trans || index === stageIndex) return;
+    closeTip();
+    var dir = index > stageIndex ? 1 : -1;
+    userRot.y = normalizeAngle(userRot.y); userRot.vx = 0; userRot.vy = 0;
+    dragging = false;
+    var prevModel = STAGES[stageIndex].model, nextModel = STAGES[index].model;
+    trans = {
+      t0: null, dur: reduceMotion ? 700 : TRANSITION_MS, dir: dir, prev: stageIndex, next: index, shown: false,
+      fade: (prevModel === "round" && nextModel === "round"),   // плавная смена цвета циферблата только между круглыми
+      swapped: false, nextModel: nextModel, modelChange: prevModel !== nextModel,
+      from: { x: cur.x, y: cur.y, s: cur.s }, to: layoutFor(index), rot0: userRot.y, rotX0: userRot.x,
+      strap0: strapMat.color.clone(), hand0: handMats[0].color.clone(),
+      strap1: new THREE.Color(DIALS[index].strap), hand1: new THREE.Color(DIALS[index].hand)
+    };
+    panelNodes[stageIndex].classList.remove("show");
+    bgNodes[stageIndex].classList.remove("on");
+    bgNodes[index].classList.add("on");
+    dialB.material.opacity = 0;
+    if (trans.fade) { dialB.material.map = dialTex[index]; }
+    else if (nextModel === "round") {                          // возвращаемся к круглым с прямоугольных: сразу готовим нужный циферблат и цвета
+      dialA.material.map = dialTex[index];
+      trans.strap0 = trans.strap1.clone(); trans.hand0 = trans.hand1.clone();
+    }
+    setAccent(index); updateDots(index);
+  };
+
+  function finishTransition() {
+    stageIndex = trans.next;
+    setModel(STAGES[stageIndex].model);
+    if (STAGES[stageIndex].model === "round") dialA.material.map = dialTex[stageIndex];
+    dialB.material.opacity = 0;
+    strapMat.color.copy(trans.strap1);
+    handMats.forEach(function (m) { m.color.copy(trans.hand1); });
+    userRot.x = 0; userRot.y = 0; spin = 0; key.intensity = KEY_BASE; camera.position.z = CAM_DIST;
+    cur = trans.to; trans = null;
+  }
+
+  /* ---------- 4.8 Главный цикл: кадр за кадром ---------- */
+  function frame(ts) {
+    requestAnimationFrame(frame);
+    if (VIEW !== "showcase") return;                 // пока открыта главная, 3D не рисуем: экономим батарею
+    lastTs = ts;
+    var lx = cur.x, ly = cur.y, ls = cur.s;
+
+    if (intro) {                                       // стартовая «перемотка» стрелок на настоящее время
+      if (intro.t0 === null) intro.t0 = ts;
+      var ip = Math.min((ts - intro.t0) / 2200, 1);
+      spin = -(1 - easeOutCubic(ip));
+      if (ip >= 1) { intro = null; spin = 0; }
+    }
+
+    if (trans) {
+      if (trans.t0 === null) trans.t0 = ts;
+      var p = Math.min((ts - trans.t0) / trans.dur, 1);
+      var e = easeInOutCubic(p);
+      lx = lerp(trans.from.x, trans.to.x, e); ly = lerp(trans.from.y, trans.to.y, e); ls = lerp(trans.from.s, trans.to.s, e);
+      userRot.y = lerp(trans.rot0, trans.dir * Math.PI * 2, e);
+      userRot.x = lerp(trans.rotX0, 0, e);
+      spin = reduceMotion ? 0 : trans.dir * e;
+      dialB.material.opacity = trans.fade ? smoothstep(0.2, 0.8, p) : 0;
+      if (trans.modelChange && !reduceMotion) ls *= 1 - 0.3 * Math.pow(Math.sin(p * Math.PI), 6);   // на миг «сжимаем» часы, пока подменяем модель
+      strapMat.color.copy(trans.strap0).lerp(trans.strap1, e);
+      handMats.forEach(function (m) { m.color.copy(trans.hand0).lerp(trans.hand1, e); });
+      key.intensity = KEY_BASE + (reduceMotion ? 0 : Math.sin(p * Math.PI) * 1.3);
+      camera.position.z = CAM_DIST - (reduceMotion ? 0 : Math.sin(p * Math.PI) * 0.8);
+      if (!trans.swapped && p >= 0.5) { trans.swapped = true; setModel(trans.nextModel); }    // в самой середине перехода меняем модель
+      if (!trans.shown && p >= 0.5) { trans.shown = true; panelNodes[trans.next].classList.add("show"); }
+      if (p >= 1) finishTransition();
+    } else if (!dragging) {                            // инерция после броска и возврат «лицом к зрителю»
+      userRot.y += userRot.vy; userRot.x = clamp(userRot.x + userRot.vx, -0.8, 0.8);
+      userRot.vy *= 0.94; userRot.vx *= 0.94;
+      if (ts - lastInteract > 2200) {
+        userRot.y = normalizeAngle(userRot.y);
+        userRot.y *= 0.965; userRot.x *= 0.965;
+      }
+    }
+
+    var bob = reduceMotion ? 0 : Math.sin(ts / 1400) * 0.025;
+    root.position.set(lx, ly + bob, 0);
+    root.scale.setScalar(ls);
+    var tiltK = reduceMotion ? 0 : 1;
+    tilt.rotation.y += (pointer.x * 0.16 * tiltK - tilt.rotation.y) * 0.06;
+    tilt.rotation.x += (pointer.y * 0.10 * tiltK - tilt.rotation.x) * 0.06;
+    spinGroup.rotation.set(userRot.x, userRot.y, 0);
+    updateHands(spin);
+    updateMech(lastTs, spin);
+    renderer.render(scene, camera);
+    updateHotspots();
+  }
+
+  window.addEventListener("resize", function () {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    if (trans) trans.to = layoutFor(trans.next); else cur = layoutFor(stageIndex);
+  });
+
+  /* ---------- 4.9 Запуск ---------- */
+  setAccent(0); updateDots(0);
+  bgNodes[0].classList.add("on");
+  panelNodes[0].classList.add("show");
+  if (!reduceMotion) intro = { t0: null };
+  requestAnimationFrame(frame);
+  requestAnimationFrame(function () { wrap.classList.add("ready"); });
+}
+
+/* ========================================================================
+   5. УПРАВЛЕНИЕ: колесо, клавиши, кнопки
+   ======================================================================== */
+var wheelCooldown = false;
+window.addEventListener("wheel", function (e) {
+  if (VIEW !== "showcase") return;                  // на главной колесо просто прокручивает страницу
+  if (wheelCooldown || Math.abs(e.deltaY) < 12) return;
+  wheelCooldown = true;
+  goToStage(stageIndex + (e.deltaY > 0 ? 1 : -1));
+  setTimeout(function () { wheelCooldown = false; }, 900);
+}, { passive: true });
+
+window.addEventListener("keydown", function (e) {
+  if (VIEW !== "showcase") return;
+  var k = e.code;
+  if (k === "Escape") { hotspotsClose(); return; }    // Esc закрывает подсказку
+  if (k === "Space" || k === "ArrowDown" || k === "ArrowRight" || k === "PageDown") { e.preventDefault(); goToStage(stageIndex + 1); }
+  else if (k === "ArrowUp" || k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); goToStage(stageIndex - 1); }
+  else if (k === "Home") { goToStage(0); }
+});
+
+elNext.addEventListener("click", function () {
+  goToStage(stageIndex === STAGES.length - 1 ? 0 : stageIndex + 1);
+});
+
+try {
+  init();
+} catch (err) {
+  console.error(err);
+  document.getElementById("nogl").style.display = "flex";
+}
+setView(window.location && window.location.hash === "#collections" ? "showcase" : "home");   // по ссылке ...#collections сразу откроется витрина
+requestAnimationFrame(heroClock);
+</script>
+</body>
+</html>
