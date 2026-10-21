@@ -1,0 +1,730 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Шалфей — студия красоты</title>
+<meta name="description" content="Маникюр, брови и стрижки. Онлайн-запись, личный кабинет.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   ЦВЕТА И ШРИФТЫ. Меняешь здесь — меняется весь сайт.
+   Шалфей: серо-зелёная «бумага», тёмно-зелёные чернила, сливовый акцент.
+   ===================================================================== */
+:root {
+  --paper: #EDF0EA;     /* фон страницы */
+  --card: #F8F9F5;      /* фон панелей */
+  --ink: #1E2B24;       /* основной текст */
+  --muted: #5E6E64;     /* второстепенный текст */
+  --sage: #8BA090;      /* шалфей — линии, иконки */
+  --line: #CDD6CC;      /* тонкие линии */
+  --plum: #6E2C51;      /* акцент: кнопки, выбранное */
+  --plum-soft: #F1E3EA;
+  --ok: #2F6B48; --warn: #9A6A12; --bad: #A33A3A;
+  --r: 14px;
+  --display: "Tenor Sans", "Trebuchet MS", sans-serif;
+  --text: "Golos Text", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--text); }
+a { color: inherit; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--plum); outline-offset: 2px; border-radius: 6px; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; line-height: 1.12; margin: 0; }
+h1 { font-size: clamp(34px, 4.6vw, 56px); letter-spacing: -.01em; }
+h2 { font-size: clamp(28px, 3.6vw, 40px); }
+h3 { font-size: 21px; }
+.muted { color: var(--muted); }
+
+/* ---------- Кнопки ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 999px;
+       padding: 12px 22px; background: var(--plum); color: #fff; font-weight: 500; cursor: pointer; text-decoration: none; }
+.btn:hover { filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1px var(--ink); filter: none; }
+.btn.small { padding: 7px 14px; font-size: 14px; }
+.link { background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; color: var(--muted); }
+
+/* ---------- Полоска «это демо» ---------- */
+#demo { background: var(--ink); color: #DCE4DD; font-size: 13px; }
+#demo .wrap { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; padding-top: 8px; padding-bottom: 8px; }
+#demo b { color: #fff; font-weight: 500; }
+@media (max-width: 600px) { #demo { font-size: 12px; } #demo .wrap { gap: 2px 12px; padding-top: 6px; padding-bottom: 6px; } #demo .wrap > span:first-child { display: none; } }
+#demo .link { color: #DCE4DD; }
+
+/* ---------- Шапка ---------- */
+header.top { border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; gap: 24px; height: 68px; }
+.logo { font-family: var(--display); font-size: 26px; text-decoration: none; display: flex; align-items: center; gap: 10px; }
+.logo svg { width: 26px; height: 26px; }
+nav.main { display: flex; gap: 22px; margin-left: auto; align-items: center; font-size: 15px; }
+nav.main a { text-decoration: none; color: var(--muted); }
+nav.main a:hover, nav.main a[aria-current] { color: var(--ink); }
+@media (max-width: 700px) { nav.main .hide-m { display: none; } nav.main { gap: 14px; } }
+
+/* ---------- Главная: первый экран ---------- */
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; padding: 64px 0 56px; align-items: start; }
+.hero p.lead { font-size: 19px; color: var(--muted); max-width: 30em; margin: 22px 0 28px; }
+.hero .addr { margin-top: 26px; font-size: 14px; color: var(--muted); }
+@media (max-width: 860px) { .hero { grid-template-columns: 1fr; gap: 32px; padding: 40px 0; } }
+
+/* «Свободно сегодня» — главное на первом экране: живые окошки для записи */
+.today { background: var(--card); border-radius: 22px; padding: 22px 22px 10px; box-shadow: 0 1px 0 var(--line), 0 20px 40px -28px rgba(30,43,36,.35); }
+.today h3 { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.today h3 small { font-family: var(--text); font-size: 13px; color: var(--muted); }
+.mrow { display: grid; grid-template-columns: 116px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); align-items: center; }
+.mrow:first-of-type { border-top: 0; }
+.mrow .who b { display: block; font-weight: 500; }
+.mrow .who span { font-size: 13px; color: var(--muted); }
+.slots { display: flex; flex-wrap: wrap; gap: 6px; }
+.slot { border: 1px solid var(--line); background: #fff; border-radius: 9px; padding: 6px 10px; font-size: 14px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.slot:hover { border-color: var(--plum); color: var(--plum); }
+.slot[aria-pressed="true"] { background: var(--plum); border-color: var(--plum); color: #fff; }
+.none { font-size: 14px; color: var(--muted); }
+
+/* ---------- Прайс: как меню, строки с точками ---------- */
+section.block { padding: 56px 0; border-top: 1px solid var(--line); }
+.cols { display: grid; grid-template-columns: 1fr 2fr; gap: 40px; }
+@media (max-width: 860px) { .cols { grid-template-columns: 1fr; gap: 20px; } }
+.price h3 { margin: 28px 0 8px; } .price h3:first-child { margin-top: 0; }
+.prow { display: flex; align-items: baseline; gap: 10px; padding: 9px 0; }
+.prow .nm { flex: none; max-width: 70%; }
+.prow .dots { flex: 1; border-bottom: 1px dotted var(--sage); transform: translateY(-4px); min-width: 20px; }
+.prow .pr { flex: none; font-variant-numeric: tabular-nums; }
+.prow .du { font-size: 13px; color: var(--muted); margin-left: 6px; }
+.prow button { margin-left: 8px; }
+
+.masters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+@media (max-width: 860px) { .masters { grid-template-columns: repeat(2, 1fr); } }
+.master .ph { aspect-ratio: 1/1.05; border-radius: 120px 120px var(--r) var(--r); background: var(--sage); display: grid; place-items: center;
+  font-family: var(--display); font-size: 56px; color: var(--card); margin-bottom: 12px; }
+.master b { font-weight: 500; display: block; } .master span { font-size: 14px; color: var(--muted); }
+
+footer { border-top: 1px solid var(--line); padding: 36px 0 60px; font-size: 14px; color: var(--muted); }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 12px 40px; justify-content: space-between; }
+
+/* ---------- Окна (запись, вход) ---------- */
+dialog { border: 0; border-radius: 22px; padding: 0; width: min(560px, calc(100% - 24px)); max-height: calc(100% - 24px);
+         background: var(--card); color: var(--ink); box-shadow: 0 30px 80px -20px rgba(20,30,25,.5); }
+dialog::backdrop { background: rgba(30,43,36,.45); }
+dialog[open] { animation: pop .22s ease-out; }
+@keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { dialog[open] { animation: none; } }
+.dlg { padding: 26px 26px 22px; }
+.dlg-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.x { border: 0; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: var(--muted); padding: 4px 8px; }
+.step { margin-bottom: 18px; }
+.step > label, .step > .lbl { display: block; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.step > .lbl b { color: var(--ink); font-weight: 500; margin-right: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: 14px; text-align: left; }
+.chip small { display: block; color: var(--muted); font-size: 12px; }
+.chip[aria-pressed="true"] { border-color: var(--plum); background: var(--plum-soft); }
+.chip[aria-pressed="true"] small { color: var(--plum); }
+select.inp, input.inp { width: 100%; border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 11px 12px; }
+input.inp:focus, select.inp:focus { outline: 2px solid var(--plum); outline-offset: 0; border-color: transparent; }
+.sum { border-top: 1px solid var(--line); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sum .t { font-size: 14px; color: var(--muted); } .sum .t b { color: var(--ink); font-weight: 500; font-size: 16px; display: block; }
+.tabs { display: flex; gap: 4px; background: var(--paper); padding: 4px; border-radius: 12px; margin-bottom: 18px; }
+.tabs button { flex: 1; border: 0; background: none; padding: 9px; border-radius: 9px; cursor: pointer; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.field { margin-bottom: 12px; } .field label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+.err { color: var(--bad); font-size: 14px; min-height: 1.4em; margin: 4px 0 8px; }
+.code-note { background: var(--plum-soft); color: var(--plum); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+
+/* ---------- Всплывающее уведомление ---------- */
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--ink); color: #fff; padding: 12px 18px;
+         border-radius: 12px; font-size: 15px; opacity: 0; pointer-events: none; transition: .25s; z-index: 50; max-width: calc(100% - 32px); }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Кабинет и админка ---------- */
+.page { padding: 44px 0 80px; }
+.page-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.list { background: var(--card); border-radius: var(--r); }
+.item { display: grid; grid-template-columns: 110px 1fr auto; gap: 16px; padding: 16px 18px; border-top: 1px solid var(--line); align-items: center; }
+.item:first-child { border-top: 0; }
+.item .when b { display: block; font-weight: 500; font-variant-numeric: tabular-nums; }
+.item .when span { font-size: 13px; color: var(--muted); }
+.item .what span { font-size: 14px; color: var(--muted); }
+@media (max-width: 600px) { .item { grid-template-columns: 1fr; gap: 6px; } }
+.badge { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: 1px; }
+.b-new { background: #FFF1D6; color: var(--warn); } .b-confirmed { background: #DDEFE3; color: var(--ok); }
+.b-done { background: #E6E9E6; color: var(--muted); } .b-cancelled { background: #F6E0E0; color: var(--bad); }
+.empty { padding: 28px 18px; color: var(--muted); }
+.h-sub { margin: 36px 0 12px; font-size: 22px; }
+
+.atabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+.atabs button { border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 8px 16px; cursor: pointer; color: var(--muted); }
+.atabs button[aria-selected="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.daynav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.daynav .d { font-family: var(--display); font-size: 24px; min-width: 210px; }
+.stats { display: flex; gap: 28px; margin-bottom: 18px; color: var(--muted); font-size: 14px; flex-wrap: wrap; }
+.stats b { color: var(--ink); font-size: 20px; font-weight: 500; display: block; font-variant-numeric: tabular-nums; }
+/* Расписание: колонка на каждого мастера */
+.board { display: grid; grid-template-columns: repeat(var(--n), minmax(220px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+.colm { background: var(--card); border-radius: var(--r); padding: 12px; min-height: 140px; }
+.colm h4 { margin: 2px 4px 10px; font-weight: 500; font-size: 15px; display: flex; justify-content: space-between; }
+.colm h4 span { color: var(--muted); font-weight: 400; font-size: 13px; }
+.bk { background: #fff; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid var(--sage); font-size: 14px; }
+.bk.s-new { border-left-color: #E2B24A; } .bk.s-confirmed { border-left-color: var(--ok); } .bk.s-cancelled { opacity: .55; border-left-color: var(--bad); }
+.bk .tm { font-weight: 600; font-variant-numeric: tabular-nums; }
+.bk .cl { color: var(--muted); font-size: 13px; }
+.bk select { margin-top: 8px; width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; background: var(--card); font-size: 13px; }
+table.t { width: 100%; border-collapse: collapse; background: var(--card); border-radius: var(--r); overflow: hidden; font-size: 15px; }
+table.t th { text-align: left; font-weight: 500; color: var(--muted); font-size: 13px; padding: 12px 12px; border-bottom: 1px solid var(--line); }
+table.t td { padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: middle; }
+table.t td.num { font-variant-numeric: tabular-nums; }
+table.t input, table.t select { width: 100%; border: 1px solid transparent; background: transparent; border-radius: 8px; padding: 7px 8px; }
+table.t input:hover, table.t select:hover { border-color: var(--line); }
+table.t input:focus, table.t select:focus { border-color: var(--plum); background: #fff; outline: 0; }
+.tscroll { overflow-x: auto; border-radius: var(--r); }
+.tog { position: relative; width: 44px; height: 24px; appearance: none; background: var(--line); border-radius: 12px; cursor: pointer; vertical-align: middle; }
+.tog::after { content: ""; position: absolute; left: 3px; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.tog:checked { background: var(--ok); } .tog:checked::after { transform: translateX(20px); }
+</style>
+</head>
+<body>
+
+<!-- Полоска для демо: подсказывает, как войти админом -->
+<div id="demo"><div class="wrap">
+  <span>Демо-версия: данные хранятся только в вашем браузере.</span>
+  <span>Админ: <b>+7 900 000-00-00</b>, пароль <b>admin</b></span>
+  <span>Клиент: <b>+7 900 111-22-33</b>, пароль <b>1234</b></span>
+  <button class="link" id="resetDemo">Сбросить демо</button>
+</div></div>
+
+<header class="top"><div class="wrap">
+  <a class="logo" href="#/">
+    <!-- листик шалфея -->
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 26C6 14 14 6 27 5c0 13-8 21-21 21z" fill="#8BA090"/><path d="M6 26L20 12" stroke="#1E2B24" stroke-width="1.6" fill="none"/></svg>
+    Шалфей
+  </a>
+  <nav class="main" id="nav"></nav>
+</div></header>
+
+<main id="app"></main>
+
+<footer><div class="wrap">
+  <div>Шалфей, студия красоты<br>Самара, Ленинградская, 48 · ежедневно 10:00–21:00</div>
+  <div>+7 846 200-48-48<br>Демо-проект для портфолио</div>
+</div></footer>
+
+<!-- Окно записи -->
+<dialog id="dlgBook" aria-labelledby="bkTitle"><div class="dlg">
+  <div class="dlg-head"><h3 id="bkTitle">Запись</h3><button class="x" data-close aria-label="Закрыть">×</button></div>
+  <div id="bookBody"></div>
+</div></dialog>
+
+<!-- Окно входа и регистрации -->
+<dialog id="dlgAuth" aria-labelledby="auTitle"><div class="dlg">
+  <div class="dlg-head"><h3 id="auTitle">Вход</h3><button class="x" data-close aria-label="Закрыть">×</button></div>
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="login" aria-selected="true">Войти</button>
+    <button role="tab" data-tab="reg" aria-selected="false">Регистрация</button>
+  </div>
+  <div id="authBody"></div>
+</div></dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =====================================================================
+   САЙТ САЛОНА «ШАЛФЕЙ»: запись, личный кабинет, админка.
+
+   Как устроено:
+   1) «База данных» (объект api ниже) — в демо хранит всё в браузере
+      (localStorage). Для настоящего клиента меняем ТОЛЬКО api на запросы
+      к серверу в России (например, Yandex Cloud) — остальной сайт не трогаем.
+   2) Страницы: #/ — главная, #/cabinet — кабинет, #/admin — админка.
+   3) Вход — по номеру телефона, как требует закон для российских сайтов.
+      В демо SMS не отправляется, код показывается на экране.
+   ===================================================================== */
+
+/* ---------- Мелкие помощники ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const rub = n => n.toLocaleString('ru-RU') + ' ₽';
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const parseYmd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const toMin = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const toTime = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+const WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+const MON = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+const dayTitle = s => { const d = parseYmd(s), t = ymd(new Date()), tm = ymd(addDays(new Date(), 1));
+  const pre = s === t ? 'Сегодня, ' : s === tm ? 'Завтра, ' : WD[d.getDay()] + ', ';
+  return pre + d.getDate() + ' ' + MON[d.getMonth()]; };
+// Склонение: plural(4, ['запись','записи','записей']) → «записи»
+const plural = (n, f) => f[(n % 10 === 1 && n % 100 !== 11) ? 0 : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? 1 : 2];
+const durTxt = m => m >= 60 ? (Math.floor(m / 60) + ' ч' + (m % 60 ? ' ' + m % 60 + ' мин' : '')) : m + ' мин';
+// Телефон: оставляем 11 цифр, 8 в начале превращаем в 7
+const normPhone = s => { let d = String(s).replace(/\D/g, ''); if (d.length === 10) d = '7' + d; if (d[0] === '8') d = '7' + d.slice(1); return d; };
+const fmtPhone = d => d.length === 11 ? `+7 ${d.slice(1, 4)} ${d.slice(4, 7)}-${d.slice(7, 9)}-${d.slice(9)}` : d;
+function toast(msg, ms = 3200) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove('show'), ms); }
+
+const OPEN = 10 * 60, CLOSE = 21 * 60, STEP = 30;   // салон работает 10:00–21:00, окна каждые 30 минут
+const STATUS = { new: 'Новая', confirmed: 'Подтверждена', done: 'Пришла', cancelled: 'Отменена' };
+
+/* =====================================================================
+   API — «база данных». В демо всё лежит в браузере.
+   ===================================================================== */
+const api = (() => {
+  const KEY = 'shalfey-demo-v1', SKEY = 'shalfey-session';
+  let mem = null, memSession = null;          // запасной вариант, если браузер запретил хранилище
+  const read = k => { try { return localStorage.getItem(k); } catch { return null; } };
+  const write = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  const remove = k => { try { localStorage.removeItem(k); } catch {} };
+
+  // Пароль не храним в открытом виде — только «отпечаток» (хеш SHA-256)
+  async function hash(phone, pass) {
+    const data = new TextEncoder().encode('shalfey:' + phone + ':' + pass);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  const uid = () => Math.random().toString(36).slice(2, 10);
+
+  // Стартовые данные: услуги, мастера, несколько клиентов и записей
+  async function seed() {
+    const services = [
+      ['s1', 'Ногти', 'Маникюр с покрытием гель-лаком', 90, 2200],
+      ['s2', 'Ногти', 'Маникюр без покрытия', 60, 1200],
+      ['s3', 'Ногти', 'Педикюр с покрытием', 120, 2800],
+      ['s4', 'Ногти', 'Снятие покрытия и уход', 30, 500],
+      ['s5', 'Брови и ресницы', 'Коррекция и окрашивание бровей', 60, 1500],
+      ['s6', 'Брови и ресницы', 'Ламинирование бровей', 60, 2100],
+      ['s7', 'Брови и ресницы', 'Ламинирование ресниц', 90, 2400],
+      ['s8', 'Волосы', 'Женская стрижка', 60, 2000],
+      ['s9', 'Волосы', 'Окрашивание в один тон', 150, 4500],
+      ['s10', 'Волосы', 'Укладка', 60, 1600],
+    ].map(([id, cat, name, dur, price]) => ({ id, cat, name, dur, price }));
+    const masters = [
+      { id: 'm1', name: 'Алина', role: 'Мастер маникюра', cats: ['Ногти'], active: true },
+      { id: 'm2', name: 'Вера', role: 'Маникюр и педикюр', cats: ['Ногти'], active: true },
+      { id: 'm3', name: 'Дарина', role: 'Брови и ресницы', cats: ['Брови и ресницы'], active: true },
+      { id: 'm4', name: 'Ксения', role: 'Парикмахер-колорист', cats: ['Волосы'], active: true },
+    ];
+    const users = [
+      { id: 'u0', phone: '79000000000', name: 'Администратор', role: 'admin', pass: await hash('79000000000', 'admin') },
+      { id: 'u1', phone: '79001112233', name: 'Ольга', role: 'client', pass: await hash('79001112233', '1234') },
+      { id: 'u2', phone: '79275550101', name: 'Мария К.', role: 'client', pass: '' },
+      { id: 'u3', phone: '79171234567', name: 'Екатерина', role: 'client', pass: '' },
+      { id: 'u4', phone: '79608887766', name: 'Анна С.', role: 'client', pass: '' },
+    ];
+    const today = new Date(), d = n => ymd(addDays(today, n));
+    const S = Object.fromEntries(services.map(s => [s.id, s]));
+    const mk = (userId, serviceId, masterId, date, time, status) =>
+      ({ id: uid(), userId, serviceId, masterId, date, time, dur: S[serviceId].dur, price: S[serviceId].price, status, createdAt: Date.now() });
+    const bookings = [
+      mk('u2', 's1', 'm1', d(0), '11:00', 'confirmed'), mk('u3', 's3', 'm2', d(0), '12:00', 'confirmed'),
+      mk('u4', 's6', 'm3', d(0), '14:00', 'new'),       mk('u2', 's9', 'm4', d(0), '15:30', 'confirmed'),
+      mk('u3', 's1', 'm1', d(1), '10:30', 'new'),       mk('u4', 's8', 'm4', d(1), '13:00', 'confirmed'),
+      mk('u1', 's1', 'm1', d(2), '18:00', 'confirmed'), mk('u1', 's5', 'm3', d(-9), '16:00', 'done'),
+      mk('u1', 's1', 'm2', d(-30), '12:30', 'done'),    mk('u2', 's7', 'm3', d(-3), '11:00', 'done'),
+    ];
+    return { services, masters, users, bookings };
+  }
+
+  let db = null;
+  async function load() {
+    const raw = read(KEY) ?? mem;
+    db = raw ? JSON.parse(raw) : await seed();
+    if (!raw) save();
+  }
+  function save() { const s = JSON.stringify(db); mem = s; write(KEY, s); }
+  const me = () => { const id = read(SKEY) ?? memSession; return db.users.find(u => u.id === id) || null; };
+  const setSession = id => { memSession = id; id ? write(SKEY, id) : remove(SKEY); };
+  const pub = u => u && ({ id: u.id, phone: u.phone, name: u.name, role: u.role });
+  const sleep = (ms = 120) => new Promise(r => setTimeout(r, ms));   // имитируем ответ сервера
+  const isAdmin = () => me()?.role === 'admin';
+  const need = cond => { if (!cond) throw new Error('Нет доступа'); };
+
+  return {
+    load,
+    async reset() { remove(KEY); remove(SKEY); mem = null; memSession = null; await load(); },
+    /* --- аккаунт --- */
+    current: () => pub(me()),
+    // Шаг 1 регистрации: «отправить SMS». В демо возвращаем код, чтобы показать его на экране.
+    async sendCode(phone) {
+      await sleep();
+      phone = normPhone(phone);
+      if (phone.length !== 11) throw new Error('Введите номер полностью: +7 и ещё 10 цифр');
+      if (db.users.some(u => u.phone === phone && u.pass)) throw new Error('Этот номер уже зарегистрирован. Войдите по паролю.');
+      const code = String(1000 + Math.floor(Math.random() * 9000));
+      db.pendingCode = { phone, code, until: Date.now() + 5 * 60e3 }; save();
+      return code;
+    },
+    async register({ phone, code, name, pass }) {
+      await sleep();
+      phone = normPhone(phone);
+      const p = db.pendingCode;
+      if (!p || p.phone !== phone || p.code !== String(code).trim() || Date.now() > p.until) throw new Error('Код не подходит. Проверьте цифры или запросите новый.');
+      if (!name.trim()) throw new Error('Напишите, как к вам обращаться');
+      if (pass.length < 4) throw new Error('Пароль — минимум 4 символа');
+      let u = db.users.find(x => x.phone === phone);   // клиент мог записываться раньше по телефону
+      if (!u) { u = { id: uid(), phone, role: 'client' }; db.users.push(u); }
+      u.name = name.trim(); u.pass = await hash(phone, pass);
+      delete db.pendingCode; save(); setSession(u.id);
+      return pub(u);
+    },
+    async login(phone, pass) {
+      await sleep();
+      phone = normPhone(phone);
+      const u = db.users.find(x => x.phone === phone);
+      if (!u || !u.pass || u.pass !== await hash(phone, pass)) throw new Error('Неверный номер или пароль');
+      setSession(u.id); return pub(u);
+    },
+    logout() { setSession(null); },
+    /* --- каталог --- */
+    services: () => db.services.slice(),
+    masters: (all = false) => db.masters.filter(m => all || m.active),
+    service: id => db.services.find(s => s.id === id),
+    master: id => db.masters.find(m => m.id === id),
+    user: id => db.users.find(u => u.id === id),
+    // Свободные окна мастера в день для услуги длительностью dur
+    freeSlots(masterId, date, dur) {
+      const busy = db.bookings.filter(b => b.masterId === masterId && b.date === date && b.status !== 'cancelled')
+                              .map(b => [toMin(b.time), toMin(b.time) + b.dur]);
+      const now = new Date(), isToday = date === ymd(now), nowMin = now.getHours() * 60 + now.getMinutes() + 30;
+      const out = [];
+      for (let t = OPEN; t + dur <= CLOSE; t += STEP) {
+        if (isToday && t < nowMin) continue;
+        if (busy.some(([a, b]) => t < b && t + dur > a)) continue;
+        out.push(toTime(t));
+      }
+      return out;
+    },
+    /* --- записи клиента --- */
+    async book({ serviceId, masterId, date, time }) {
+      await sleep();
+      const u = me(); need(u);
+      const s = this.service(serviceId);
+      if (!this.freeSlots(masterId, date, s.dur).includes(time)) throw new Error('Это время только что заняли. Выберите другое.');
+      const b = { id: uid(), userId: u.id, serviceId, masterId, date, time, dur: s.dur, price: s.price, status: 'new', createdAt: Date.now() };
+      db.bookings.push(b); save(); return b;
+    },
+    myBookings() { const u = me(); need(u); return db.bookings.filter(b => b.userId === u.id); },
+    async cancel(id) {
+      await sleep();
+      const u = me(), b = db.bookings.find(x => x.id === id); need(u && b && (b.userId === u.id || u.role === 'admin'));
+      b.status = 'cancelled'; save();
+    },
+    /* --- админка --- */
+    bookingsOn(date) { need(isAdmin()); return db.bookings.filter(b => b.date === date); },
+    setStatus(id, st) { need(isAdmin()); const b = db.bookings.find(x => x.id === id); b.status = st; save(); },
+    saveService(s) { need(isAdmin()); const i = db.services.findIndex(x => x.id === s.id); if (i >= 0) db.services[i] = s; else db.services.push(s); save(); },
+    newService() { need(isAdmin()); const s = { id: 's' + uid(), cat: 'Ногти', name: 'Новая услуга', dur: 60, price: 1000 }; db.services.push(s); save(); return s; },
+    deleteService(id) { need(isAdmin()); db.services = db.services.filter(s => s.id !== id); save(); },
+    setMasterActive(id, on) { need(isAdmin()); this.master(id).active = on; save(); },
+    clients() {
+      need(isAdmin());
+      return db.users.filter(u => u.role === 'client').map(u => {
+        const bs = db.bookings.filter(b => b.userId === u.id), done = bs.filter(b => b.status === 'done');
+        const last = bs.filter(b => b.status !== 'cancelled').map(b => b.date).sort().pop();
+        return { ...pub(u), visits: done.length, spent: done.reduce((a, b) => a + b.price, 0), last, registered: !!u.pass };
+      });
+    },
+  };
+})();
+
+/* =====================================================================
+   ГЛАВНАЯ СТРАНИЦА
+   ===================================================================== */
+function viewHome() {
+  const cats = [...new Set(api.services().map(s => s.cat))];
+  // «Свободно сегодня»: если сегодня окон не осталось, показываем завтра
+  let day = ymd(new Date()), label = 'Свободно сегодня';
+  const anyFree = d => api.masters().some(m => api.freeSlots(m.id, d, 60).length);
+  if (!anyFree(day)) { day = ymd(addDays(new Date(), 1)); label = 'Свободно завтра'; }
+  const rows = api.masters().map(m => {
+    const sl = api.freeSlots(m.id, day, 60).slice(0, 5);
+    return `<div class="mrow"><div class="who"><b>${esc(m.name)}</b><span>${esc(m.role)}</span></div>
+      <div class="slots">${sl.length ? sl.map(t => `<button class="slot" data-quick="${m.id}|${day}|${t}">${t}</button>`).join('')
+        : '<span class="none">На этот день всё занято</span>'}</div></div>`;
+  }).join('');
+  return `
+  <div class="wrap hero">
+    <div>
+      <h1>Маникюр, брови и стрижки в пяти минутах от Ленинградской</h1>
+      <p class="lead">Записывайтесь онлайн в свободное окно. Свои записи вы видите в личном кабинете и можете отменить их в пару нажатий.</p>
+      <button class="btn" data-book>Записаться</button>
+      <p class="addr">Ленинградская, 48, второй этаж · ежедневно 10:00–21:00</p>
+    </div>
+    <div class="today" aria-label="${label}">
+      <h3>${label} <small>${dayTitle(day).replace(/^(Сегодня|Завтра), /, '')}</small></h3>
+      ${rows}
+    </div>
+  </div>
+  <section class="block" id="prices"><div class="wrap cols">
+    <div><h2>Услуги и цены</h2><p class="muted">Длительность указана с учётом подготовки. Цена окончательная.</p></div>
+    <div class="price">${cats.map(c => `<h3>${esc(c)}</h3>` + api.services().filter(s => s.cat === c).map(s =>
+      `<div class="prow"><span class="nm">${esc(s.name)}<span class="du">${durTxt(s.dur)}</span></span><span class="dots"></span>
+        <span class="pr">${rub(s.price)}</span><button class="btn ghost small" data-book="${s.id}" aria-label="Записаться: ${esc(s.name)}">Записаться</button></div>`).join('')).join('')}
+    </div>
+  </div></section>
+  <section class="block" id="team"><div class="wrap">
+    <h2 style="margin-bottom:24px">Мастера</h2>
+    <div class="masters">${api.masters(true).map(m => `<div class="master"><div class="ph" aria-hidden="true">${esc(m.name[0])}</div>
+      <b>${esc(m.name)}</b><span>${esc(m.role)}</span></div>`).join('')}</div>
+  </div></section>`;
+}
+
+/* =====================================================================
+   ЗАПИСЬ: услуга → мастер → день → время → подтверждение
+   ===================================================================== */
+const bk = { serviceId: null, masterId: null, date: null, time: null };
+function openBooking(preset = {}) {
+  Object.assign(bk, { serviceId: null, masterId: null, date: ymd(new Date()), time: null }, preset);
+  renderBooking(); $('#dlgBook').showModal();
+}
+function renderBooking() {
+  const S = api.services(), s = bk.serviceId && api.service(bk.serviceId);
+  // мастера, которые делают выбранную услугу
+  const ms = api.masters().filter(m => !s || m.cats.includes(s.cat));
+  if (bk.masterId && !ms.some(m => m.id === bk.masterId)) bk.masterId = null;
+  if (!bk.masterId && s && ms.length === 1) bk.masterId = ms[0].id;
+  const days = Array.from({ length: 10 }, (_, i) => ymd(addDays(new Date(), i)));
+  const slots = s && bk.masterId ? api.freeSlots(bk.masterId, bk.date, s.dur) : [];
+  if (bk.time && !slots.includes(bk.time)) bk.time = null;
+  const m = bk.masterId && api.master(bk.masterId);
+  const ready = s && m && bk.date && bk.time;
+  $('#bookBody').innerHTML = `
+    <div class="step"><label for="bkSvc" class="lbl"><b>1</b>Услуга</label>
+      <select id="bkSvc" class="inp"><option value="">Выберите услугу</option>
+      ${[...new Set(S.map(x => x.cat))].map(c => `<optgroup label="${esc(c)}">${S.filter(x => x.cat === c).map(x =>
+        `<option value="${x.id}" ${x.id === bk.serviceId ? 'selected' : ''}>${esc(x.name)} — ${rub(x.price)}</option>`).join('')}</optgroup>`).join('')}
+      </select></div>
+    <div class="step"><div class="lbl"><b>2</b>Мастер</div><div class="chips">
+      ${s ? ms.map(x => `<button class="chip" data-m="${x.id}" aria-pressed="${x.id === bk.masterId}">${esc(x.name)}<small>${esc(x.role)}</small></button>`).join('') || '<span class="none">Сейчас нет мастера на эту услугу</span>'
+          : '<span class="none">Сначала выберите услугу</span>'}</div></div>
+    <div class="step"><div class="lbl"><b>3</b>День</div><div class="chips">
+      ${days.map(d => { const dd = parseYmd(d); return `<button class="chip" data-d="${d}" aria-pressed="${d === bk.date}">${dd.getDate()}<small>${d === days[0] ? 'сегодня' : WD[dd.getDay()]}</small></button>`; }).join('')}
+    </div></div>
+    <div class="step"><div class="lbl"><b>4</b>Время</div><div class="slots">
+      ${!s || !m ? '<span class="none">Выберите услугу и мастера</span>' : slots.length ? slots.map(t => `<button class="slot" data-t="${t}" aria-pressed="${t === bk.time}">${t}</button>`).join('')
+        : nextFree(s, m) }
+    </div></div>
+    <div class="sum">
+      <div class="t">${ready ? `<b>${esc(s.name)}</b>${dayTitle(bk.date)}, ${bk.time} · ${esc(m.name)} · ${rub(s.price)}` : 'Выберите всё, чтобы записаться'}</div>
+      <button class="btn" id="bkGo" ${ready ? '' : 'disabled'}>${api.current() ? 'Записаться' : 'Войти и записаться'}</button>
+    </div>`;
+}
+// Если в выбранный день окон нет — предлагаем ближайшее свободное
+function nextFree(s, m) {
+  for (let i = 1; i <= 30; i++) {
+    const d = ymd(addDays(parseYmd(bk.date), i)), sl = api.freeSlots(m.id, d, s.dur);
+    if (sl.length) return `<span class="none">В этот день окон нет.</span>
+      <button class="slot" data-jump="${d}|${sl[0]}">Ближайшее: ${dayTitle(d).toLowerCase()}, ${sl[0]}</button>`;
+  }
+  return '<span class="none">Свободных окон на месяц вперёд нет</span>';
+}
+$('#bookBody').addEventListener('change', e => { if (e.target.id === 'bkSvc') { bk.serviceId = e.target.value || null; renderBooking(); } });
+$('#bookBody').addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.m) { bk.masterId = b.dataset.m; renderBooking(); }
+  else if (b.dataset.d) { bk.date = b.dataset.d; renderBooking(); }
+  else if (b.dataset.t) { bk.time = b.dataset.t; renderBooking(); }
+  else if (b.dataset.jump) { [bk.date, bk.time] = b.dataset.jump.split('|'); renderBooking(); }
+  else if (b.id === 'bkGo') {
+    // Не вошёл — сначала вход, потом запись продолжится сама
+    if (!api.current()) { afterAuth = finishBooking; openAuth('login'); return; }
+    finishBooking();
+  }
+});
+async function finishBooking() {
+  try {
+    const b = await api.book(bk);
+    $('#dlgBook').open && $('#dlgBook').close();
+    toast(`Вы записаны: ${dayTitle(b.date)}, ${b.time}. Мастер подтвердит запись.`, 4500);
+    location.hash = '#/cabinet'; render();
+  } catch (err) { toast(err.message); renderBooking(); if (!$('#dlgBook').open) $('#dlgBook').showModal(); }
+}
+
+/* =====================================================================
+   ВХОД И РЕГИСТРАЦИЯ (по номеру телефона)
+   ===================================================================== */
+let authTab = 'login', afterAuth = null, regStep = 1, regPhone = '';
+function openAuth(tab = 'login') { authTab = tab; regStep = 1; renderAuth(); $('#dlgAuth').showModal(); }
+function renderAuth() {
+  for (const t of document.querySelectorAll('#dlgAuth [data-tab]')) t.setAttribute('aria-selected', t.dataset.tab === authTab);
+  $('#auTitle').textContent = authTab === 'login' ? 'Вход' : 'Регистрация';
+  const phoneField = (id, val = '') => `<div class="field"><label for="${id}">Номер телефона</label>
+    <input class="inp" id="${id}" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 900 123-45-67" value="${esc(val)}"></div>`;
+  if (authTab === 'login') {
+    $('#authBody').innerHTML = `<form id="fLogin">${phoneField('lPhone')}
+      <div class="field"><label for="lPass">Пароль</label><input class="inp" id="lPass" type="password" autocomplete="current-password"></div>
+      <div class="err" id="aErr"></div><button class="btn" style="width:100%">Войти</button></form>`;
+  } else if (regStep === 1) {
+    $('#authBody').innerHTML = `<form id="fReg1">${phoneField('rPhone', regPhone)}
+      <p class="muted" style="font-size:14px;margin:0 0 8px">Пришлём SMS с кодом, чтобы убедиться, что номер ваш.</p>
+      <div class="err" id="aErr"></div><button class="btn" style="width:100%">Получить код</button></form>`;
+  } else {
+    $('#authBody').innerHTML = `<form id="fReg2">
+      <div class="code-note">Демо: SMS не отправляется. Ваш код — <b id="demoCode">${esc(regStep.code)}</b></div>
+      <div class="field"><label for="rCode">Код из SMS на ${esc(fmtPhone(normPhone(regPhone)))}</label><input class="inp" id="rCode" inputmode="numeric" autocomplete="one-time-code" maxlength="4"></div>
+      <div class="field"><label for="rName">Как к вам обращаться</label><input class="inp" id="rName" autocomplete="given-name"></div>
+      <div class="field"><label for="rPass">Придумайте пароль</label><input class="inp" id="rPass" type="password" autocomplete="new-password" minlength="4"></div>
+      <div class="err" id="aErr"></div><button class="btn" style="width:100%">Зарегистрироваться</button>
+      <p style="margin:12px 0 0;text-align:center"><button type="button" class="link" id="rBack">Изменить номер</button></p></form>`;
+  }
+  setTimeout(() => $('#authBody input')?.focus(), 30);
+}
+$('#dlgAuth').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (t) { authTab = t.dataset.tab; regStep = 1; renderAuth(); }
+  if (e.target.id === 'rBack') { regStep = 1; renderAuth(); } });
+$('#authBody').addEventListener('submit', async e => {
+  e.preventDefault();
+  const err = m => { $('#aErr').textContent = m; }, btn = e.target.querySelector('.btn'); btn.disabled = true;
+  try {
+    if (e.target.id === 'fLogin') { const u = await api.login($('#lPhone').value, $('#lPass').value); return authDone(u, `Здравствуйте, ${u.name}!`); }
+    if (e.target.id === 'fReg1') { regPhone = $('#rPhone').value; const code = await api.sendCode(regPhone); regStep = { code }; renderAuth(); return; }
+    if (e.target.id === 'fReg2') { const u = await api.register({ phone: regPhone, code: $('#rCode').value, name: $('#rName').value, pass: $('#rPass').value });
+      return authDone(u, `Готово, ${u.name}! Аккаунт создан.`); }
+  } catch (x) { err(x.message); } finally { btn.disabled = false; }
+});
+function authDone(u, msg) {
+  $('#dlgAuth').close(); toast(msg);
+  const next = afterAuth; afterAuth = null;
+  if (next) return next();
+  location.hash = u.role === 'admin' ? '#/admin' : '#/cabinet'; render();
+}
+
+/* =====================================================================
+   ЛИЧНЫЙ КАБИНЕТ КЛИЕНТА
+   ===================================================================== */
+function viewCabinet() {
+  const u = api.current();
+  const all = api.myBookings().sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const now = ymd(new Date());
+  const up = all.filter(b => b.date >= now && b.status !== 'cancelled' && b.status !== 'done');
+  const past = all.filter(b => !up.includes(b)).reverse();
+  const item = (b, canCancel) => { const s = api.service(b.serviceId), m = api.master(b.masterId);
+    return `<div class="item"><div class="when"><b>${b.time}</b><span>${dayTitle(b.date)}</span></div>
+      <div class="what">${esc(s ? s.name : 'Услуга удалена')} <span class="badge b-${b.status}">${STATUS[b.status]}</span><br><span>${esc(m?.name)} · ${rub(b.price)}</span></div>
+      <div>${canCancel ? `<button class="btn ghost small" data-cancel="${b.id}">Отменить</button>` : ''}</div></div>`; };
+  return `<div class="wrap page">
+    <div class="page-head"><div><h1 style="font-size:clamp(32px,5vw,48px)">Здравствуйте, ${esc(u.name)}</h1>
+      <p class="muted" style="margin:8px 0 0">${fmtPhone(u.phone)}</p></div>
+      <button class="btn" data-book>Записаться</button></div>
+    <h2 class="h-sub">Предстоящие записи</h2>
+    <div class="list">${up.map(b => item(b, true)).join('') || '<div class="empty">Записей пока нет. Выберите услугу и свободное время — это займёт минуту.</div>'}</div>
+    <h2 class="h-sub">История</h2>
+    <div class="list">${past.map(b => item(b, false)).join('') || '<div class="empty">Здесь появятся прошедшие визиты.</div>'}</div>
+  </div>`;
+}
+
+/* =====================================================================
+   АДМИНКА
+   ===================================================================== */
+let aTab = 'day', aDate = ymd(new Date());
+function viewAdmin() {
+  const tabs = [['day', 'Записи'], ['svc', 'Услуги'], ['team', 'Мастера'], ['cli', 'Клиенты']];
+  let body = '';
+  if (aTab === 'day') {
+    const bs = api.bookingsOn(aDate).sort((a, b) => a.time.localeCompare(b.time));
+    const live = bs.filter(b => b.status !== 'cancelled');
+    const ms = api.masters(true);
+    body = `<div class="daynav"><button class="btn ghost small" data-day="-1" aria-label="Предыдущий день">‹</button>
+        <span class="d">${dayTitle(aDate)}</span><button class="btn ghost small" data-day="1" aria-label="Следующий день">›</button>
+        <button class="btn ghost small" data-day="0">Сегодня</button></div>
+      <div class="stats"><div><b>${live.length}</b>${plural(live.length, ['запись', 'записи', 'записей'])}</div><div><b>${bs.filter(b => b.status === 'new').length}</b>ждут подтверждения</div>
+        <div><b>${rub(live.reduce((a, b) => a + b.price, 0))}</b>выручка по записям</div></div>
+      <div class="board" style="--n:${ms.length}">${ms.map(m => { const mine = bs.filter(b => b.masterId === m.id);
+        return `<div class="colm"><h4>${esc(m.name)} <span>${mine.filter(b => b.status !== 'cancelled').length} зап.</span></h4>
+          ${mine.map(b => { const s = api.service(b.serviceId), u = api.user(b.userId);
+            return `<div class="bk s-${b.status}"><div class="tm">${b.time}–${toTime(toMin(b.time) + b.dur)}</div>
+              <div>${esc(s ? s.name : 'Услуга удалена')}</div><div class="cl">${esc(u?.name)} · ${fmtPhone(u?.phone || '')}</div>
+              <select data-status="${b.id}" aria-label="Статус записи">${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${k === b.status ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`; }).join('')
+            || '<p class="none" style="margin:4px">Свободный день</p>'}</div>`; }).join('')}</div>`;
+  }
+  if (aTab === 'svc') {
+    const cats = [...new Set(api.masters(true).flatMap(m => m.cats))];
+    body = `<p class="muted" style="margin-top:0">Изменения сохраняются сразу и видны на сайте.</p>
+      <div class="tscroll"><table class="t"><thead><tr><th style="width:38%">Услуга</th><th style="width:22%">Раздел</th><th>Длительность</th><th>Цена, ₽</th><th></th></tr></thead><tbody>
+      ${api.services().map(s => `<tr data-svc="${s.id}">
+        <td><input data-f="name" value="${esc(s.name)}" aria-label="Название"></td>
+        <td><select data-f="cat" aria-label="Раздел">${cats.map(c => `<option ${c === s.cat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></td>
+        <td><select data-f="dur" aria-label="Длительность">${[30, 60, 90, 120, 150, 180].map(d => `<option value="${d}" ${d === s.dur ? 'selected' : ''}>${durTxt(d)}</option>`).join('')}</select></td>
+        <td class="num"><input data-f="price" type="number" min="0" step="100" value="${s.price}" aria-label="Цена"></td>
+        <td><button class="link" data-del="${s.id}">Удалить</button></td></tr>`).join('')}
+      </tbody></table></div><p><button class="btn ghost" id="addSvc">Добавить услугу</button></p>`;
+  }
+  if (aTab === 'team') {
+    body = `<div class="list">${api.masters(true).map(m => `<div class="item"><div class="when"><b>${esc(m.name)}</b></div>
+      <div class="what">${esc(m.role)}<br><span>${m.cats.map(esc).join(', ')}</span></div>
+      <label style="display:flex;gap:10px;align-items:center;font-size:14px">Принимает записи <input type="checkbox" class="tog" data-active="${m.id}" ${m.active ? 'checked' : ''}></label></div>`).join('')}</div>
+      <p class="muted">Выключенный мастер пропадает из записи на сайте, но остаётся в расписании и истории.</p>`;
+  }
+  if (aTab === 'cli') {
+    const cl = api.clients().sort((a, b) => b.spent - a.spent);
+    body = `<div class="tscroll"><table class="t"><thead><tr><th>Клиент</th><th>Телефон</th><th>Визитов</th><th>Потратил(а)</th><th>Последняя запись</th></tr></thead><tbody>
+      ${cl.map(c => `<tr><td>${esc(c.name)}${c.registered ? '' : ' <span class="muted" style="font-size:13px">(без аккаунта)</span>'}</td><td class="num">${fmtPhone(c.phone)}</td>
+        <td class="num">${c.visits}</td><td class="num">${rub(c.spent)}</td><td>${c.last ? dayTitle(c.last) : '—'}</td></tr>`).join('')}
+      </tbody></table></div>`;
+  }
+  return `<div class="wrap page">
+    <div class="page-head"><h1 style="font-size:clamp(32px,5vw,48px)">Админка</h1></div>
+    <div class="atabs" role="tablist">${tabs.map(([k, v]) => `<button role="tab" data-atab="${k}" aria-selected="${k === aTab}">${v}</button>`).join('')}</div>
+    ${body}</div>`;
+}
+
+/* =====================================================================
+   НАВИГАЦИЯ И ОБРАБОТКА КЛИКОВ
+   ===================================================================== */
+function renderNav() {
+  const u = api.current(), r = location.hash;
+  $('#nav').innerHTML = `<a href="#/" class="hide-m" ${r === '#/' || !r ? 'aria-current="page"' : ''}>Главная</a>
+    <a href="#/" data-scroll="prices" class="hide-m">Цены</a>
+    ${u ? `${u.role === 'admin' ? `<a href="#/admin" ${r === '#/admin' ? 'aria-current="page"' : ''}>Админка</a>` : `<a href="#/cabinet" ${r === '#/cabinet' ? 'aria-current="page"' : ''}>Мои записи</a>`}
+      <button class="btn ghost small" id="logout">Выйти</button>` : `<button class="btn small" id="loginBtn">Войти</button>`}`;
+}
+function render() {
+  const u = api.current(); let r = location.hash || '#/';
+  // Защита страниц: кабинет только для вошедших, админка только для админа
+  if (r === '#/cabinet' && !u) r = '#/';
+  if (r === '#/admin' && u?.role !== 'admin') r = '#/';
+  if (r === '#/cabinet' && u?.role === 'admin') r = '#/admin';
+  if (location.hash && location.hash !== r) history.replaceState(null, '', r);
+  $('#app').innerHTML = r === '#/cabinet' ? viewCabinet() : r === '#/admin' ? viewAdmin() : viewHome();
+  renderNav();
+}
+addEventListener('hashchange', () => { render(); scrollTo(0, 0); });
+
+document.addEventListener('click', async e => {
+  const b = e.target.closest('button, a'); if (!b) return;
+  if (b.matches('[data-close]')) { b.closest('dialog').close(); return; }
+  if (b.id === 'loginBtn') return openAuth('login');
+  if (b.id === 'logout') { api.logout(); location.hash = '#/'; render(); toast('Вы вышли из аккаунта'); return; }
+  if (b.id === 'resetDemo') { if (confirm('Вернуть демо к исходным данным? Ваши записи и изменения удалятся.')) { await api.reset(); location.hash = '#/'; render(); toast('Демо сброшено'); } return; }
+  if (b.dataset.scroll) { e.preventDefault(); if (location.hash !== '#/' && location.hash) { location.hash = '#/'; } setTimeout(() => document.getElementById(b.dataset.scroll)?.scrollIntoView({ behavior: 'smooth' }), 30); return; }
+  if (b.hasAttribute('data-book')) return openBooking(b.dataset.book ? { serviceId: b.dataset.book } : {});
+  if (b.dataset.quick) { const [masterId, date, time] = b.dataset.quick.split('|'); return openBooking({ masterId, date, time }); }
+  if (b.dataset.cancel) { if (confirm('Отменить запись?')) { await api.cancel(b.dataset.cancel); render(); toast('Запись отменена'); } return; }
+  if (b.dataset.atab) { aTab = b.dataset.atab; render(); return; }
+  if (b.dataset.day !== undefined) { const n = +b.dataset.day; aDate = n === 0 ? ymd(new Date()) : ymd(addDays(parseYmd(aDate), n)); render(); return; }
+  if (b.id === 'addSvc') { api.newService(); render(); const rows = document.querySelectorAll('[data-svc] [data-f="name"]'); rows[rows.length - 1]?.select(); return; }
+  if (b.dataset.del) { if (confirm('Удалить услугу? Старые записи на неё сохранятся.')) { api.deleteService(b.dataset.del); render(); toast('Услуга удалена'); } return; }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.status) { api.setStatus(t.dataset.status, t.value); render(); toast('Статус: ' + STATUS[t.value]); }
+  if (t.dataset.active) { api.setMasterActive(t.dataset.active, t.checked); toast(t.checked ? 'Мастер снова принимает записи' : 'Мастер скрыт из записи'); }
+  const row = t.closest('[data-svc]');
+  if (row) {   // правка услуги прямо в таблице
+    const s = { ...api.service(row.dataset.svc) }, f = t.dataset.f;
+    s[f] = f === 'price' || f === 'dur' ? Math.max(0, Math.round(+t.value || 0)) : t.value.trim() || s[f];
+    api.saveService(s); toast('Сохранено');
+  }
+});
+// Клик по затемнённому фону закрывает окно
+for (const d of document.querySelectorAll('dialog')) d.addEventListener('click', e => { if (e.target === d) d.close(); });
+
+api.load().then(render);
+</script>
+</body>
+</html>
