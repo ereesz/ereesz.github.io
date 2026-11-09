@@ -1,6 +1,7 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" translate="no">
 <head>
+<meta name="google" content="notranslate">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Династия — студия красоты в Брянске</title>
@@ -70,7 +71,7 @@
   .pg .more{display:block;margin-top:14px;font-size:14px;color:var(--muted)}
 
   /* мастера */
-  .masters{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .masters{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
   .m{background:var(--bg-2);border:1px solid var(--line);border-radius:22px;overflow:hidden}
   .ph{background:linear-gradient(150deg,#555,#3c3c3c);display:flex;align-items:center;justify-content:center;color:#9d968c;font-size:13px;text-align:center;padding:16px}
   .ph span{border:1px dashed #777;border-radius:12px;padding:8px 12px}
@@ -98,6 +99,24 @@
   .edu li{padding-left:26px;position:relative;color:var(--muted)}
   .edu li:before{content:"";position:absolute;left:0;top:9px;width:12px;height:2px;background:var(--gold)}
   .edu .ph{aspect-ratio:4/3;border-radius:20px}
+
+  .edu-intro{display:flex;align-items:end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+  .edu-intro p{color:var(--muted);max-width:460px}
+  .courses{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .course{background:var(--bg-2);border:1px solid var(--line);border-radius:22px;padding:24px;display:flex;flex-direction:column}
+  .course .tag{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+  .course h3{font-family:"Cormorant Garamond",serif;font-weight:500;font-size:28px;line-height:1.1;margin:6px 0 12px}
+  .course .meta{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .course .meta div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding-bottom:6px;font-size:15px}
+  .course .meta b{color:var(--gold-2);white-space:nowrap}
+  .course ul{list-style:none;display:grid;gap:7px;margin-bottom:12px}
+  .course li{padding-left:22px;position:relative;color:var(--muted);font-size:15px}
+  .course li:before{content:"";position:absolute;left:0;top:10px;width:10px;height:2px;background:var(--gold)}
+  .course .bonus{border-top:1px solid var(--line);padding-top:12px;margin-top:auto}
+  .course .bonus span{display:block;font-size:13px;color:var(--gold-2);font-weight:600;margin-bottom:8px;letter-spacing:.4px;text-transform:uppercase}
+  .course .note{font-size:14px;color:var(--muted);margin-top:10px}
+  .edu-cta{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:18px;background:var(--bg-2);border:1px solid var(--line);border-radius:22px;padding:20px 24px;color:var(--muted)}
+  .edu-cta b{color:var(--ink)}
 
   /* удобства */
   .perks{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
@@ -128,7 +147,9 @@
     .visual img{width:78%;margin-bottom:0}
     .float{display:none}
     section.block{padding:40px 0}
-    .price-groups,.masters,.reviews,.contacts,.edu{grid-template-columns:1fr}
+    .price-groups,.masters,.reviews,.contacts,.edu,.courses{grid-template-columns:1fr}
+    .course{padding:20px}
+    .course h3{font-size:26px}
     .edu{padding:22px}
     .gallery{grid-template-columns:1fr 1fr}
     .perks{grid-template-columns:1fr 1fr}
@@ -160,7 +181,7 @@
   <section class="hero">
     <div>
       <div class="badge"><span class="stars">★★★★★</span> <b>5.0</b> · 149 оценок на Яндекс Картах</div>
-      <h1>Маникюр и&nbsp;брови <em class="gold">с&nbsp;заботой</em> о&nbsp;вас</h1>
+      <h1>Студия красоты <em class="gold">с&nbsp;заботой</em> о&nbsp;вас</h1>
       <p class="lead">Уютная студия красоты в Брянске на Киевской, 65. Маникюр и педикюр по всем стандартам безопасности и с гарантией 14 дней, брови и ресницы, перманент и массаж, а ещё обучение ногтевому сервису. Запись онлайн за минуту.</p>
       <div class="actions">
         <a class="btn btn-main" href="https://dikidi.ru/1272436">Записаться онлайн</a>
@@ -190,7 +211,7 @@
     <div class="price-groups">
       <div class="pg">
         <h3>Ногтевой сервис</h3>
-        <div class="row"><span>Маникюр с покрытием (классический)</span><span>от 1 300 ₽</span></div>
+        <div class="row"><span>Маникюр с покрытием гель-лак</span><span>от 1 700 ₽</span></div>
         <div class="row"><span>Педикюр: пальчики + гель-лак</span><span>от 1 800 ₽</span></div>
         <div class="row"><span>Педикюр: пальчики + стопа + гель-лак</span><span>от 2 400 ₽</span></div>
         <div class="row"><span>Маникюр + педикюр в 4 руки за 2 часа</span><span>от 4 300 ₽</span></div>
@@ -221,6 +242,7 @@
         <div class="row"><span>Перманент бровей, первый визит</span><span>6 500 ₽</span></div>
         <div class="row"><span>Перманент губ, первый визит</span><span>6 500 ₽</span></div>
         <div class="row"><span>Перманент век (стрелка)</span><span>6 500 ₽</span></div>
+        <small class="more">Удаление перманента ремувером, стоимость уточняйте</small>
         <a class="more link" href="https://dikidi.ru/1272436">Записаться →</a>
       </div>
     </div>
@@ -230,17 +252,18 @@
   <section class="block" id="masters">
     <div class="sec-head">
       <h2>Наши <em class="gold">мастера</em></h2>
-      <p>9 специалистов: ногтевой сервис, брови и ресницы, перманент и массаж.</p>
+      <p>10 специалистов: ногтевой сервис, брови и ресницы, перманент и массаж.</p>
     </div>
     <div class="masters">
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Анастасия Букленкова</b><small>преподаватель, мастер ногтевого сервиса</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Анна</b><small>ведущий специалист</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Мария</b><small>топ-мастер</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Анастасия</b><small>мастер ногтевого сервиса</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Елена</b><small>мастер ногтевого сервиса</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Снежана</b><small>мастер ногтевого сервиса</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Софья</b><small>бровист, ламинирование</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
-      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Светлана</b><small>мастер перманентного макияжа</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Анастасия Букленкова</b><small>преподаватель, топ-мастер. Креативные ногти и сложные дизайны</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Анна</b><small>ведущий специалист: маникюр, педикюр, наращивание</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Мария</b><small>топ-мастер: маникюр и педикюр любой сложности</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Анастасия</b><small>маникюр и наращивание</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Елена</b><small>маникюр и педикюр</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Снежана</b><small>маникюр и наращивание</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Ксения</b><small>универсальный мастер: маникюр, педикюр, наращивание</small><small class="rate">новый мастер</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Софья</b><small>бровист, ламимейкер: брови и ресницы</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
+      <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Светлана</b><small>перманент: брови, губы, межресничка, стрелки. Удаление ремувером</small></div></div>
       <div class="m"><div class="ph"><span>Портрет мастера<br>со съёмки</span></div><div class="info"><b>Дмитрий</b><small>массажист</small><small class="rate">★ 5.0 в DIKIDI</small></div></div>
     </div>
   </section>
@@ -272,18 +295,93 @@
   </section>
 
   <section class="block" id="edu">
-    <div class="edu">
-      <div>
-        <h2>Обучение <em class="gold">ногтевому сервису</em></h2>
+    <div class="edu-intro">
+      <h2>Обучение <em class="gold">ногтевому сервису</em></h2>
+      <p>Учим в мини-группах до 2 человек, с практикой и поддержкой после курса. После обучения можно устроиться к нам на работу.</p>
+    </div>
+    <div class="courses">
+      <div class="course">
+        <span class="tag">Базовый курс · с нуля</span>
+        <h3>Master of nail service</h3>
+        <div class="meta"><div><span>3 дня</span><b>20 000 ₽</b></div></div>
         <ul>
-          <li>[Курс маникюра для начинающих]</li>
-          <li>[Повышение квалификации для мастеров]</li>
-          <li>Практика на моделях и сертификат по окончании</li>
-          <li>Есть онлайн-занятия</li>
+          <li>Идеальный маникюр с нуля</li>
+          <li>Быстрая техника, чтобы зарабатывать уже завтра</li>
+          <li>Мини-группы до 2 человек, индивидуальный подход</li>
+          <li>Стерилизация, материалы и организация рабочего места</li>
+          <li>Работа с гелем, ремонт и укрепление ногтей</li>
+          <li>Учебное пособие в подарок и поддержка после курса</li>
         </ul>
-        <a class="btn btn-ghost" href="https://t.me/DiNastiaSTUDIO">Узнать о ближайшем курсе</a>
+        <div class="bonus"><span>Бонусы</span>
+          <ul>
+            <li>Секреты крутых фото работ и экспресс-дизайны</li>
+            <li>Готовые посты для соцсетей на месяц</li>
+            <li>Как считать себестоимость</li>
+            <li>Видеоуроки навсегда</li>
+          </ul>
+        </div>
+        <p class="note">Дополнительно: наращивание ногтей, 4-й день обучения (оплачивается отдельно).</p>
       </div>
-      <div class="ph"><span>Фото с обучения</span></div>
+      <div class="course">
+        <span class="tag">Повышение квалификации</span>
+        <h3>Wow nails</h3>
+        <div class="meta"><div><span>1 день</span><b>10 000 ₽</b></div></div>
+        <ul>
+          <li>Идеальные синусы и пазухи</li>
+          <li>Маникюр за 1:30</li>
+          <li>Чёткий опил и видение формы</li>
+          <li>Работа гелем без отслоек</li>
+        </ul>
+        <div class="bonus"><span>Супер-бонусы</span>
+          <ul>
+            <li>Секреты быстрых дизайнов</li>
+            <li>Система «конверта» для расчёта себестоимости</li>
+            <li>Готовые посты для соцсетей на месяц</li>
+          </ul>
+        </div>
+      </div>
+      <div class="course">
+        <span class="tag">Наращивание на верхние формы</span>
+        <h3>Турбо-формы и выкладной френч</h3>
+        <div class="meta">
+          <div><span>«Турбо-формы», скоростная техника · 1 день</span><b>10 000 ₽</b></div>
+          <div><span>«Выкладной френч» · 2 дня</span><b>15 000 ₽</b></div>
+        </div>
+        <ul>
+          <li>Всё о материалах и формах</li>
+          <li>Секреты моделирования тонких и прочных ногтей</li>
+          <li>Насыщенная теория и много лайфхаков</li>
+          <li>Эффектные дизайны: аквариум, градиент</li>
+          <li>Мини-группы до 2 человек, максимум внимания</li>
+        </ul>
+        <div class="bonus"><span>Супер-бонусы</span>
+          <ul>
+            <li>Готовые посты для соцсетей</li>
+            <li>Как считать себестоимость</li>
+            <li>Поддержка после курса</li>
+          </ul>
+        </div>
+        <p class="note">На этих курсах маникюр не изучаем.</p>
+      </div>
+      <div class="course">
+        <span class="tag">Педикюр</span>
+        <h3>Эстетика педикюра</h3>
+        <div class="meta">
+          <div><span>Базовый · 2 дня</span><b>20 000 ₽</b></div>
+          <div><span>Повышение · 1 день</span><b>8 000 ₽</b></div>
+        </div>
+        <ul>
+          <li>Идеальный педикюр без боли и страха</li>
+          <li>Обработка пальчиков: комби и аппарат</li>
+          <li>Обработка стопы Smart-дисками</li>
+          <li>Ремонт и протезирование</li>
+          <li>Покрытие под кутикулу</li>
+        </ul>
+      </div>
+    </div>
+    <div class="edu-cta">
+      <span><b>Есть вопросы по курсам?</b> Напишите, расскажем о ближайших датах.</span>
+      <a class="btn btn-ghost" href="https://t.me/DiNastiaSTUDIO">Узнать о ближайшем курсе</a>
     </div>
   </section>
 
