@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ereesz — сайты и Telegram-боты для салонов и кофеен</title>
+<meta name="description" content="Сайты и Telegram-боты для малого бизнеса под ключ. Заявка онлайн.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   ereesz — сайт студии в стиле «Бенто» (стиль 5): светлый фон,
+   всё разложено по скруглённым плиткам, как у Apple.
+   Эффекты из избранного сохранены: нырок в букву e (19), буквы-волна
+   и кнопка-магнит (15), бегущие строки (2), 3D-карусель работ (16),
+   голографические карточки-пакеты (20), появление блоков при прокрутке.
+   ЦВЕТА И ШРИФТЫ меняются в блоке :root ниже.
+   ===================================================================== */
+:root{
+  --bg:#f2f2ef;          /* фон страницы — тёплый светло-серый */
+  --card:#ffffff;        /* белые плитки */
+  --ink:#111111;         /* чёрные плитки и текст */
+  --text:#111111;
+  --muted:#6f6f6a;       /* второстепенный текст */
+  --line:#e6e6e1;        /* тонкие линии */
+  --y:#ffd23f;           /* жёлтый */
+  --p:#ff7ab6;           /* розовый */
+  --v:#7c5cff;           /* фиолетовый */
+  --r:28px;              /* скругление плиток */
+  --head:'Inter Tight',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{overflow-x:clip}
+body{font-family:var(--head);background:var(--bg);color:var(--text);line-height:1.5;font-size:16px}
+a{color:inherit}
+.wrap{max-width:1240px;margin:0 auto;padding:0 18px;position:relative;z-index:1}
+section{padding:36px 0;position:relative}
+h2{font-size:clamp(30px,4.2vw,56px);line-height:1;font-weight:800;letter-spacing:-.045em;margin-bottom:12px}
+h3{font-weight:800;letter-spacing:-.03em}
+.kicker{display:inline-block;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:10px}
+.lead{color:var(--muted);font-size:18px;max-width:620px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;font:inherit;font-weight:700;padding:15px 24px;border-radius:14px;text-decoration:none;transition:transform .15s,box-shadow .2s,background .2s}
+.btn-main{background:var(--y);color:#111}
+.btn-main:hover{box-shadow:0 10px 30px rgba(255,210,63,.45)}
+.btn-dark{background:#111;color:#fff}
+.btn-line{background:#f2f2ef;color:#111}
+.btn-line:hover{background:#e8e8e3}
+.muted{color:var(--muted);font-size:14px}
+/* Плитка — основа стиля */
+.t{background:var(--card);border-radius:var(--r);padding:26px;position:relative;overflow:hidden}
+.t small{display:block;color:var(--muted);font-weight:500;font-size:14px}
+.t.ink{background:var(--ink);color:#fff}.t.ink small,.t.ink .lead,.t.ink .muted{color:#a9a9a4}
+.t.y{background:var(--y);color:#111}.t.y small{color:#5c4a00}
+.t.v{background:var(--v);color:#fff}.t.v small{color:#e2dbff}
+.num{font-size:clamp(40px,min(4.6vw,8vh),66px);font-weight:800;letter-spacing:-.05em;line-height:1;margin-top:6px}
+/* Появление блоков при прокрутке: плитки «выпрыгивают» */
+.anim .rv{opacity:0;transform:scale(.94) translateY(26px);transition:opacity .7s,transform .7s cubic-bezier(.2,.9,.3,1.2)}
+.anim .rv.in{opacity:1;transform:none}
+
+/* ---------- ШАПКА ---------- */
+header{position:fixed;top:0;left:0;right:0;z-index:30;transition:background .3s,box-shadow .3s}
+header.solid{background:rgba(242,242,239,.94);box-shadow:0 1px 0 var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-weight:800;font-size:21px;letter-spacing:-.04em;text-decoration:none}
+.logo i{font-style:normal;color:var(--v)}
+nav{display:flex;align-items:center;gap:24px}
+nav a{text-decoration:none;font-weight:600;color:var(--muted);font-size:15px}
+nav a:hover{color:var(--text)}
+nav .btn{padding:10px 18px;color:#111}
+@media(max-width:860px){nav .hm{display:none}}
+
+/* ---------- 1. НЫРОК В БУКВУ e (стиль 19) ---------- */
+.intro{height:175vh;position:relative}
+.pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.zoom{position:absolute;inset:0;width:100%;height:100%;z-index:3;display:none}
+/* эффект включается, только когда скрипт реально заработал; иначе сайт просто виден целиком */
+.zready .zoom{display:block}
+html:not(.zready) .intro{height:auto;min-height:100vh}
+html:not(.zready) .pin{position:relative;height:auto;min-height:100vh}
+html:not(.zready) .hero{position:relative}
+html:not(.zready) .hint{display:none}
+.hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);border:0;cursor:pointer;font:inherit;font-size:17px;font-weight:700;background:#111;color:var(--y);padding:15px 28px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);z-index:4;animation:hb 1.6s infinite}
+@keyframes hb{50%{transform:translate(-50%,8px)}}
+
+/* ---------- 2. ПЕРВЫЙ ЭКРАН: БЕНТО-СЕТКА ---------- */
+.hero{padding:84px 0 18px}
+.hero .wrap{width:100%}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,minmax(200px,1fr));gap:14px;height:calc(100vh - 110px);min-height:460px;max-height:640px}
+.bento .big{grid-column:1/3;grid-row:1/3;display:flex;flex-direction:column;justify-content:space-between;gap:16px}
+.bento .wide{grid-column:span 2}
+.hero h1{font-weight:800;font-size:clamp(34px,min(4.4vw,8vh),66px);line-height:1;letter-spacing:-.045em}
+.hero h1 .l{display:inline-block}
+.hero h1 .y{color:var(--y)}
+@keyframes wave{50%{transform:translateY(-.08em)}}
+.hero .lead{color:#b5b5b0;font-size:clamp(15px,1.3vw,18px);max-width:520px}
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.t.ink .btn-line{background:#262626;color:#fff}
+.t.ink .btn-line:hover{background:#333}
+.mag{display:inline-block;padding:18px;margin:-18px}
+.t .sub{font-size:14px;margin-top:8px;font-weight:500}
+/* плитки первого экрана выпрыгивают по очереди, когда вынырнули из буквы */
+.bento>.t{transition:opacity .6s,transform .6s cubic-bezier(.2,.9,.3,1.25)}
+.zready .hero:not(.pop) .bento>.t{opacity:0;transform:scale(.9) translateY(24px)}
+.bento>.t:nth-child(2){transition-delay:.08s}.bento>.t:nth-child(3){transition-delay:.16s}.bento>.t:nth-child(4){transition-delay:.24s}
+.bento>.t:nth-child(5){transition-delay:.32s}.bento>.t:nth-child(6){transition-delay:.4s}.bento>.t:nth-child(7){transition-delay:.48s}
+/* мини-переписка в фиолетовой плитке */
+.mini{display:flex;flex-direction:column;gap:6px;margin-top:12px;position:relative;z-index:1}
+.mini b{background:#fff;color:#111;border-radius:12px 12px 12px 4px;padding:7px 11px;font-size:13px;font-weight:500;align-self:flex-start;opacity:0;transform:translateY(8px);transition:.4s}
+.mini b.me{align-self:flex-end;background:#2b5278;color:#fff;border-radius:12px 12px 4px 12px}
+.pop .mini b{opacity:1;transform:none}
+.pop .mini b:nth-child(1){transition-delay:.9s}.pop .mini b:nth-child(2){transition-delay:1.6s}.pop .mini b:nth-child(3){transition-delay:2.3s}
+.spin{position:absolute;right:-30px;bottom:-30px;width:140px;height:140px;border:16px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:sp 3s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* лента «Делаю для» */
+.tl-wrap{overflow:hidden;margin-top:14px;-webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.tl{display:flex;gap:8px;width:max-content;animation:run 16s linear infinite}
+.tl span{flex:0 0 auto;padding:9px 15px;border-radius:999px;background:#f2f2ef;font-weight:600;font-size:14px}
+
+/* ---------- 3. БЕГУЩИЕ СТРОКИ (стиль 2) ---------- */
+.kins{max-width:1240px;margin:0 auto;padding:18px 18px 0;display:grid;gap:14px}
+.kin{background:var(--y);color:#111;overflow:hidden;padding:20px 0;border-radius:var(--r);position:relative}
+.kin.dark{background:#111;color:var(--y)}
+.kin div{white-space:nowrap;display:inline-block;font-weight:800;font-size:clamp(28px,4.4vw,58px);text-transform:uppercase;letter-spacing:-.04em;animation:run 24s linear infinite}
+.kin.dark div{animation-direction:reverse}
+.kin .o{-webkit-text-stroke:2px currentColor;color:transparent}
+@keyframes run{to{transform:translateX(-50%)}}
+
+/* ---------- 4. РАБОТЫ: 3D-КАРУСЕЛЬ (стиль 16) ---------- */
+.works{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.works .c{position:relative;inset:auto;transform:none;min-height:340px;padding-top:calc(56% + 30px)}
+.works .c .shot{height:auto;aspect-ratio:1.2/1}
+.works .c:hover{transform:translateY(-4px)}
+.works .c{transition:transform .2s,filter .2s}
+@media(max-width:1000px){.works{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.works{grid-template-columns:1fr}.works .c{min-height:0;padding-top:24px}.works .c .shot{position:relative;left:auto;right:auto;top:auto;margin-bottom:14px;aspect-ratio:1.6/1}}
+.works .t:first-child{display:flex;flex-direction:column;justify-content:flex-end}
+.stage{perspective:1400px;height:420px;display:grid;place-items:center;background:#111;padding:0}
+.ring{position:relative;width:210px;height:270px;transform-style:preserve-3d;animation:rot 30s linear infinite;will-change:transform}
+.off .ring,.off.kin div,.off .tl{animation-play-state:paused}
+@keyframes rot{to{transform:rotateY(-360deg)}}
+.c{position:absolute;inset:0;border-radius:22px;padding:20px;display:flex;flex-direction:column;justify-content:flex-end;color:#111;font-weight:700;text-decoration:none;
+  transform:rotateY(calc(var(--i)*60deg)) translateZ(320px);transition:filter .2s}
+.c:hover{filter:brightness(1.08)}
+/* с обратной стороны карточка просто цветная, без зеркальных надписей */
+.c{transform-style:preserve-3d}
+.c>*{position:relative;transform:translateZ(1px);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.c>.shot{position:absolute}
+.c b{font-size:26px;line-height:1.05;letter-spacing:-.04em}
+.c small{opacity:.7}
+.c .go{margin-top:8px;font-size:14px}
+@media(max-width:860px){.works{grid-template-columns:1fr}}
+@media(max-width:700px){.ring{width:150px;height:200px}.c{transform:rotateY(calc(var(--i)*60deg)) translateZ(215px)}.c b{font-size:18px}.stage{height:320px}}
+
+
+/* мини-превью главного экрана демо-сайта в карточке карусели */
+.shot{position:absolute;left:12px;right:12px;top:12px;height:56%;border-radius:14px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.shot .bar{display:flex;gap:4px;padding:7px 9px;background:rgba(0,0,0,.08)}
+.shot .bar u{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.25)}
+.sh-in{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;padding:6px}
+.sh-in svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-bottom:2px}
+.sh-in h5{font-size:24px;line-height:1;letter-spacing:-.03em;font-weight:800}
+.sh-in p{font-size:11px;opacity:.7;font-weight:600}
+.sh-in span{margin-top:6px;font-size:10px;font-weight:700;padding:5px 11px;border-radius:999px}
+.sh-shalfey{background:#f3f1e8;color:#3f6b4a}.sh-shalfey h5{font-family:Georgia,serif;font-weight:700;font-style:italic}.sh-shalfey span{background:#3f6b4a;color:#fff}
+.sh-britva{background:#1c1814;color:#d9a86c}.sh-britva .bar{background:rgba(255,255,255,.06)}.sh-britva .bar u{background:rgba(255,255,255,.25)}.sh-britva h5{letter-spacing:.12em;font-size:20px}.sh-britva span{background:#d9a86c;color:#1c1814}
+.sh-kant{background:#16130f;color:#d9a24a}.sh-kant .bar{background:rgba(255,255,255,.06)}.sh-kant .bar u{background:rgba(255,255,255,.25)}.sh-kant h5{letter-spacing:.14em;font-size:20px}.sh-kant span{background:#d9a24a;color:#16130f}
+.sh-mindal{background:#f5efe6;color:#7a1f2b}.sh-mindal h5{font-family:Georgia,serif;font-weight:700}.sh-mindal span{background:#7a1f2b;color:#fdf6ec}
+.sh-penka{background:#fff7ee;color:#7a4a2a}.sh-penka h5{font-family:Georgia,serif;font-weight:700}.sh-penka span{background:#7a4a2a;color:#fff}
+@media(max-width:700px){.shot{left:8px;right:8px;top:8px;height:54%;border-radius:10px}.shot .bar{padding:5px 7px}.sh-in svg{width:18px;height:18px}.sh-in h5{font-size:16px}.sh-britva h5{font-size:13px}.sh-in p{font-size:9px}.sh-in span{font-size:8px;padding:3px 8px;margin-top:3px}}
+
+/* ---------- 5. ПАКЕТЫ: ГОЛО-КАРТОЧКИ (стиль 20) ---------- */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:14px}
+.holo-wrap{perspective:1000px}
+.plan{position:relative;border-radius:var(--r);overflow:hidden;background:var(--card);padding:28px;display:flex;flex-direction:column;min-height:520px}
+.plan .holo{position:absolute;inset:0;mix-blend-mode:multiply;opacity:.14;pointer-events:none;
+  background:repeating-linear-gradient(115deg,#ff8a8a 0%,#ffe27a 7%,#8affa1 14%,#8af3ff 21%,#9a8aff 28%,#ff8af0 35%,#ff8a8a 42%);background-size:300% 300%;background-position:var(--px,50%) var(--py,50%);transition:opacity .3s}
+.plan:hover .holo{opacity:.32}
+.plan .shine{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.7),transparent 50%)}
+.plan>*:not(.holo):not(.shine){position:relative}
+.plan .no{font-size:13px;font-weight:600;color:var(--muted)}
+.plan h3{font-size:26px;margin-top:4px}
+.plan .for{font-size:14px;color:#55554f;margin-top:8px;font-weight:500;min-height:64px;line-height:1.45}
+.plan .for b{color:#111;font-weight:700}
+.copy-box{text-align:left;margin-top:16px;background:#f2f2ef;border-radius:14px;padding:12px 16px}
+.copy-box summary{font-size:14px}
+.copy-box p{font-size:13px;margin-top:8px}
+.copy-box pre{white-space:pre-wrap;font:13px/1.5 var(--head);margin-top:8px;background:#fff;border-radius:10px;padding:10px;user-select:all}
+.price{font-size:44px;font-weight:800;letter-spacing:-.05em;margin:14px 0 2px;line-height:1.05}
+.plan ul{list-style:none;margin:20px 0 24px;flex:1}
+.plan li{padding:8px 0 8px 26px;position:relative;font-size:15px;border-top:1px solid var(--line)}
+.plan li::before{content:"✦";position:absolute;left:0;color:var(--v)}
+.plan .btn{background:#111;color:#fff}
+@media(max-width:900px){.plans{grid-template-columns:1fr}.plan{min-height:0}}
+
+/* ---------- TELEGRAM-БОТЫ ---------- */
+.bots{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:24px 0}
+.feat div{background:#f2f2ef;border-radius:18px;padding:16px}
+.feat b{display:block;margin-bottom:4px}
+.feat span{color:var(--muted);font-size:14px}
+.bot-price{display:flex;gap:30px;flex-wrap:wrap;margin:24px 0 22px}
+.bot-price .price{font-size:34px;margin:0}
+.phone-tile{display:grid;place-items:center;padding:30px 20px}
+.phone{background:#17212b;border-radius:34px;padding:16px;max-width:340px;width:100%;margin:0 auto;box-shadow:0 30px 60px rgba(30,10,90,.45);color:#fff;position:relative;z-index:1}
+.phone .top{display:flex;align-items:center;gap:10px;padding:6px 6px 14px;border-bottom:1px solid #2b3540}
+.phone .ava{width:38px;height:38px;border-radius:50%;background:var(--y);display:grid;place-items:center;color:#111;font-weight:800}
+.phone .top b{display:block;font-size:15px}
+.phone .top span{font-size:12px;color:#7fa3d6}
+.chat{padding:14px 4px;display:flex;flex-direction:column;gap:8px;font-size:14px;min-height:380px}
+.msg{background:#232e3c;border-radius:14px 14px 14px 4px;padding:10px 12px;max-width:88%;opacity:0;transform:translateY(10px);transition:.4s}
+.msg.me{align-self:flex-end;background:#2b5278;border-radius:14px 14px 4px 14px}
+.msg.show{opacity:1;transform:none}
+@media(max-width:900px){.bots{grid-template-columns:1fr}.feat{grid-template-columns:1fr}}
+
+/* ---------- ПОДДЕРЖКА ---------- */
+.support{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+.support ul{list-style:none;margin-top:18px}
+.support li{padding:6px 0 6px 28px;position:relative;font-weight:600}
+.support li::before{content:"✓";position:absolute;left:0;font-weight:800}
+.support .lead{color:#4d3f00}
+.support-box{display:flex;flex-direction:column;justify-content:center;text-align:center}
+.support-box .price{color:var(--y);font-size:64px}
+@media(max-width:860px){.support{grid-template-columns:1fr}}
+
+/* ---------- ДОП. УСЛУГИ, ЭТАПЫ, ВОПРОСЫ ---------- */
+.head-tile{margin-bottom:14px}
+.extras-tile{margin-top:14px}
+.extras-tile .extras{margin-top:12px;grid-template-columns:repeat(4,1fr);gap:10px}
+.extras-tile .extra{background:#f2f2ef!important;color:#111!important;min-height:0;padding:16px 18px;border-radius:18px;font-size:14px;gap:8px}
+.extras-tile .extra b{font-size:20px}
+@media(max-width:860px){.extras-tile .extras{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.extras-tile .extras{grid-template-columns:1fr}}
+.extras{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.extra{background:var(--card);border-radius:var(--r);padding:24px;display:flex;flex-direction:column;justify-content:space-between;gap:18px;min-height:170px;font-weight:600}
+.extra b{font-size:30px;letter-spacing:-.04em;white-space:nowrap}
+.extra:nth-child(2){background:var(--y)}.extra:nth-child(3){background:#111;color:#fff}.extra:nth-child(4){background:var(--v);color:#fff}
+@media(max-width:860px){.extras{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.extras{grid-template-columns:1fr}.extra{min-height:0}}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;counter-reset:s}
+.step{background:var(--card);border-radius:var(--r);padding:26px}
+.step::before{counter-increment:s;content:counter(s);display:block;font-size:64px;font-weight:800;letter-spacing:-.05em;line-height:1;margin-bottom:18px;color:var(--v)}
+.step h4{font-size:19px;letter-spacing:-.02em;margin-bottom:6px}
+.step p{color:var(--muted);font-size:14px}
+@media(max-width:860px){.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.steps{grid-template-columns:1fr}}
+.faq{display:grid;grid-template-columns:1fr 2fr;gap:14px;align-items:start}
+.faq-list{display:grid;gap:10px}
+details{background:var(--card);border-radius:22px;padding:20px 24px}
+summary{font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;font-size:17px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--v);font-size:24px;line-height:1;font-weight:500}
+details[open] summary::after{content:"−"}
+details p{color:var(--muted);margin-top:10px;max-width:760px}
+@media(max-width:860px){.faq{grid-template-columns:1fr}}
+
+/* ---------- СВЯЗЬ И ПОДВАЛ ---------- */
+#contact .t{text-align:center;padding:70px 26px 150px}
+#contact .lead{margin:14px auto 30px}
+#contact .wave{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:130px;pointer-events:none}
+footer{padding:20px 0 40px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer a{margin-right:18px}
+
+/* ---------- ОКНО ЗАКАЗА ---------- */
+.modal{position:fixed;inset:0;background:rgba(20,20,18,.45);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;z-index:50;overflow-y:auto;padding:30px 14px}
+.modal.open{display:flex}
+.box{background:#fff;border-radius:var(--r);max-width:560px;width:100%;padding:32px;position:relative}
+.close{position:absolute;top:14px;right:18px;border:0;background:none;color:var(--muted);font-size:30px;cursor:pointer;line-height:1}
+.box h3{font-size:24px;margin-bottom:6px}
+label{display:block;font-weight:600;font-size:14px;margin:16px 0 6px}
+input,textarea{width:100%;font:inherit;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:#f7f7f4;color:var(--text)}
+input:focus,textarea:focus{outline:none;border-color:var(--v)}
+textarea{min-height:80px;resize:vertical}
+.checks label{display:flex;gap:10px;align-items:center;font-weight:500;margin:8px 0}
+.checks input,.agree input{width:auto;accent-color:var(--v)}
+.total{background:#f2f2ef;border-radius:16px;padding:16px 18px;margin-top:20px}
+.total div{display:flex;justify-content:space-between;gap:10px;margin:4px 0}
+.total span:last-child{white-space:nowrap}
+.total .big{font-size:20px;font-weight:800}
+.agree{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:13px;color:var(--muted)}
+.agree input{margin-top:3px}
+.box .btn{width:100%;margin-top:18px}
+.btn-yellow{background:var(--y);color:#111}
+.note{font-size:13px;color:var(--muted);margin-top:10px;text-align:center}
+.done{text-align:center}
+.done .big-ico{font-size:52px}
+
+/* ---------- ТЕЛЕФОН ---------- */
+@media(max-width:860px){
+  .bento{grid-template-columns:1fr 1fr;grid-template-rows:auto;height:auto;min-height:0;max-height:none}
+  .bento .big{grid-column:1/3;grid-row:auto}
+  .bento .wide{display:none}
+  .hero{padding-top:72px;align-items:flex-start}
+}
+@media(max-width:700px){
+  .hero h1{font-size:31px}
+  .hero .lead{font-size:15px}
+  .hero .btn{padding:13px 18px}
+  .t{padding:20px;border-radius:22px}
+  .bento{gap:10px}
+  .bento .num{font-size:36px}
+  .t .sub{font-size:12px}
+  section{padding:24px 0}
+  .kins{padding:10px 18px 0;gap:10px}
+  .kin{padding:14px 0;border-radius:22px}
+}
+
+/* ---------- ПАНЕЛЬ-ИКОНКИ СЛЕВА ---------- */
+.rail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:35;display:flex;flex-direction:column;gap:6px;padding:8px;background:#fff;border-radius:24px;box-shadow:0 10px 40px rgba(0,0,0,.08);transition:opacity .3s}
+.rail a{position:relative;width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:#55554f;text-decoration:none;transition:background .2s,color .2s,transform .15s}
+.rail a:hover{background:#f2f2ef;color:#111}
+.rail a:active{transform:scale(.92)}
+.rail a.on{background:#111;color:var(--y)}
+.rail a[data-s="contact"]{background:var(--y);color:#111}
+.rail a[data-s="contact"].on{background:#111;color:var(--y)}
+.rail svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rail span{display:none}
+/* подпись появляется справа при наведении */
+.rail em{position:absolute;left:58px;top:50%;transform:translate(-6px,-50%);background:#111;color:#fff;font-style:normal;font-size:13px;font-weight:600;white-space:nowrap;padding:6px 11px;border-radius:10px;opacity:0;pointer-events:none;transition:.2s}
+.rail a:hover em{opacity:1;transform:translate(0,-50%)}
+.rail.hide{opacity:0;pointer-events:none}
+/* место под панель, чтобы она не закрывала плитки */
+@media(min-width:861px) and (max-width:1420px){.wrap,.kins{padding-left:96px}}
+@media(min-width:861px){nav .hm{display:none}}
+/* на телефоне панель уезжает вниз и показывает 5 главных разделов */
+@media(max-width:860px){
+  .rail{left:10px;right:10px;top:auto;bottom:10px;transform:none;flex-direction:row;justify-content:space-around;gap:2px;padding:6px;border-radius:22px}
+  .rail a{width:auto;flex:1;height:54px;border-radius:16px;gap:2px;align-content:center}
+  .rail a.more{display:none}
+  .rail span{display:block;font-size:10.5px;font-weight:600;line-height:1}
+  .rail em{display:none}
+  .rail svg{width:21px;height:21px}
+  body{padding-bottom:84px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ===================================================================
+     НАСТРОЙКИ (ник, цены, ссылки на оплату) — в блоке SETTINGS внизу файла.
+     =================================================================== -->
+
+<!-- ========== ПАНЕЛЬ С ИКОНКАМИ (слева, на телефоне — снизу) ========== -->
+<nav class="rail" id="rail" aria-label="Разделы">
+  <a href="#top" data-s="top" class="" aria-label="Главная"><svg viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h4.5v-5.5h4V20h4.5V9.8"/></svg><span>Главная</span><em>Главная</em></a>
+  <a href="#works" data-s="works" class="" aria-label="Работы"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="3.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="3.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg><span>Работы</span><em>Работы</em></a>
+  <a href="#plans" data-s="plans" class="" aria-label="Цены"><svg viewBox="0 0 24 24"><path d="M3.5 12.6V4.5a1 1 0 0 1 1-1h8.1l8 8a1.5 1.5 0 0 1 0 2.1l-7 7a1.5 1.5 0 0 1-2.1 0z"/><circle cx="8.3" cy="8.3" r="1.6"/></svg><span>Цены</span><em>Цены</em></a>
+  <a href="#bots" data-s="bots" class="" aria-label="Боты"><svg viewBox="0 0 24 24"><path d="M21 3.8 2.8 10.9c-.8.3-.8 1.4 0 1.7l4.5 1.6 1.8 5.4c.2.7 1.1.9 1.6.4l2.6-2.4 4.6 3.4c.6.4 1.4.1 1.6-.6L22.2 5c.2-.8-.5-1.5-1.2-1.2z"/><path d="m7.3 14.2 10-7.2-7.6 8.6"/></svg><span>Боты</span><em>Боты</em></a>
+  <a href="#support" data-s="support" class="more" aria-label="Поддержка"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="m6 6 3.5 3.5M18 6l-3.5 3.5M6 18l3.5-3.5M18 18l-3.5-3.5"/></svg><span>Поддержка</span><em>Поддержка</em></a>
+  <a href="#steps" data-s="steps" class="more" aria-label="Как работаем"><svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4.5h11l-2 4 2 4H5"/></svg><span>Как работаем</span><em>Как работаем</em></a>
+  <a href="#faq" data-s="faq" class="more" aria-label="Вопросы"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.2 1-1.2 1.9"/><circle cx="12" cy="16.8" r=".6" fill="currentColor"/></svg><span>Вопросы</span><em>Вопросы</em></a>
+  <a href="#contact" data-s="contact" class="" aria-label="Связаться"><svg viewBox="0 0 24 24"><path d="M20.5 11.5a8 8 0 0 1-11.8 7L3.5 20l1.5-4.7A8 8 0 1 1 20.5 11.5z"/><path d="M8.5 11.5h.01M12 11.5h.01M15.5 11.5h.01"/></svg><span>Связаться</span><em>Связаться</em></a>
+</nav>
+
+<header id="hdr">
+  <div class="wrap">
+    <a href="#" class="logo">ereesz<i>.</i></a>
+    <nav>
+      <a href="#works" class="hm">Работы</a>
+      <a href="#plans" class="hm">Цены</a>
+      <a href="#bots" class="hm">Боты</a>
+      <a href="#contact" class="hm">Связаться</a>
+      <a href="#plans" class="btn btn-main">Заказать</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ========== ПЕРВЫЙ ЭКРАН ========== -->
+<section class="hero" id="hero">
+  <div class="wrap">
+    <div class="bento">
+      <div class="t ink big">
+        <h1 id="h1">Сайты и боты,<br>которые <span class="y">приводят</span><br><span class="y">клиентов</span></h1>
+        <p class="lead">Без шаблонов и конструкторов. Каждый сайт делаю под ваше заведение, от первого экрана до кнопки записи, и запускаю за 1–2 недели.</p>
+        <div class="hero-btns">
+          <a href="#plans" class="btn btn-main">Выбрать пакет →</a>
+          <a href="#works" class="btn btn-line">Посмотреть работы</a>
+        </div>
+      </div>
+      <div class="t y"><small>запуск от</small><div class="num">7 дн.</div><div class="sub">до готового сайта</div></div>
+      <div class="t"><small>сайт от</small><div class="num">12к ₽</div><div class="sub muted">цена фиксированная</div></div>
+      <div class="t"><small>оплата</small><div class="num">50/50</div><div class="sub muted">предоплата и после запуска</div></div>
+      <div class="t v"><small>официально</small><div class="num">Чек</div><div class="sub">после каждой оплаты</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 4. РАБОТЫ ========== -->
+<section id="works">
+  <div class="wrap">
+    <div class="works">
+      <div class="t y rv">
+        <span class="kicker" style="color:#5c4a00">Примеры</span>
+        <h2>Работы</h2>
+        <p class="lead" style="color:#4d3f00">Нажмите на карточку, чтобы открыть сайт.</p>
+      </div>
+      <a class="c rv" style="background:linear-gradient(160deg,#f1dcd8,#7a1f2b)" href="https://ereesz.github.io/mindal/" target="_blank"><div class="shot sh-mindal"><i class="bar"><u></u><u></u><u></u></i><div class="sh-in"><svg viewBox="0 0 24 24"><path d="M12 2.6C7.6 6.4 6.1 10.4 6.1 13.9a5.9 5.9 0 0 0 11.8 0c0-3.5-1.5-7.5-5.9-11.3Z"/><path d="M12 6.4c-1.5 3.2-1.5 9.6 0 13.3"/></svg><h5>Миндаль</h5><p>салон красоты</p><span>Записаться</span></div></div><small>Салон красоты · запись и админка</small><b>Миндаль</b><span class="go">Открыть →</span></a>
+      <a class="c rv" style="background:linear-gradient(160deg,#3a2f22,#c48a3a)" href="https://ereesz.github.io/kant/" target="_blank"><div class="shot sh-kant"><i class="bar"><u></u><u></u><u></u></i><div class="sh-in"><svg viewBox="0 0 24 24"><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/><path d="M8.3 15.7 18 4M15.7 15.7 6 4"/></svg><h5>КАНТ</h5><p>барбершоп</p><span>Записаться</span></div></div><small>Барбершоп · запись и админка</small><b>Кант</b><span class="go">Открыть →</span></a>
+      <a class="c rv" style="background:linear-gradient(160deg,#fbe7d6,#e0a77c)" href="https://ereesz.github.io/penka/" target="_blank"><div class="shot sh-penka"><i class="bar"><u></u><u></u><u></u></i><div class="sh-in"><svg viewBox="0 0 24 24"><path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3.5c0 1.2 1 1.3 1 2.5M12 3.5c0 1.2 1 1.3 1 2.5"/></svg><h5>Пенка</h5><p>кофейня</p><span>Меню</span></div></div><small>Кофейня</small><b>Пенка</b><span class="go">Открыть →</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ========== 5. ПАКЕТЫ ========== -->
+<section id="plans">
+  <div class="wrap">
+    <div class="t rv">
+      <span class="kicker">Сайты</span>
+      <h2>Пакеты и цены</h2>
+      <p class="lead">Цена фиксированная, без скрытых доплат. Предоплата 50%, остальное после запуска.</p>
+    </div>
+    <div class="plans">
+      <div class="plan rv">
+        <span class="no">№ 01</span><h3>Сайт-визитка</h3><p class="for"><b>Подойдёт мастеру или небольшому салону:</b> чтобы вас находили в интернете и видели услуги, цены и адрес.</p>
+        <div class="price" data-price="vizitka"></div><div class="muted">срок 7–10 дней</div>
+        <ul><li>Одна страница: услуги, цены, фото, контакты</li><li>Кнопка записи (DIKIDI, YCLIENTS) или Telegram</li><li>Карта и адрес</li><li>Удобно с телефона</li><li>Размещение в интернете</li></ul>
+        <button class="btn" data-order="vizitka">Заказать</button>
+      </div>
+      <div class="plan rv">
+        <span class="no">№ 02</span><h3>Сайт с онлайн-записью</h3><p class="for"><b>Подойдёт салону или барбершопу:</b> клиенты записываются сами, без звонков, а заявки приходят вам в Telegram.</p>
+        <div class="price" data-price="sait"></div><div class="muted">срок 10–14 дней</div>
+        <ul><li>Всё из «Сайта-визитки»</li><li>Онлайн-запись или предзаказ на самом сайте</li><li>Заявки приходят вам в Telegram</li><li>Несколько страниц: мастера, отзывы, галерея</li><li>Настройка под поиск Яндекса</li></ul>
+        <button class="btn" data-order="sait">Заказать</button>
+      </div>
+      <div class="plan rv">
+        <span class="no">№ 03</span><h3>Сайт с каталогом</h3><p class="for"><b>Подойдёт кофейне, доставке или магазину:</b> меню или товары с корзиной, заказы приходят вам.</p>
+        <div class="price" data-price="saitplus"></div><div class="muted">срок 2–3 недели</div>
+        <ul><li>Всё из «Сайта с онлайн-записью»</li><li>Личный кабинет клиента</li><li>Админка: сами меняете цены и услуги</li><li>Каталог или меню с корзиной</li><li>2 месяца поддержки в подарок</li></ul>
+        <button class="btn" data-order="saitplus">Заказать</button>
+      </div>
+    </div>
+    <div class="t extras-tile rv">
+      <b>Можно добавить к любому пакету:</b>
+      <div class="extras" id="extrasList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TELEGRAM-БОТЫ ========== -->
+<section id="bots">
+  <div class="wrap bots">
+    <div class="t rv">
+      <span class="kicker">Telegram-боты</span>
+      <h2>Бот, который записывает клиентов за вас</h2>
+      <p class="lead">Клиент открывает бота, выбирает услугу и время, оставляет контакт. Заявка сразу приходит администратору. Работает круглосуточно.</p>
+      <div class="bot-price">
+        <div><div class="muted">Бот отдельно</div><div class="price" data-price="bot"></div></div>
+        <div><div class="muted">К любому сайту</div><div class="price">+4 000 ₽</div></div>
+      </div>
+      <div class="hero-btns">
+        <button class="btn btn-main" data-order="bot">Заказать бота</button>
+        <a class="btn btn-line" href="https://t.me/Shalfey_agent" target="_blank">Попробовать пример</a>
+      </div>
+    </div>
+    <div class="t v phone-tile"><div class="spin"></div>
+    <div class="phone rv">
+      <div class="top"><div class="ava">Ш</div><div><b>Шалфей · запись</b><span>бот</span></div></div>
+      <div class="chat" id="chat">
+        <div class="msg">Здравствуйте! Я помогу записаться в студию «Шалфей» 🌿</div>
+        <div class="msg me">📅 Записаться</div>
+        <div class="msg">Выберите услугу: маникюр, стрижка, брови, окрашивание</div>
+        <div class="msg me">Маникюр</div>
+        <div class="msg">Когда вам удобно?</div>
+        <div class="msg me">Пятница, после 18:00</div>
+        <div class="msg">Готово! Администратор подтвердит запись в течение 15 минут ✅</div>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ПОДДЕРЖКА ========== -->
+<section id="support">
+  <div class="wrap">
+    <div class="support">
+      <div class="t y rv">
+        <span class="kicker" style="color:#5c4a00">Поддержка</span>
+        <h2>Сайт всегда в порядке</h2>
+        <p class="lead">Чтобы сайт работал и был актуальным, а вам не нужно было в нём разбираться.</p>
+        <ul>
+          <li>До 3 правок в месяц: цены, фото, тексты, акции</li>
+          <li>Слежу, что сайт открывается, а запись и бот работают</li>
+          <li>Продлеваю домен, чтобы сайт не пропал</li>
+          <li>Отвечаю в Telegram в течение дня</li>
+        </ul>
+      </div>
+      <div class="t ink support-box rv">
+        <div class="muted">в месяц</div>
+        <div class="price" data-price="support"></div>
+        <p class="muted" style="margin-bottom:20px">Можно отменить в любой момент</p>
+        <button class="btn btn-main" data-order="support" style="width:100%">Подключить</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ДОП. УСЛУГИ ========== -->
+<!-- ========== ЭТАПЫ ========== -->
+<section id="steps">
+  <div class="wrap">
+    <div class="t ink head-tile rv"><span class="kicker">Как это работает</span><h2>Четыре шага до запуска</h2></div>
+    <div class="steps">
+      <div class="step rv"><h4>Заявка и предоплата</h4><p>Выбираете пакет, заполняете короткую анкету и вносите 50%.</p></div>
+      <div class="step rv"><h4>Знакомство</h4><p>В течение дня пишу вам, уточняем детали, вы присылаете фото и тексты.</p></div>
+      <div class="step rv"><h4>Первая версия</h4><p>Показываю результат, вносим правки, пока всё не понравится.</p></div>
+      <div class="step rv"><h4>Запуск</h4><p>Сайт или бот начинает работать, вы оплачиваете вторую половину.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== ВОПРОСЫ ========== -->
+<section id="faq">
+  <div class="wrap faq">
+    <div class="t v rv"><span class="kicker" style="color:#e2dbff">Вопросы</span><h2>Частые вопросы</h2><p class="lead" style="color:#e2dbff">Не нашли ответ? Напишите мне в Telegram.</p></div>
+    <div class="faq-list rv">
+    <details><summary>Что если мне не понравится?</summary><p>Правки до запуска бесплатные. Если работа ещё не начата, предоплату верну полностью.</p></details>
+    <details><summary>Нужно ли что-то платить после запуска?</summary><p>Нет, сайт ваш. Поддержка по желанию. Отдельно оплачивается только домен (около 200–900 ₽ в год), если он нужен.</p></details>
+    <details><summary>У меня уже есть запись в DIKIDI / YCLIENTS</summary><p>Отлично, подключу её на сайт, клиенты будут записываться через неё.</p></details>
+    <details><summary>Бот заменит администратора?</summary><p>Нет, он снимает с администратора рутину: отвечает на вопросы о ценах и адресе и собирает заявки, а подтверждает запись человек.</p></details>
+    <details><summary>Даёте чек?</summary><p>Да, чек приходит после каждой оплаты.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ========== СВЯЗАТЬСЯ ========== -->
+<section id="contact">
+  <div class="wrap"><div class="t ink rv">
+    <span class="kicker">Связаться</span>
+    <h2>Есть вопрос?</h2>
+    <p class="lead">Напишите мне в Telegram, подскажу, что подойдёт именно вам.</p>
+    <span class="mag"><a class="btn btn-main" id="cTg" target="_blank">Написать в Telegram →</a></span>
+    <svg class="wave" viewBox="0 0 1440 120" preserveAspectRatio="none"><path class="w1" fill="#7fd0f7"/><path class="w2" fill="#229ed9"/></svg>
+  </div></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><b style="color:var(--text)">ereesz<span style="color:var(--v)">.</span></b> сайты и боты для малого бизнеса<br><span id="seller"></span></div>
+    <div><a id="tgLink" href="#" target="_blank">Telegram</a><a href="oferta.html">Договор-оферта</a><a href="privacy.html">Персональные данные</a></div>
+  </div>
+</footer>
+
+<!-- ========== ОКНО ЗАКАЗА ========== -->
+<div class="modal" id="modal">
+  <div class="box">
+    <button class="close" id="closeBtn" aria-label="Закрыть">×</button>
+
+    <!-- Шаг 1: анкета -->
+    <form id="orderForm">
+      <h3 id="mTitle">Заказ</h3>
+      <p class="muted" id="mSub"></p>
+
+      <label>Ваше имя</label>
+      <input name="name" required placeholder="Анна">
+
+      <label>Название бизнеса</label>
+      <input name="biz" required placeholder="Студия «Шалфей»">
+
+      <label>Telegram или телефон для связи</label>
+      <input name="contact" required placeholder="@username или +7…">
+
+      <div id="extrasBlock">
+        <label>Добавить к заказу</label>
+        <div class="checks" id="extrasChecks"></div>
+      </div>
+
+      <label>Пожелания (необязательно)</label>
+      <textarea name="comment" placeholder="Ссылка на запись, пожелания по цветам, примеры сайтов, которые нравятся…"></textarea>
+
+      <div class="total" id="totalBox"></div>
+
+      <label class="agree"><input type="checkbox" required> <span>Согласен с <a href="oferta.html" target="_blank">договором-офертой</a> и <a href="privacy.html" target="_blank">обработкой персональных данных</a></span></label>
+
+      <button class="btn btn-yellow" type="submit" id="payBtn">Оплатить</button>
+      <p class="note" id="payNote"></p>
+    </form>
+
+    <!-- Шаг 2: после отправки -->
+    <div class="done" id="doneBox" hidden>
+      <div class="big-ico">✅</div>
+      <h3>Заявка готова</h3>
+      <p class="muted" id="doneText" style="margin:10px 0 0"></p>
+      <button class="btn btn-yellow" id="doneBtn"></button>
+      <details class="copy-box"><summary>Текст не появился в чате?</summary><p>Он уже скопирован, просто вставьте его в сообщение. Вот он:</p><pre id="doneCopy"></pre></details>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   SETTINGS — ГЛАВНЫЕ НАСТРОЙКИ. Меняй только здесь.
+   ===================================================================== */
+const SETTINGS = {
+  // Твой ник в Telegram БЕЗ @. Сюда будут приходить заявки.
+  telegram: 'ereesz',
+
+  // Для оферты и подвала (требование кассы): ФИО и ИНН самозанятого
+  sellerName: 'Самозанятый ФИО',
+  sellerInn: '000000000000',
+
+  // Предоплата в процентах
+  prepayPercent: 50,
+
+  // Пакеты. payLink — ссылка на оплату из кабинета ЮKassa / Робокассы.
+  // Пока ссылка пустая, кнопка «Оплатить» отправляет заявку в Telegram.
+  plans: {
+    vizitka:  { name: 'Сайт-визитка',    price: 12000, payLink: '' },
+    sait:     { name: 'Сайт с онлайн-записью', price: 25000, payLink: '' },
+    saitplus: { name: 'Сайт с каталогом', price: 45000, payLink: '' },
+    bot:      { name: 'Telegram-бот',    price: 6000,  payLink: '' },
+    support:  { name: 'Поддержка сайта', price: 1500,  payLink: '', monthly: true },
+  },
+
+  // Доп. услуги (галочки в форме заказа и список на странице)
+  extras: [
+    { id: 'maps',   name: 'Карточка на Яндекс Картах и 2ГИС', price: 3000 },
+    { id: 'domain', name: 'Подключение своего домена',        price: 1500 },
+    { id: 'qr',     name: 'QR-табличка на стойку',            price: 1000 },
+    { id: 'bot',    name: 'Telegram-бот к сайту (скидка 2 000 ₽)', price: 4000 },
+  ],
+};
+
+/* =====================================================================
+   ДАЛЬШЕ КОД. Трогать не нужно.
+   ===================================================================== */
+const rub = n => n.toLocaleString('ru-RU') + ' ₽';
+const $ = s => document.querySelector(s);
+
+// Проставляем цены в карточки
+document.querySelectorAll('[data-price]').forEach(el => {
+  const p = SETTINGS.plans[el.dataset.price];
+  el.textContent = rub(p.price);
+});
+
+// Список доп. услуг на странице
+$('#extrasList').innerHTML = SETTINGS.extras.map(e =>
+  `<div class="extra"><span>${e.name}</span><b>${rub(e.price)}</b></div>`).join('');
+
+// Подвал и ссылка на Telegram
+// Строка с ФИО и ИНН появится, когда впишешь настоящий ИНН
+if (!/^0+$/.test(SETTINGS.sellerInn)) $('#seller').textContent = `${SETTINGS.sellerName}, ИНН ${SETTINGS.sellerInn}`;
+$('#tgLink').href = `https://t.me/${SETTINGS.telegram}`;
+
+/* ---------- Блок «Связаться» ---------- */
+$('#cTg').href = `https://t.me/${SETTINGS.telegram}`;
+
+/* ---------- Окно заказа ---------- */
+let current = null; // какой пакет сейчас заказывают
+
+function openOrder(key){
+  current = key;
+  const p = SETTINGS.plans[key];
+  $('#mTitle').textContent = p.monthly ? 'Подключить поддержку' : `Заказ: ${p.name}`;
+  $('#mSub').textContent = p.monthly
+    ? 'Оплата раз в месяц, отменить можно в любой момент.'
+    : `Стоимость ${rub(p.price)}. Сейчас оплачивается ${SETTINGS.prepayPercent}%.`;
+  // Для поддержки доп. услуги не показываем
+  $('#extrasBlock').hidden = !!p.monthly;
+  $('#extrasChecks').innerHTML = SETTINGS.extras.filter(e => !(key === 'bot' && e.id === 'bot')).map(e =>
+    `<label><input type="checkbox" value="${e.id}"> ${e.name} — ${rub(e.price)}</label>`).join('');
+  $('#extrasChecks').onchange = updateTotal;
+  $('#orderForm').hidden = false;
+  $('#doneBox').hidden = true;
+  updateTotal();
+  $('#modal').classList.add('open');
+}
+
+// Считаем итог и сумму к оплате сейчас
+function calc(){
+  const p = SETTINGS.plans[current];
+  const chosen = [...document.querySelectorAll('#extrasChecks input:checked')]
+    .map(i => SETTINGS.extras.find(e => e.id === i.value));
+  const total = p.price + chosen.reduce((s, e) => s + e.price, 0);
+  const now = p.monthly ? total : Math.round(total * SETTINGS.prepayPercent / 100);
+  return { p, chosen, total, now };
+}
+
+function updateTotal(){
+  const { p, total, now } = calc();
+  $('#totalBox').innerHTML = p.monthly
+    ? `<div class="big"><span>К оплате</span><span>${rub(now)} / мес</span></div>`
+    : `<div><span>Итого за работу</span><span>${rub(total)}</span></div>
+       <div class="big"><span>Предоплата сейчас</span><span>${rub(now)}</span></div>
+       <div class="muted"><span>После запуска</span><span>${rub(total - now)}</span></div>`;
+  const hasPay = !!p.payLink;
+  $('#payBtn').textContent = hasPay ? `Оплатить ${rub(now)}` : 'Отправить заявку';
+  $('#payNote').textContent = hasPay
+    ? 'Оплата картой или через СБП. Чек придёт автоматически.'
+    : 'Напишу вам в течение дня и пришлю ссылку на оплату.';
+}
+
+// Отправка формы
+$('#orderForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const { p, chosen, total, now } = calc();
+
+  // Текст заявки, который уйдёт тебе в Telegram
+  const text = [
+    `Заявка с сайта ereesz`,
+    `Пакет: ${p.name}${p.monthly ? ' (' + rub(p.price) + '/мес)' : ''}`,
+    chosen.length ? `Доп.: ${chosen.map(c => c.name).join(', ')}` : '',
+    !p.monthly ? `Итого: ${rub(total)}, предоплата ${rub(now)}` : '',
+    `Имя: ${f.get('name')}`,
+    `Бизнес: ${f.get('biz')}`,
+    `Связь: ${f.get('contact')}`,
+    f.get('comment') ? `Комментарий: ${f.get('comment')}` : '',
+  ].filter(Boolean).join('\n');
+
+  // Ссылка открывает чат со мной, где текст заявки уже вписан в поле сообщения
+  const tgLink = `https://t.me/${SETTINGS.telegram}?text=${encodeURIComponent(text)}`;
+  // На всякий случай ещё и копируем: если текст не вставился сам, его можно вставить
+  try { await navigator.clipboard.writeText(text); } catch (_) {}
+  $('#doneCopy').textContent = text;
+
+  $('#orderForm').hidden = true;
+  $('#doneBox').hidden = false;
+
+  if (p.payLink) {
+    // Есть касса: ведём на оплату
+    $('#doneText').textContent = 'Сначала оплатите, потом нажмите кнопку ещё раз: откроется Telegram с готовой заявкой.';
+    $('#doneBtn').textContent = `Перейти к оплате ${rub(now)}`;
+    $('#doneBtn').onclick = () => {
+      window.open(p.payLink, '_blank');
+      $('#doneBtn').textContent = 'Отправить заявку в Telegram';
+      $('#doneBtn').onclick = () => window.open(tgLink, '_blank');
+    };
+  } else {
+    // Кассы пока нет: просто пишем в Telegram
+    $('#doneText').textContent = 'Нажмите кнопку: откроется Telegram с уже написанной заявкой, останется нажать «Отправить». Я отвечу в течение дня.';
+    $('#doneBtn').textContent = 'Отправить заявку в Telegram';
+    $('#doneBtn').onclick = () => window.open(tgLink, '_blank');
+  }
+});
+
+document.querySelectorAll('[data-order]').forEach(b =>
+  b.addEventListener('click', () => openOrder(b.dataset.order)));
+$('#closeBtn').onclick = () => $('#modal').classList.remove('open');
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') $('#modal').classList.remove('open'); });
+
+
+
+
+/* =====================================================================
+   АНИМАЦИИ. Трогать не нужно.
+   ===================================================================== */
+
+// Заголовок из отдельных букв, каждая качается волной (стиль 15)
+(function(){
+  const lines = [['Сайты и боты,',''], ['которые ','приводят'], ['клиентов','y']];
+  let k = 0;
+  // Слова целиком в обёртке nowrap, чтобы слово не переносилось посередине
+  const part = (s, cls) => s.split(/( )/).map(w => w === ' ' ? ' ' : `<span style="white-space:nowrap">${[...w].map(ch => `<span class="l ${cls}" style="animation-delay:${(k++)*.04}s">${ch}</span>`).join('')}</span>`).join('');
+  $('#h1').innerHTML = [part('Сайты и боты,',''), part('которые ','') + part('приводят','y'), part('клиентов','y')].join('<br>');
+})();
+
+// Шапка получает фон, когда начали листать
+(function(){
+  const hdr = $('#hdr');
+  const f = () => hdr.classList.toggle('solid', scrollY > 10);
+  addEventListener('scroll', f, { passive: true }); f();
+})();
+
+// Панель-иконки: «Главная» ведёт сразу на первый экран (после нырка), подсветка текущего раздела
+(function(){
+  const rail = $('#rail'), links = [...rail.querySelectorAll('a')];
+  rail.querySelector('[data-s="top"]').addEventListener('click', e => {
+    e.preventDefault();
+    scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  const ids = ['works','plans','bots','support','steps','faq','contact'];
+  function spy(){
+    let cur = 'top';
+    const mid = innerHeight * .45;
+    ids.forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < mid) cur = id; });
+    // в самом низу страницы подсвечиваем «Связаться»
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) cur = 'contact';
+    // на телефоне скрытые разделы подсвечивают ближайшую видимую кнопку
+    let on = links.find(a => a.dataset.s === cur);
+    if (on && getComputedStyle(on).display === 'none') on = links.find(a => a.dataset.s === ({support:'bots',steps:'bots',faq:'contact'})[cur]);
+    links.forEach(a => a.classList.toggle('on', a === on));
+  }
+  let t = false;
+  addEventListener('scroll', () => { if (!t) { t = true; requestAnimationFrame(() => { t = false; spy(); }); } }, { passive: true });
+  addEventListener('resize', spy); spy();
+})();
+
+// Жидкие волны (стиль 15)
+(function(){
+  const W = [...document.querySelectorAll('.wave')]; let t = 0;
+  const path = (ph, amp, base) => { let d = `M0,120 L0,${base}`; for (let x = 0; x <= 1440; x += 40) d += ` L${x},${base + Math.sin(x*.006 + ph)*amp + Math.sin(x*.013 + ph*1.3)*amp*.5}`; return d + ' L1440,120 Z'; };
+  // Анимируем только те волны, которые сейчас видно на экране
+  const vis = new Set();
+  const wo = new IntersectionObserver(es => es.forEach(e => e.isIntersecting ? vis.add(e.target) : vis.delete(e.target)));
+  W.forEach(w => wo.observe(w));
+  (function f(){ t += .02; vis.forEach(w => { w.querySelector('.w1').setAttribute('d', path(t, 12, 60)); w.querySelector('.w2').setAttribute('d', path(-t*1.2 + 2, 10, 86)); }); requestAnimationFrame(f); })();
+})();
+
+// Появление блоков при прокрутке + переписка бота по очереди
+// Срабатывает каждый раз, в том числе при прокрутке вверх: ушёл блок с экрана, анимация сбрасывается
+let chatT = [];
+const io = new IntersectionObserver(es => es.forEach(e => {
+  const t = e.target, isPhone = t.classList.contains('phone');
+  if (e.intersectionRatio >= .15 && !t.classList.contains('in')){
+    t.classList.add('in');
+    if (isPhone) chatT = [...document.querySelectorAll('#chat .msg')].map((m, i) => setTimeout(() => m.classList.add('show'), 400 + i * 700));
+  } else if (!e.isIntersecting && t.classList.contains('in')){
+    t.classList.remove('in');
+    if (isPhone){ chatT.forEach(clearTimeout); document.querySelectorAll('#chat .msg').forEach(m => m.classList.remove('show')); }
+  }
+  document.documentElement.classList.add('anim'); // прятать блоки до появления начинаем, только когда наблюдатель точно работает
+}), { threshold: [0, .15] });
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+
+// Карусель и бегущие строки ставим на паузу, когда их не видно (меньше нагрузки)
+const po = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('off', !e.isIntersecting)));
+document.querySelectorAll('.stage,.kin,.tl-wrap').forEach(el => po.observe(el));
+</script>
+</body>
+</html>
